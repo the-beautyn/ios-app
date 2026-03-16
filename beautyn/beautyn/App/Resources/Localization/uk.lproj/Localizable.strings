@@ -1,0 +1,110 @@
+// MARK: - Common
+"continue_button" = "Продовжити";
+"details_button" = "Деталі";
+"or" = "або";
+"send_button" = "Відправити";
+"add_button" = "Додати";
+"added_button" = "Додано";
+"select_button" = "Обрати";
+"search_hint" = "Уведить назву салону або майстра";
+"ok_button" = "OK";
+"error_title" = "Помилка";
+"input_phone_placeholder" = "номер телефону";
+
+// MARK: - Errors
+"error_invalid_response" = "Невірна відповідь сервера.";
+"error_server" = "Помилка сервера (%d).";
+"error_no_connection" = "Відсутнє інтернет-з'єднання.";
+"error_timeout" = "Час очікування запиту вичерпано.";
+"error_data" = "Помилка даних: %@";
+"error_unknown" = "Сталася невідома помилка.";
+
+// MARK: - Tab Bar
+"tab_home" = "Головна";
+"tab_search" = "Пошук";
+"tab_bookings" = "Бронювання";
+"tab_profile" = "Профайл";
+
+// MARK: - Authorization
+"auth_title" = "Авторизація";
+"auth_subtitle" = "Створи акаунт або увійди.";
+"auth_email_placeholder" = "Введіть email";
+"auth_continue_apple" = "Продовжити з Apple";
+"auth_continue_google" = "Продовжити з Google";
+
+"sign_up_title" = "Створення аккаунту";
+"sign_up_subtitle" = "Додайте інформацію про себе";
+"sign_up_first_name_placeholder" = "Введіть ім'я";
+"sign_up_last_name_placeholder" = "Введіть Прізвище";
+"sign_up_password_placeholder" = "Створіть пароль";
+
+"login_title" = "Увійдіть до аккаунту";
+"login_subtitle" = "Введіть пароль від аккаунту зареєстрованого за поштою %@";
+"login_password_placeholder" = "Введіть пароль";
+"forgot_password_link" = "Забули пароль?";
+
+"forgot_password_title" = "Забули пароль?";
+"forgot_password_subtitle" = "Ми відправимо на вказану пошту інструкцію по відновленню";
+
+// MARK: - Home
+"home_greeting" = "Привіт, %@!";
+"home_section_next_appointment" = "Наступний запис";
+"home_section_saved" = "Збережені 🩷";
+"home_section_popular" = "Популярні ⭐️";
+"home_section_available_today" = "Nails доступні сьогодні 💅🏼";
+"home_section_nearby" = "Перукар біля тебе 💇🏻‍♀️";
+
+// MARK: - Search
+"search_filter_service_type" = "Тип послуги";
+"search_filter_sort" = "Сортувати";
+"search_filter_price" = "Ціна";
+"search_results_count" = "Знайдено: %d місць";
+
+// MARK: - Salon Profile
+"salon_tab_services" = "Послуги";
+"salon_tab_specialists" = "Спеціалісти";
+"salon_tab_reviews" = "Відгуки (%d)";
+"salon_tab_portfolio" = "Портфоліо";
+"salon_tab_details" = "Деталі";
+"salon_badge_top_masters" = "Top 10 Masters";
+"salon_price_from" = "від %@ грн";
+"salon_duration" = "%@ хв.";
+"salon_book_button" = "Записатись";
+"salon_options_count" = "%d опцій";
+"salon_specialist_nearest_date" = "Найближча дата запису %@:";
+
+// MARK: - Booking
+"booking_date_picker_title" = "Оберіть час та дату";
+"booking_choose_day" = "Оберіть день:";
+"booking_choose_time" = "Оберіть час:";
+"booking_any_master" = "Будь-який";
+"booking_total_price" = "Всього: %@ грн";
+"booking_clear_button" = "Почистити";
+"booking_apply_button" = "Застосувати";
+
+// MARK: - My Bookings
+"bookings_title" = "Мої бронювання";
+"bookings_tab_upcoming" = "Наступні";
+"bookings_tab_past" = "Попередні";
+"bookings_tab_cancelled" = "Скасовані";
+"bookings_upcoming_section_title" = "Наступні записи";
+
+// MARK: - My Profile
+"profile_title" = "Профайл";
+"profile_menu_personal_data" = "Персональні дані";
+"profile_menu_notifications" = "Нотифікації";
+"profile_menu_saved_salons" = "Обрані салони";
+"profile_menu_settings" = "Налаштування";
+"profile_menu_language" = "Мова";
+"profile_edit_button" = "Редагувати профіль";
+"profile_date_of_birth" = "Дата народження";
+"profile_phone_number" = "Номер телефону";
+"profile_email" = "Пошта";
+"profile_city" = "Місто";
+"profile_gender" = "Стать";
+
+"profile_personal_data_title" = "Персональні дані";
+"profile_change_password_title" = "Змінити пароль";
+"profile_old_password_label" = "Старий пароль";
+"profile_new_password_label" = "Новий пароль";
+"profile_confirm_password_label" = "Повторити новий пароль";

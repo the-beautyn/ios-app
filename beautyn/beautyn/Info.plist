@@ -15,11 +15,28 @@
 					<string>Default Configuration</string>
 					<key>UISceneDelegateClassName</key>
 					<string>$(PRODUCT_MODULE_NAME).SceneDelegate</string>
-					<key>UISceneStoryboardFile</key>
-					<string>Main</string>
 				</dict>
 			</array>
 		</dict>
 	</dict>
+	<key>UIAppFonts</key>
+	<array>
+		<string>AeonikProTRIAL-Air.otf</string>
+		<string>AeonikProTRIAL-AirItalic.otf</string>
+		<string>AeonikProTRIAL-Black.otf</string>
+		<string>AeonikProTRIAL-BlackItalic.otf</string>
+		<string>AeonikProTRIAL-Bold.otf</string>
+		<string>AeonikProTRIAL-BoldItalic.otf</string>
+		<string>AeonikProTRIAL-Light.otf</string>
+		<string>AeonikProTRIAL-LightItalic.otf</string>
+		<string>AeonikProTRIAL-Medium.otf</string>
+		<string>AeonikProTRIAL-MediumItalic.otf</string>
+		<string>AeonikProTRIAL-Regular.otf</string>
+		<string>AeonikProTRIAL-RegularItalic.otf</string>
+		<string>AeonikProTRIAL-SemiBold.otf</string>
+		<string>AeonikProTRIAL-SemiBoldItalic.otf</string>
+		<string>AeonikProTRIAL-Thin.otf</string>
+		<string>AeonikProTRIAL-ThinItalic.otf</string>
+	</array>
 </dict>
 </plist>

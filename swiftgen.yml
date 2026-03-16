@@ -1,0 +1,13 @@
+input_dir: beautyn/App/Resources
+output_dir: beautyn/App/Resources/Generated
+
+strings:
+  inputs: Localization/uk.lproj
+  filter: .+\.strings$
+  outputs:
+    - templateName: structured-swift5
+      output: Localization.swift
+      params:
+        enumName: Localization
+        noComments: true
+        publicAccess: true
