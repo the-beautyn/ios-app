@@ -65,8 +65,10 @@ final class NetworkServiceImpl {
         provider.request(target) { result in
             switch result {
             case .success(let response):
-                print("\n--> Request: \(response.request!)")
+                #if DEBUG
+                print("\n--> Request: \(response.request?.description ?? "nil")")
                 print("\n<-- Response: \(String(data: response.data, encoding: .utf8) ?? "")\n *")
+                #endif
                 do {
                     let filteredResponse = try response.filterSuccessfulStatusCodes()
                     let decoder = JSONDecoder()
@@ -102,8 +104,10 @@ final class NetworkServiceImpl {
         provider.request(target) { result in
             switch result {
             case .success(let response):
-                print("\n--> Request: \(response.request!)")
+                #if DEBUG
+                print("\n--> Request: \(response.request?.description ?? "nil")")
                 print("\n<-- Response: \(String(data: response.data, encoding: .utf8) ?? "")\n *")
+                #endif
                 do {
                     let _ = try response.filterSuccessfulStatusCodes()
                     completion(.success(Void()))

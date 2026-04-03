@@ -81,7 +81,13 @@ extension HomeFeed {
     )
 
     static let authorizedPreview = HomeFeed(
-        categories: nil,
+        categories: [
+            AppCategory(id: "1", slug: "nails", name: "Нігті", imageUrl: nil, sortOrder: 0),
+            AppCategory(id: "2", slug: "hair", name: "Волосся", imageUrl: nil, sortOrder: 1),
+            AppCategory(id: "3", slug: "spa", name: "SPA/Масаж", imageUrl: nil, sortOrder: 2),
+            AppCategory(id: "4", slug: "injections", name: "Ін'єкції", imageUrl: nil, sortOrder: 3),
+            AppCategory(id: "5", slug: "epilation", name: "Епіляція", imageUrl: nil, sortOrder: 4),
+        ],
         nextBooking: NextBooking(
             bookingId: "b1",
             salonId: "s1",

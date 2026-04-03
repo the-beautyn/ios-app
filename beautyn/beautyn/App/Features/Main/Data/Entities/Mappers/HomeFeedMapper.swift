@@ -4,27 +4,38 @@ import Foundation
 
 enum HomeFeedMapper {
 
-    // MARK: - ISO8601 Date Formatter
+    // MARK: - ISO8601 Date Formatters
 
-    private static let isoFormatter: ISO8601DateFormatter = {
+    private static let isoFormatterWithFractional: ISO8601DateFormatter = {
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         return formatter
     }()
 
+    private static let isoFormatter: ISO8601DateFormatter = {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime]
+        return formatter
+    }()
+
     private static func parseDate(_ string: String) -> Date {
-        isoFormatter.date(from: string) ?? Date()
+        if let date = isoFormatterWithFractional.date(from: string) {
+            return date
+        }
+        if let date = isoFormatter.date(from: string) {
+            return date
+        }
+        assertionFailure("HomeFeedMapper: failed to parse date '\(string)'")
+        return Date()
     }
 
     // MARK: - Map Response → Domain
-
-    @MainActor
     static func map(_ dto: HomeFeedResponseDTO) -> HomeFeed {
         HomeFeed(
-            categories: dto.categories.map(mapCategory),
-            nextBooking: dto.nextBooking.map(mapNextBooking),
-            savedSalons: dto.savedSalons?.map(mapSavedSalon),
-            sections: dto.sections.map(mapSection)
+            categories: dto.categories.map { mapCategory($0) },
+            nextBooking: dto.nextBooking.map { mapNextBooking($0) },
+            savedSalons: dto.savedSalons?.map { mapSavedSalon($0) },
+            sections: dto.sections.map { mapSection($0) }
         )
     }
 
@@ -40,7 +51,6 @@ enum HomeFeedMapper {
         )
     }
 
-    @MainActor
     static func mapNextBooking(_ dto: HomeFeedNextBookingDTO) -> NextBooking {
         NextBooking(
             bookingId: dto.bookingId,
@@ -49,7 +59,7 @@ enum HomeFeedMapper {
             salonCoverImageUrl: dto.salonCoverImageUrl,
             salonAddressLine: dto.salonAddressLine,
             datetime: parseDate(dto.datetime),
-            endDatetime: dto.endDatetime.map(parseDate),
+            endDatetime: dto.endDatetime.map { parseDate($0) },
             totalPriceCents: dto.totalPriceCents,
             durationMinutes: dto.durationMinutes
         )
@@ -69,14 +79,13 @@ enum HomeFeedMapper {
         )
     }
 
-    @MainActor
     static func mapSection(_ dto: HomeFeedSectionDTO) -> HomeFeedSection {
         HomeFeedSection(
             id: dto.id,
             type: dto.type,
             title: dto.title,
             emoji: dto.emoji,
-            items: dto.items.map(mapSalonCard)
+            items: dto.items.map { mapSalonCard($0) }
         )
     }
 
