@@ -6,46 +6,24 @@ final class AppCoordinator: BaseCoordinator {
 
     private let router: Router
     private let factory: any AppFactory
+    private let assembler: AssemblerLike
 
-    init(router: Router, factory: any AppFactory) {
+    init(router: Router, factory: any AppFactory, assembler: AssemblerLike) {
         self.router = router
         self.factory = factory
+        self.assembler = assembler
     }
 
     override func start() {
-        showLaunch()
+        showMain()
     }
 
-    // MARK: - Private
+    // MARK: - Main Flow
 
-    private func showLaunch() {
-        let vc = makePlaceholderViewController()
-        router.setRoot(vc, animated: false)
-    }
-
-    private func makePlaceholderViewController() -> UIViewController {
-        let view = LaunchPlaceholderView()
-        let host = UIHostingController(rootView: view)
-        host.view.backgroundColor = .systemBackground
-        return host
-    }
-}
-
-// MARK: - LaunchPlaceholderView
-
-private struct LaunchPlaceholderView: View {
-    var body: some View {
-        VStack(spacing: CGFloat.Spacing.md) {
-            Image(systemName: "sparkles")
-                .font(.system(size: 64))
-                .foregroundStyle(Color.App.red)
-
-            Text("beautyn")
-                .font(.App.largeTitleBold)
-                .tracking(0)
-                .foregroundStyle(Color.App.text)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.App.backgroundLight)
+    private func showMain() {
+        let mainFactory: any MainControllerFactory = assembler.require((any MainControllerFactory).self)
+        let coordinator = MainCoordinator(router: router, factory: mainFactory)
+        addChild(coordinator)
+        coordinator.start()
     }
 }

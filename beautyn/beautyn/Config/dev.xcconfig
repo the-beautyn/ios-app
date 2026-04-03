@@ -1,0 +1,16 @@
+//
+//  dev.xcconfig
+//  beautyn
+//
+
+// Configuration settings file format documentation can be found at:
+// https://help.apple.com/xcode/#/dev745c5c974
+
+ENVIRONMENT_TYPE = Development
+
+API_SCHEME = https
+API_HOST = dev-api.beautyn.app
+API_PATH_PREFIX = api/v1
+
+BUNDLE_DISPLAY_NAME = beautyn (Dev)
+PRODUCT_BUNDLE_IDENTIFIER = com.beautyn.app.dev

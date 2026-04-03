@@ -22,7 +22,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let router = Router(navigationController: UINavigationController())
         let assembler = AppDelegate.shared.assembler
         let factory = assembler.resolver.require((any AppFactory).self)
-        let coordinator = AppCoordinator(router: router, factory: factory)
+        let coordinator = AppCoordinator(router: router, factory: factory, assembler: assembler.resolver)
 
         appCoordinator = coordinator
         window.rootViewController = router.rootViewController

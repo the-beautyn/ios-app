@@ -41,7 +41,7 @@ struct CategoryChipView: View {
                     .foregroundStyle(Color.App.text)
                     .multilineTextAlignment(.center)
                     .lineLimit(2)
-                    .frame(width: imageSize + 8)
+                    .frame(width: imageSize + 8, alignment: .top)
             }
         }
         .buttonStyle(.plain)

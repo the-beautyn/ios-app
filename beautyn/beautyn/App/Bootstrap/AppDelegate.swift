@@ -5,7 +5,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 
     private(set) static var shared: AppDelegate!
 
-    let assembler: Assembler = Assembler([AppAssembly()])
+    let assembler: Assembler = Assembler([AppAssembly(), MainAssembly()])
 
     func application(
         _ application: UIApplication,

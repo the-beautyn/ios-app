@@ -1,0 +1,23 @@
+{
+  "skill_name": "render-preview",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "render the home screen preview",
+      "expected_output": "Runs xcodebuild render tests, reads the PNG files, and shows the rendered screenshots to the user",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "I just updated the HomeView spacing, can you check how it looks now?",
+      "expected_output": "Recognizes this as a post-UI-change verification, runs render tests, reads PNGs, and reports on the visual result",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "does the home screen match the Figma design? here's the figma: https://www.figma.com/design/jhPfJ6hh8NTS6zc1R1A5kE/Beautyn-App?node-id=313-3541",
+      "expected_output": "Runs render tests, reads PNGs, fetches Figma screenshot AND design context (get_design_context), compares with detailed checklist: checks horizontal padding on headers vs scrollable rows, vertical section spacing, item alignment within rows (e.g. category chips top-aligned), shadow direction (bottom-only vs all-around), whether child elements incorrectly inherit parent shadows, corner radii, badge positioning, typography exact values, and color matches. Reports specific pixel/point discrepancies, not just general observations.",
+      "files": []
+    }
+  ]
+}
