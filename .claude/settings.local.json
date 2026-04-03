@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -E \"\\\\.\\(swift|xcconfig\\)$\")",
+      "Bash(git:*)",
+      "Bash(wc:*)",
+      "mcp__figma__get_design_context",
+      "Bash(xcodebuild build-for-testing:*)",
+      "Bash(xcodebuild test-without-building:*)",
+      "Bash(xcodebuild test:*)",
+      "mcp__figma__get_screenshot",
+      "Read(//Users/dmytropogrebniak/.claude/skills/**)",
+      "Read(//Users/dmytropogrebniak/.claude/**)",
+      "Bash(xcrun simctl:*)",
+      "Bash(ls:*)",
+      "Bash(xargs kill:*)",
+      "Bash(xcodebuild -showBuildSettings -scheme beautyn-Local)"
+    ]
+  }
+}

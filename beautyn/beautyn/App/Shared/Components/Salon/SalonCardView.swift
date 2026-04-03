@@ -49,17 +49,19 @@ struct SalonCardView: View {
 
     private var imageSection: some View {
         ZStack(alignment: .bottom) {
-            AsyncImage(url: salon.imageURL) { phase in
-                switch phase {
-                case .success(let image):
-                    image.resizable().scaledToFill()
-                default:
-                    Color.App.beige2
-                }
-            }
+            Color.clear
             .frame(maxWidth: .infinity)
             .frame(height: imageHeight)
-            .clipped()
+            .overlay {
+                AsyncImage(url: salon.imageURL) { phase in
+                    switch phase {
+                    case .success(let image):
+                        image.resizable().scaledToFill()
+                    default:
+                        Color.App.beige2
+                    }
+                }
+            }
             .overlay(Color.App.brown1.opacity(0.2))
             .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
 

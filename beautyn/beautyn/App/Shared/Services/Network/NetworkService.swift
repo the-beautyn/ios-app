@@ -1,72 +1,179 @@
+import Moya
+import Alamofire
 import Foundation
-
-// MARK: - HTTPMethod
-
-enum HTTPMethod: String {
-    case get    = "GET"
-    case post   = "POST"
-    case put    = "PUT"
-    case patch  = "PATCH"
-    case delete = "DELETE"
-}
-
-// MARK: - Endpoint
-
-protocol Endpoint {
-    var baseURL: URL { get }
-    var path: String { get }
-    var method: HTTPMethod { get }
-    var headers: [String: String] { get }
-    var parameters: [String: Any]? { get }
-}
 
 // MARK: - NetworkService
 
 protocol NetworkService {
-    func request<T: Decodable>(_ endpoint: any Endpoint) async throws -> T
+    func request<D: Decodable>(_ target: Target, priority: TaskPriority?) async throws -> D
+    func request(_ target: Target, priority: TaskPriority?) async throws
 }
 
-// MARK: - URLSessionNetworkService
+// MARK: - NetworkError
 
-final class URLSessionNetworkService: NetworkService {
-    private let session: URLSession
-    private let decoder: JSONDecoder
+enum NetworkError: Error {
+    case underlying(Error, Response)
+    case decoding(Error, Response)
+    case nilData(Response)
+}
 
-    init(session: URLSession = .shared, decoder: JSONDecoder = JSONDecoder()) {
-        self.session = session
-        self.decoder = decoder
-    }
+extension NetworkError: LocalizedError {
+    var code: Int? {
+        switch self {
+        case let .underlying(_, response):
+            return response.statusCode
 
-    func request<T: Decodable>(_ endpoint: any Endpoint) async throws -> T {
-        let urlRequest = try buildRequest(from: endpoint)
-        let (data, response) = try await session.data(for: urlRequest)
-
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw AppError.network(.invalidResponse)
-        }
-
-        guard (200...299).contains(httpResponse.statusCode) else {
-            throw AppError.network(.statusCode(httpResponse.statusCode))
-        }
-
-        do {
-            return try decoder.decode(T.self, from: data)
-        } catch {
-            throw AppError.parsing(error)
+        case .nilData, .decoding:
+            return nil
         }
     }
 
-    private func buildRequest(from endpoint: any Endpoint) throws -> URLRequest {
-        let url = endpoint.baseURL.appendingPathComponent(endpoint.path)
-        var request = URLRequest(url: url)
-        request.httpMethod = endpoint.method.rawValue
-        endpoint.headers.forEach { request.setValue($1, forHTTPHeaderField: $0) }
+    var errorDescription: String? {
+        switch self {
+        case let .underlying(_, response):
+            return String(data: response.data, encoding: .utf8)
 
-        if let params = endpoint.parameters, endpoint.method != .get {
-            request.httpBody = try JSONSerialization.data(withJSONObject: params)
-            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        case .nilData:
+            return "No data"
+
+        case let .decoding(error, _):
+            #if DEBUG
+            return "Decoding failed with " + error.localizedDescription
+            #else
+            return "Decoding failed"
+            #endif
         }
+    }
 
-        return request
+    var description: String {
+        errorDescription ?? "Server error"
+    }
+}
+
+// MARK: - NetworkServiceImpl
+
+final class NetworkServiceImpl {
+
+    private var provider: MoyaProvider<Target> {
+        return MoyaProvider<Target>(plugins: handlePlugins())
+    }
+
+    private func request<D: Decodable>(
+        _ target: Target,
+        completion: @escaping (Result<D, NetworkError>) -> Void
+    ) {
+        provider.request(target) { result in
+            switch result {
+            case .success(let response):
+                print("\n--> Request: \(response.request!)")
+                print("\n<-- Response: \(String(data: response.data, encoding: .utf8) ?? "")\n *")
+                do {
+                    let filteredResponse = try response.filterSuccessfulStatusCodes()
+                    let decoder = JSONDecoder()
+                    let decodedResponse = try filteredResponse.map(ApiEnvelope<D>.self, using: decoder, failsOnEmptyData: false)
+                    if let data = decodedResponse.data {
+                        completion(.success(data))
+                    } else {
+                        completion(.failure(.nilData(response)))
+                    }
+                } catch {
+                    if let error = error as? MoyaError {
+                        switch error {
+                        case .objectMapping(let error, let response):
+                            completion(.failure(NetworkError.decoding(error, response)))
+                        default:
+                            completion(.failure(NetworkError.underlying(error, response)))
+                        }
+                    } else {
+                        completion(.failure(NetworkError.underlying(error, response)))
+                    }
+                }
+
+            case .failure(let error):
+                completion(.failure(NetworkError.underlying(error, Response(statusCode: error.errorCode, data: Data()))))
+            }
+        }
+    }
+
+    private func request(
+        _ target: Target,
+        completion: @escaping (Result<Void, NetworkError>) -> Void
+    ) {
+        provider.request(target) { result in
+            switch result {
+            case .success(let response):
+                print("\n--> Request: \(response.request!)")
+                print("\n<-- Response: \(String(data: response.data, encoding: .utf8) ?? "")\n *")
+                do {
+                    let _ = try response.filterSuccessfulStatusCodes()
+                    completion(.success(Void()))
+                } catch {
+                    completion(.failure(NetworkError.underlying(error, response)))
+                }
+
+            case .failure(let error):
+                completion(.failure(NetworkError.underlying(error, Response(statusCode: error.errorCode, data: Data()))))
+            }
+        }
+    }
+
+    private func handlePlugins() -> [PluginType] {
+        var plugins = [PluginType]()
+        plugins.append(NetworkLoggerPlugin())
+        return plugins
+    }
+}
+
+// MARK: - Default Parameters
+
+extension NetworkService {
+    func request<D: Decodable>(_ target: Target) async throws -> D {
+        try await self.request(target, priority: .userInitiated)
+    }
+
+    func request(_ target: Target) async throws {
+        try await self.request(target, priority: .userInitiated)
+    }
+}
+
+// MARK: - NetworkServiceImpl + NetworkService
+
+extension NetworkServiceImpl: NetworkService {
+    func request<D: Decodable>(
+        _ target: Target,
+        priority: TaskPriority?
+    ) async throws -> D {
+        return try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<D, Error>) in
+            _Concurrency.Task(priority: priority) {
+                self.request(target) { (result: Result<D, NetworkError>) in
+                    switch result {
+                    case let .success(response):
+                        continuation.resume(returning: response)
+
+                    case let .failure(error):
+                        continuation.resume(throwing: error)
+                    }
+                }
+            }
+        }
+    }
+
+    func request(
+        _ target: Target,
+        priority: TaskPriority?
+    ) async throws {
+        return try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+            _Concurrency.Task(priority: priority) {
+                self.request(target) { (result: Result<Void, NetworkError>) in
+                    switch result {
+                    case let .success(response):
+                        continuation.resume(returning: response)
+
+                    case let .failure(error):
+                        continuation.resume(throwing: error)
+                    }
+                }
+            }
+        }
     }
 }

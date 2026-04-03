@@ -48,11 +48,15 @@
 
 // MARK: - Home
 "home_greeting" = "Привіт, %@!";
+"home_greeting_unauthorized" = "Привіт!";
 "home_section_next_appointment" = "Наступний запис";
 "home_section_saved" = "Збережені 🩷";
 "home_section_popular" = "Популярні ⭐️";
 "home_section_available_today" = "Nails доступні сьогодні 💅🏼";
 "home_section_nearby" = "Перукар біля тебе 💇🏻‍♀️";
+
+"home_appointment_price" = "%@ грн";
+"home_appointment_duration" = "%@ хв.";
 
 // MARK: - Search
 "search_filter_service_type" = "Тип послуги";

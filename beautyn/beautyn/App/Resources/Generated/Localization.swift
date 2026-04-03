@@ -66,11 +66,18 @@ public enum Localization {
   public static func homeGreeting(_ p1: Any) -> String {
     return Localization.tr("Localizable", "home_greeting", String(describing: p1), fallback: "Привіт, %@!")
   }
+  public static let homeGreetingUnauthorized = Localization.tr("Localizable", "home_greeting_unauthorized", fallback: "Привіт!")
   public static let homeSectionAvailableToday = Localization.tr("Localizable", "home_section_available_today", fallback: "Nails доступні сьогодні 💅🏼")
   public static let homeSectionNearby = Localization.tr("Localizable", "home_section_nearby", fallback: "Перукар біля тебе 💇🏻‍♀️")
   public static let homeSectionNextAppointment = Localization.tr("Localizable", "home_section_next_appointment", fallback: "Наступний запис")
   public static let homeSectionPopular = Localization.tr("Localizable", "home_section_popular", fallback: "Популярні ⭐️")
   public static let homeSectionSaved = Localization.tr("Localizable", "home_section_saved", fallback: "Збережені 🩷")
+  public static func homeAppointmentPrice(_ p1: Any) -> String {
+    return Localization.tr("Localizable", "home_appointment_price", String(describing: p1), fallback: "%@ грн")
+  }
+  public static func homeAppointmentDuration(_ p1: Any) -> String {
+    return Localization.tr("Localizable", "home_appointment_duration", String(describing: p1), fallback: "%@ хв.")
+  }
 
   // MARK: - Search
   public static let searchFilterPrice = Localization.tr("Localizable", "search_filter_price", fallback: "Ціна")
