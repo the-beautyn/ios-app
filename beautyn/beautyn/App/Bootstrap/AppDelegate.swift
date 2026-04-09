@@ -5,13 +5,14 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 
     private(set) static var shared: AppDelegate!
 
-    let assembler: Assembler = Assembler([AppAssembly(), MainAssembly()])
+    let assembler: Assembler = Assembler([AppAssembly()])
 
     func application(
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
         AppDelegate.shared = self
+        ImagePipelineConfig.setup()
         return true
     }
 

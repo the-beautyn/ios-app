@@ -41,14 +41,11 @@ struct ServiceRowView: View {
             if !service.photoURLs.isEmpty {
                 HStack(spacing: CGFloat.Spacing.xs) {
                     ForEach(service.photoURLs.prefix(3), id: \.self) { url in
-                        AsyncImage(url: url) { phase in
-                            switch phase {
-                            case .success(let image): image.resizable().scaledToFill()
-                            default: Color.App.beige2
-                            }
-                        }
-                        .frame(width: thumbnailSize, height: thumbnailSize)
-                        .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+                        CachedImage(
+                            url: url,
+                            size: CGSize(width: thumbnailSize, height: thumbnailSize),
+                            clipShape: RoundedRectangle(cornerRadius: 6, style: .continuous)
+                        )
                     }
                 }
             }

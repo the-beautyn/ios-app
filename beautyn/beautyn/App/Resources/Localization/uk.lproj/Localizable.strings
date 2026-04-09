@@ -19,6 +19,17 @@
 "error_data" = "Помилка даних: %@";
 "error_unknown" = "Сталася невідома помилка.";
 
+// MARK: - Validation
+"validation_required_field" = "Обов'язкове поле";
+"validation_password_latin_only" = "Пароль має містити лише латинські літери, цифри та спецсимволи";
+"validation_password_min_length" = "Пароль має містити мінімум 8 символів";
+"validation_password_max_length" = "Пароль має містити максимум 50 символів";
+"validation_password_uppercase" = "Пароль має містити хоча б одну велику літеру";
+"validation_password_lowercase" = "Пароль має містити хоча б одну малу літеру";
+"validation_password_digit" = "Пароль має містити хоча б одну цифру";
+"validation_invalid_phone" = "Невірний номер телефону";
+"validation_invalid_code" = "Невірний код";
+
 // MARK: - Tab Bar
 "tab_home" = "Головна";
 "tab_search" = "Пошук";
@@ -31,6 +42,7 @@
 "auth_email_placeholder" = "Введіть email";
 "auth_continue_apple" = "Продовжити з Apple";
 "auth_continue_google" = "Продовжити з Google";
+"auth_email_invalid_format" = "Невірний формат email";
 
 "sign_up_title" = "Створення аккаунту";
 "sign_up_subtitle" = "Додайте інформацію про себе";
@@ -45,6 +57,15 @@
 
 "forgot_password_title" = "Забули пароль?";
 "forgot_password_subtitle" = "Ми відправимо на вказану пошту інструкцію по відновленню";
+
+// MARK: - Phone Verification
+"phone_verification_title" = "Веріфікуй свій номер телефону";
+"phone_verification_subtitle" = "Для завершення реєстрації будь ласка, підтвердить ваш номер телефону";
+"phone_verification_send_code" = "Відправити код";
+"phone_verification_legal" = "Натискаючи \"Відправити код\", ви погоджуєтесь з Умовами використання та Політикою конфіденційності";
+"phone_code_subtitle" = "Введіть 4 значний код який ми відправили на %@";
+"phone_code_resend" = "Відправити ще раз";
+"phone_code_change_number" = "Змінити номер";
 
 // MARK: - Home
 "home_greeting" = "Привіт, %@!";

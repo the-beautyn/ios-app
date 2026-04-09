@@ -47,3 +47,12 @@ extension HomeFeedTarget: TargetType {
         return ["Content-type": "application/json"]
     }
 }
+
+// MARK: - AccessTokenAuthorizable
+
+extension HomeFeedTarget: AccessTokenAuthorizable {
+
+    var authorizationType: AuthorizationType? {
+        .bearer
+    }
+}

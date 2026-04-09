@@ -20,7 +20,9 @@ final class MainControllerFactoryImpl: MainControllerFactory {
 
     func makeHome(transition: HomeViewModel.Transition) -> UIViewController {
         let useCase: any GetHomeFeedUseCase = assembler.require((any GetHomeFeedUseCase).self)
-        let viewModel = HomeViewModel(transition: transition, getHomeFeedUseCase: useCase)
+        let sessionManager: SessionManager = assembler.require(SessionManager.self)
+        let userRepository: any UserRepository = assembler.require((any UserRepository).self)
+        let viewModel = HomeViewModel(transition: transition, getHomeFeedUseCase: useCase, sessionManager: sessionManager, userRepository: userRepository)
         return HomeController(viewModel: viewModel)
     }
 }

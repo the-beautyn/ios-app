@@ -54,8 +54,24 @@ extension NetworkError: LocalizedError {
 
 final class NetworkServiceImpl {
 
+    private let tokenProvider: TokenProvider?
+
+    init(tokenProvider: TokenProvider? = nil) {
+        self.tokenProvider = tokenProvider
+    }
+
     private var provider: MoyaProvider<Target> {
-        return MoyaProvider<Target>(plugins: handlePlugins())
+        let accessToken = tokenProvider?.currentAccessToken
+        let endpointClosure = { (target: Target) -> Endpoint in
+            let defaultEndpoint = MoyaProvider.defaultEndpointMapping(for: target)
+            guard let token = accessToken,
+                  !token.isEmpty,
+                  target.authorizationType != nil else {
+                return defaultEndpoint
+            }
+            return defaultEndpoint.adding(newHTTPHeaderFields: ["Authorization": "Bearer \(token)"])
+        }
+        return MoyaProvider<Target>(endpointClosure: endpointClosure, plugins: handlePlugins())
     }
 
     private func request<D: Decodable>(
@@ -65,10 +81,6 @@ final class NetworkServiceImpl {
         provider.request(target) { result in
             switch result {
             case .success(let response):
-                #if DEBUG
-                print("\n--> Request: \(response.request?.description ?? "nil")")
-                print("\n<-- Response: \(String(data: response.data, encoding: .utf8) ?? "")\n *")
-                #endif
                 do {
                     let filteredResponse = try response.filterSuccessfulStatusCodes()
                     let decoder = JSONDecoder()
@@ -104,10 +116,6 @@ final class NetworkServiceImpl {
         provider.request(target) { result in
             switch result {
             case .success(let response):
-                #if DEBUG
-                print("\n--> Request: \(response.request?.description ?? "nil")")
-                print("\n<-- Response: \(String(data: response.data, encoding: .utf8) ?? "")\n *")
-                #endif
                 do {
                     let _ = try response.filterSuccessfulStatusCodes()
                     completion(.success(Void()))
@@ -122,9 +130,7 @@ final class NetworkServiceImpl {
     }
 
     private func handlePlugins() -> [PluginType] {
-        var plugins = [PluginType]()
-        plugins.append(NetworkLoggerPlugin())
-        return plugins
+        [NetworkLoggerPlugin()]
     }
 }
 

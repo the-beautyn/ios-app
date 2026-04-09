@@ -9,7 +9,7 @@ import SwiftUI
 private enum InputMetrics {
     static let cornerRadius: CGFloat = 12
     static let paddingH:     CGFloat = 14
-    static let paddingV:     CGFloat = 16
+    static let fieldHeight:  CGFloat = 50
     static let codeSize:     CGFloat = 50
     static let codeSpacing:  CGFloat = 12
     static let hintSpacing:  CGFloat = 4
@@ -39,10 +39,10 @@ private extension View {
             .tint(Color.inputCaret)
     }
 
-    /// Applies padding + 1 pt border overlay.
+    /// Applies padding + 1 pt border overlay with fixed 50 pt height (Figma spec).
     func inputContainer(hasError: Bool) -> some View {
         padding(.horizontal, InputMetrics.paddingH)
-            .padding(.vertical, InputMetrics.paddingV)
+            .frame(height: InputMetrics.fieldHeight)
             .overlay {
                 RoundedRectangle(cornerRadius: InputMetrics.cornerRadius, style: .continuous)
                     .stroke(Color.inputBorder(hasError: hasError), lineWidth: 1)
@@ -53,6 +53,24 @@ private extension View {
     @ViewBuilder
     func applyIf<V: View>(_ condition: Bool, transform: (Self) -> V) -> some View {
         if condition { transform(self) } else { self }
+    }
+
+    @ViewBuilder
+    func applyFocus(_ binding: FocusState<Bool>.Binding?) -> some View {
+        if let binding {
+            self.focused(binding)
+        } else {
+            self
+        }
+    }
+
+    @ViewBuilder
+    func applyOnSubmit(_ action: (() -> Void)?) -> some View {
+        if let action {
+            self.onSubmit(action)
+        } else {
+            self
+        }
     }
 }
 
@@ -99,6 +117,8 @@ struct AppTextField: View {
     var keyboardType: UIKeyboardType = .default
     var textContentType: UITextContentType? = nil
     var isDisabled: Bool            = false
+    var isFocused: FocusState<Bool>.Binding?  = nil
+    var onSubmit: (() -> Void)?     = nil
 
     var body: some View {
         VStack(alignment: .leading, spacing: InputMetrics.hintSpacing) {
@@ -123,6 +143,9 @@ struct AppTextField: View {
         let base = TextField("", text: $text)
             .inputTextStyle()
             .keyboardType(keyboardType)
+            .textInputAutocapitalization(keyboardType == .emailAddress ? .never : .sentences)
+            .applyFocus(isFocused)
+            .applyOnSubmit(onSubmit)
 
         if let ct = textContentType {
             base.textContentType(ct)
@@ -142,6 +165,8 @@ struct AppSecureField: View {
     @Binding var text: String
     var errorMessage: String? = nil
     var isDisabled: Bool      = false
+    var externalFocus: FocusState<Bool>.Binding? = nil
+    var onSubmit: (() -> Void)? = nil
 
     @State  private var isRevealed = false
     @FocusState private var isFocused: Bool
@@ -156,12 +181,16 @@ struct AppSecureField: View {
                     Group {
                         if isRevealed {
                             TextField("", text: $text)
+                                .textInputAutocapitalization(.never)
+                                .applyOnSubmit(onSubmit)
                         } else {
                             SecureField("", text: $text)
+                                .applyOnSubmit(onSubmit)
                         }
                     }
                     .inputTextStyle()
                     .focused($isFocused)
+                    .applyFocus(externalFocus)
                 }
 
                 Button {
@@ -200,6 +229,7 @@ struct AppPhoneField: View {
     @Binding var text: String
     var errorMessage: String?        = nil
     var isDisabled: Bool             = false
+    var isFocused: FocusState<Bool>.Binding? = nil
     /// Called when the user taps the country-code prefix (show a picker).
     var onCountryCodeTap: (() -> Void)? = nil
 
@@ -234,6 +264,7 @@ struct AppPhoneField: View {
                         .inputTextStyle()
                         .keyboardType(.phonePad)
                         .textContentType(.telephoneNumber)
+                        .applyFocus(isFocused)
                 }
             }
             .inputContainer(hasError: errorMessage != nil)
@@ -257,6 +288,7 @@ struct AppCodeField: View {
     @Binding var code: String
     var length: Int        = 4
     var errorMessage: String? = nil
+    var autoFocus: Bool    = false
 
     @FocusState private var isFocused: Bool
 
@@ -289,6 +321,7 @@ struct AppCodeField: View {
             }
             .contentShape(Rectangle())
             .onTapGesture { isFocused = true }
+            .onAppear { if autoFocus { isFocused = true } }
 
             if let error = errorMessage {
                 InputHintRow(message: error)

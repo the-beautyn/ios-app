@@ -24,16 +24,11 @@ struct SavedSalonItemView: View {
     var body: some View {
         Button(action: onTap) {
             VStack(spacing: CGFloat.Spacing.sm) {
-                AsyncImage(url: salon.imageURL) { phase in
-                    switch phase {
-                    case .success(let image):
-                        image.resizable().scaledToFill()
-                    default:
-                        Color.App.beige2
-                    }
-                }
-                .frame(width: imageSize, height: imageSize)
-                .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+                CachedImage(
+                    url: salon.imageURL,
+                    size: CGSize(width: imageSize, height: imageSize),
+                    clipShape: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                )
                 .overlay(
                     RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                         .fill(Color.App.brown1.opacity(0.2))

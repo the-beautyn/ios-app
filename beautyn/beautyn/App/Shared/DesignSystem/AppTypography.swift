@@ -48,6 +48,7 @@ extension Font {
         static let headline         = Font.custom(AeonikPro.medium,  size: 17)
         static let body             = Font.custom(AeonikPro.regular, size: 17)
         static let callout          = Font.custom(AeonikPro.regular, size: 16)
+        static let calloutMedium    = Font.custom(AeonikPro.medium,  size: 16)
         static let subheadline      = Font.custom(AeonikPro.regular, size: 15)
         static let footnote         = Font.custom(AeonikPro.regular, size: 13)
 

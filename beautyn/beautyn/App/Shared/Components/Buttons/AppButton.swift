@@ -147,7 +147,6 @@ private struct AppButtonStyle: ButtonStyle {
             .background(background(pressed: configuration.isPressed))
             .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
             .overlay(stroke(pressed: configuration.isPressed))
-            .opacity(isDisabled ? 0.4 : 1.0)
             .scaleEffect(configuration.isPressed ? 0.97 : 1.0)
             .animation(.easeOut(duration: 0.12), value: configuration.isPressed)
     }
@@ -166,10 +165,10 @@ private struct AppButtonStyle: ButtonStyle {
             switch style {
             case .primary:
                 Color.App.brown1
-                    .opacity(pressed ? 0.85 : 1.0)
+                    .opacity(isDisabled ? 0.3 : (pressed ? 0.85 : 1.0))
             case .secondary:
                 Color.App.white
-                    .opacity(pressed ? 0.85 : 1.0)
+                    .opacity(isDisabled ? 0.3 : (pressed ? 0.85 : 1.0))
             }
         }
     }

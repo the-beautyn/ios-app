@@ -21,7 +21,14 @@ struct SocialAuthButtonView: View {
         var icon: String {
             switch self {
             case .apple:  return "apple.logo"
-            case .google: return "g.circle.fill"   // placeholder; replace with asset if available
+            case .google: return "ic_google"
+            }
+        }
+
+        var usesSystemImage: Bool {
+            switch self {
+            case .apple:  return true
+            case .google: return false
             }
         }
     }
@@ -31,13 +38,22 @@ struct SocialAuthButtonView: View {
 
     var body: some View {
         Button(action: action) {
-            HStack(spacing: CGFloat.Spacing.sm) {
-                Image(systemName: provider.icon)
-                    .font(.system(size: 18))
-                    .foregroundStyle(Color.App.text)
+            HStack(spacing: 4) {
+                Group {
+                    if provider.usesSystemImage {
+                        Image(systemName: provider.icon)
+                            .font(.system(size: 20))
+                    } else {
+                        Image(provider.icon)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 24, height: 24)
+                    }
+                }
+                .foregroundStyle(Color.App.text)
 
                 Text(provider.title)
-                    .font(.App.subheadline)
+                    .font(.App.headline)
                     .foregroundStyle(Color.App.text)
             }
             .frame(maxWidth: .infinity, minHeight: 52)

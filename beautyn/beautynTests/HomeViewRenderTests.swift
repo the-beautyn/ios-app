@@ -45,9 +45,12 @@ final class HomeViewRenderTests: XCTestCase {
                 didTapSeeAllSaved: {},
                 didTapSeeAllSection: { _ in },
                 didTapAppointmentDetails: { _ in },
-                didTapCategory: { _ in }
+                didTapCategory: { _ in },
+                didRequireAuth: {}
             ),
-            getHomeFeedUseCase: MockHomeFeedUseCase(feed: feed)
+            getHomeFeedUseCase: MockHomeFeedUseCase(feed: feed),
+            sessionManager: SessionManager(keychainService: KeychainServiceImpl(), defaultsService: DefaultsStorageService()),
+            userRepository: UserRepositoryImpl(networkService: NetworkServiceImpl(), defaultsService: DefaultsStorageService())
         )
     }
 }

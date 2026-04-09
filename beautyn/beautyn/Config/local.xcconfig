@@ -14,3 +14,6 @@ API_PATH_PREFIX = api/v1
 
 BUNDLE_DISPLAY_NAME = beautyn (Local)
 PRODUCT_BUNDLE_IDENTIFIER = com.beautyn.app.local
+
+GID_CLIENT_ID = 939341919013-6pov0ptgbq0clluk5q6nvc74p64g4h4n.apps.googleusercontent.com
+GID_URL_SCHEME = com.googleusercontent.apps.939341919013-6pov0ptgbq0clluk5q6nvc74p64g4h4n
