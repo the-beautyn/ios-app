@@ -195,7 +195,7 @@ final class AuthCoordinator: BaseCoordinator {
     private func showSocialAccountAlert(provider: String) {
         let alert = UIAlertController(
             title: nil,
-            message: "Цей аккаунт зареєстрований через \(provider)",
+            message: Localization.authSocialAccountMessage(provider),
             preferredStyle: .alert
         )
         alert.addAction(UIAlertAction(title: Localization.okButton, style: .default))

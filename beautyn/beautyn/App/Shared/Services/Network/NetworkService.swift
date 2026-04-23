@@ -87,7 +87,7 @@ final class NetworkServiceImpl {
             switch result {
             case .success(let response):
                 #if DEBUG
-                print("\n--> Request: \(response.request!)")
+                print("\n--> Request: \(response.request?.description ?? "nil")")
                 print("\n<-- Response: \(String(data: response.data, encoding: .utf8) ?? "")\n *")
                 #endif
                 do {
@@ -126,7 +126,7 @@ final class NetworkServiceImpl {
             switch result {
             case .success(let response):
                 #if DEBUG
-                print("\n--> Request: \(response.request!)")
+                print("\n--> Request: \(response.request?.description ?? "nil")")
                 print("\n<-- Response: \(String(data: response.data, encoding: .utf8) ?? "")\n *")
                 #endif
                 do {

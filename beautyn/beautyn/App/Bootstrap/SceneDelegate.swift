@@ -17,6 +17,10 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         for userActivity in connectionOptions.userActivities {
             handleUserActivity(userActivity)
         }
+
+        for urlContext in connectionOptions.urlContexts {
+            GIDSignIn.sharedInstance.handle(urlContext.url)
+        }
     }
 
     func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {

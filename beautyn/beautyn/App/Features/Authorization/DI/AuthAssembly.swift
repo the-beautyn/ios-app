@@ -42,7 +42,8 @@ final class AuthAssembly: Assembly {
 
         container.register((any VerifyPhoneOTPUseCase).self) { resolver in
             VerifyPhoneOTPUseCaseImpl(
-                repository: resolver.require((any AuthRepository).self)
+                repository: resolver.require((any AuthRepository).self),
+                sessionManager: resolver.require(SessionManager.self)
             )
         }
 

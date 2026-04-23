@@ -43,6 +43,7 @@
 "auth_continue_apple" = "Продовжити з Apple";
 "auth_continue_google" = "Продовжити з Google";
 "auth_email_invalid_format" = "Невірний формат email";
+"auth_social_account_message" = "Цей аккаунт зареєстрований через %@";
 
 "sign_up_title" = "Створення аккаунту";
 "sign_up_subtitle" = "Додайте інформацію про себе";
@@ -73,10 +74,10 @@
 
 // MARK: - Phone Verification
 "phone_verification_title" = "Веріфікуй свій номер телефону";
-"phone_verification_subtitle" = "Для завершення реєстрації будь ласка, підтвердить ваш номер телефону";
+"phone_verification_subtitle" = "Для завершення реєстрації, будь ласка, підтвердіть ваш номер телефону";
 "phone_verification_send_code" = "Відправити код";
 "phone_verification_legal" = "Натискаючи \"Відправити код\", ви погоджуєтесь з Умовами використання та Політикою конфіденційності";
-"phone_code_subtitle" = "Введіть 4 значний код який ми відправили на %@";
+"phone_code_subtitle" = "Введіть 4-значний код, який ми відправили на %@";
 "phone_code_resend" = "Відправити ще раз";
 "phone_code_change_number" = "Змінити номер";
 

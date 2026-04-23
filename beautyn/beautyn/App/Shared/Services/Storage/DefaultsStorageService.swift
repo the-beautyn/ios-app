@@ -4,6 +4,7 @@ import Foundation
 
 enum DefaultsKeys {
     static let isAuthenticated = "beautyn.isAuthenticated"
+    static let phoneVerificationRequired = "beautyn.phoneVerificationRequired"
     static let userProfile = "beautyn.userProfile"
 }
 

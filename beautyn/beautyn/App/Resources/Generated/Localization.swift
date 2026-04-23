@@ -57,6 +57,9 @@ public enum Localization {
   public static let authContinueApple = Localization.tr("Localizable", "auth_continue_apple", fallback: "Продовжити з Apple")
   public static let authContinueGoogle = Localization.tr("Localizable", "auth_continue_google", fallback: "Продовжити з Google")
   public static let authEmailInvalidFormat = Localization.tr("Localizable", "auth_email_invalid_format", fallback: "Невірний формат email")
+  public static func authSocialAccountMessage(_ p1: Any) -> String {
+    return Localization.tr("Localizable", "auth_social_account_message", String(describing: p1), fallback: "Цей аккаунт зареєстрований через %@")
+  }
   public static let authEmailPlaceholder = Localization.tr("Localizable", "auth_email_placeholder", fallback: "Введіть email")
   public static let authSubtitle = Localization.tr("Localizable", "auth_subtitle", fallback: "Створи акаунт або увійди.")
   public static let authTitle = Localization.tr("Localizable", "auth_title", fallback: "Авторизація")

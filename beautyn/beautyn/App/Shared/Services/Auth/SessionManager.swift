@@ -36,6 +36,7 @@ final class SessionManager: ObservableObject {
         keychainService.storeValue(refreshToken, for: KeychainKeys.refreshToken)
         tokenLock.withLock { $0 = accessToken }
         self.phoneVerificationRequired = phoneVerificationRequired
+        defaultsService.storeValue(phoneVerificationRequired, for: DefaultsKeys.phoneVerificationRequired)
         defaultsService.storeValue(true, for: DefaultsKeys.isAuthenticated)
         authState = .authenticated
     }
@@ -44,6 +45,11 @@ final class SessionManager: ObservableObject {
         keychainService.storeValue(accessToken, for: KeychainKeys.accessToken)
         keychainService.storeValue(refreshToken, for: KeychainKeys.refreshToken)
         tokenLock.withLock { $0 = accessToken }
+    }
+
+    func markPhoneVerified() {
+        phoneVerificationRequired = false
+        defaultsService.storeValue(false, for: DefaultsKeys.phoneVerificationRequired)
     }
 
     var currentRefreshToken: String? {
@@ -56,6 +62,7 @@ final class SessionManager: ObservableObject {
         tokenLock.withLock { $0 = nil }
         phoneVerificationRequired = false
         defaultsService.storeValue(false, for: DefaultsKeys.isAuthenticated)
+        defaultsService.removeValue(for: DefaultsKeys.phoneVerificationRequired)
         defaultsService.removeValue(for: DefaultsKeys.userProfile)
         authState = .unauthenticated
     }
@@ -67,12 +74,13 @@ final class SessionManager: ObservableObject {
             return
         }
 
-        let accessToken: String? = keychainService.retrieveValue(for: KeychainKeys.accessToken)
-        if let accessToken {
-            tokenLock.withLock { $0 = accessToken }
+        guard let accessToken: String = keychainService.retrieveValue(for: KeychainKeys.accessToken) else {
+            clearSession()
+            return
         }
+        tokenLock.withLock { $0 = accessToken }
 
-        // TODO: Wire actual /auth/refresh call when AuthTarget is integrated
+        phoneVerificationRequired = defaultsService.retrieveValue(for: DefaultsKeys.phoneVerificationRequired, default: false)
         authState = .authenticated
     }
 }

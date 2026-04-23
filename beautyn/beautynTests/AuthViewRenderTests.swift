@@ -4,7 +4,9 @@ import XCTest
 
 // MARK: - AuthViewRenderTests
 //
-// Renders all 6 authorization screens to PNG files for visual verification.
+// Renders all 8 authorization screens to PNG files for visual verification:
+// Email Check, Login, Forgot Password, Sign Up, Phone Verification,
+// Phone Code, Set New Password, Check Email Sent.
 //
 // Run:
 //   xcodebuild test -scheme beautyn-Production \

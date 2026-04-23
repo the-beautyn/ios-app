@@ -37,7 +37,9 @@ final class RefreshTokenUseCaseImpl: RefreshTokenUseCase {
                 accessToken: session.accessToken,
                 refreshToken: session.refreshToken
             )
-        } catch {
+        } catch let error as NetworkError where error.code == 401 || error.code == 403 {
+            // Only clear on definitive auth-invalid responses; transient
+            // failures (5xx, timeouts, offline) must keep the session.
             sessionManager.clearSession()
             throw error
         }
