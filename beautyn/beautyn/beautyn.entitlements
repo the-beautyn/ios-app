@@ -6,5 +6,11 @@
 	<array>
 		<string>Default</string>
 	</array>
+	<key>com.apple.developer.associated-domains</key>
+	<array>
+		<string>applinks:api.beautyn.com.ua</string>
+		<string>applinks:stage.beautyn.com.ua</string>
+		<string>applinks:dev.beautyn.com.ua</string>
+	</array>
 </dict>
 </plist>

@@ -1,12 +1,12 @@
-import UIKit
 import SwiftUI
+import UIKit
 
-// MARK: - ForgotPasswordController
+// MARK: - CheckEmailSentController
 
-final class ForgotPasswordController: BaseHostingViewController<ForgotPasswordViewModel, ForgotPasswordView> {
+final class CheckEmailSentController: BaseHostingViewController<CheckEmailSentViewModel, CheckEmailSentView> {
 
-    init(viewModel: ForgotPasswordViewModel) {
-        let view = ForgotPasswordView(viewModel: viewModel)
+    init(viewModel: CheckEmailSentViewModel) {
+        let view = CheckEmailSentView(viewModel: viewModel)
         super.init(viewModel: viewModel, rootView: view)
     }
 

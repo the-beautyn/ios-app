@@ -176,6 +176,45 @@ final class AuthViewRenderTests: XCTestCase {
         let view = PhoneCodeView(viewModel: viewModel)
         try await ViewRenderer.render(view, name: "auth_phone_code_partial")
     }
+
+    // MARK: - 7. Set New Password
+
+    func testRenderSetNewPassword() async throws {
+        let viewModel = SetNewPasswordViewModel(
+            email: "helga.altuhova@gmail.com",
+            code: "mock-code",
+            transition: .init(didResetPassword: {}),
+            resetPasswordUseCase: MockResetPasswordUseCase(),
+            forgotPasswordUseCase: MockForgotPasswordUseCase()
+        )
+        let view = SetNewPasswordView(viewModel: viewModel)
+        try await ViewRenderer.render(view, name: "auth_set_new_password")
+    }
+
+    func testRenderSetNewPasswordFilled() async throws {
+        let viewModel = SetNewPasswordViewModel(
+            email: "helga.altuhova@gmail.com",
+            code: "mock-code",
+            transition: .init(didResetPassword: {}),
+            resetPasswordUseCase: MockResetPasswordUseCase(),
+            forgotPasswordUseCase: MockForgotPasswordUseCase()
+        )
+        viewModel.newPassword = "NewPassword1"
+        viewModel.confirmPassword = "NewPassword1"
+        let view = SetNewPasswordView(viewModel: viewModel)
+        try await ViewRenderer.render(view, name: "auth_set_new_password_filled")
+    }
+
+    // MARK: - 8. Check Email Sent
+
+    func testRenderCheckEmailSent() async throws {
+        let viewModel = CheckEmailSentViewModel(
+            email: "anna@example.com",
+            transition: .init(didClose: {}, didTapBack: {})
+        )
+        let view = CheckEmailSentView(viewModel: viewModel)
+        try await ViewRenderer.render(view, name: "auth_check_email_sent")
+    }
 }
 
 // MARK: - Mock Use Cases
@@ -210,4 +249,8 @@ private final class MockVerifyPhoneOTPUseCase: VerifyPhoneOTPUseCase {
     func execute(phone: String, code: String) async throws -> Bool {
         true
     }
+}
+
+private final class MockResetPasswordUseCase: ResetPasswordUseCase {
+    func execute(token: String, newPassword: String) async throws {}
 }

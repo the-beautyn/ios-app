@@ -63,6 +63,21 @@ public enum Localization {
   public static let forgotPasswordLink = Localization.tr("Localizable", "forgot_password_link", fallback: "Забули пароль?")
   public static let forgotPasswordSubtitle = Localization.tr("Localizable", "forgot_password_subtitle", fallback: "Ми відправимо на вказану пошту інструкцію по відновленню")
   public static let forgotPasswordTitle = Localization.tr("Localizable", "forgot_password_title", fallback: "Забули пароль?")
+  public static let setNewPasswordTitle = Localization.tr("Localizable", "set_new_password_title", fallback: "Змінити пароль")
+  public static let setNewPasswordEmailLabel = Localization.tr("Localizable", "set_new_password_email_label", fallback: "Твій email")
+  public static let setNewPasswordNewLabel = Localization.tr("Localizable", "set_new_password_new_label", fallback: "Новий пароль")
+  public static let setNewPasswordConfirmLabel = Localization.tr("Localizable", "set_new_password_confirm_label", fallback: "Повторити новий пароль")
+  public static let setNewPasswordMismatch = Localization.tr("Localizable", "set_new_password_mismatch", fallback: "Паролі не збігаються")
+  public static let setNewPasswordExpiredLink = Localization.tr("Localizable", "set_new_password_expired_link", fallback: "Посилання недійсне або застаріле. Запросіть нове.")
+  public static let setNewPasswordRequestNewLink = Localization.tr("Localizable", "set_new_password_request_new_link", fallback: "Запросити нове посилання")
+  public static func setNewPasswordNewLinkSent(_ p1: Any) -> String {
+    return Localization.tr("Localizable", "set_new_password_new_link_sent", String(describing: p1), fallback: "Ми надіслали нове посилання на %@")
+  }
+  public static let checkEmailSentTitle = Localization.tr("Localizable", "check_email_sent_title", fallback: "Перевірте вашу пошту")
+  public static func checkEmailSentSubtitle(_ p1: Any) -> String {
+    return Localization.tr("Localizable", "check_email_sent_subtitle", String(describing: p1), fallback: "Ми надіслали інструкцію на %@")
+  }
+  public static let checkEmailSentBack = Localization.tr("Localizable", "check_email_sent_back", fallback: "Повернутись на вхід")
   public static let loginPasswordPlaceholder = Localization.tr("Localizable", "login_password_placeholder", fallback: "Введіть пароль")
   public static func loginSubtitle(_ p1: Any) -> String {
     return Localization.tr("Localizable", "login_subtitle", String(describing: p1), fallback: "Введіть пароль від аккаунту зареєстрованого за поштою %@")

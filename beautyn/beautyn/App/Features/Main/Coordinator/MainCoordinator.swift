@@ -12,7 +12,7 @@ final class MainCoordinator: BaseCoordinator {
 
     init(router: Router, parentAssembler: Assembler) {
         let assembler = Assembler([MainAssembly()], parent: parentAssembler)
-        self.factory = assembler.resolver.require((any MainControllerFactory).self)
+        self.factory = assembler.main.controllerFactory
         self.router = router
     }
 

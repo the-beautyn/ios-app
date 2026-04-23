@@ -58,6 +58,19 @@
 "forgot_password_title" = "Забули пароль?";
 "forgot_password_subtitle" = "Ми відправимо на вказану пошту інструкцію по відновленню";
 
+"set_new_password_title" = "Змінити пароль";
+"set_new_password_email_label" = "Твій email";
+"set_new_password_new_label" = "Новий пароль";
+"set_new_password_confirm_label" = "Повторити новий пароль";
+"set_new_password_mismatch" = "Паролі не збігаються";
+"set_new_password_expired_link" = "Посилання недійсне або застаріле. Запросіть нове.";
+"set_new_password_request_new_link" = "Запросити нове посилання";
+"set_new_password_new_link_sent" = "Ми надіслали нове посилання на %@";
+
+"check_email_sent_title" = "Перевірте вашу пошту";
+"check_email_sent_subtitle" = "Ми надіслали інструкцію на %@";
+"check_email_sent_back" = "Повернутись на вхід";
+
 // MARK: - Phone Verification
 "phone_verification_title" = "Веріфікуй свій номер телефону";
 "phone_verification_subtitle" = "Для завершення реєстрації будь ласка, підтвердить ваш номер телефону";

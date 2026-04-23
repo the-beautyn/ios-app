@@ -55,9 +55,14 @@ extension NetworkError: LocalizedError {
 final class NetworkServiceImpl {
 
     private let tokenProvider: TokenProvider?
+    private var tokenRefresher: TokenRefresher?
 
     init(tokenProvider: TokenProvider? = nil) {
         self.tokenProvider = tokenProvider
+    }
+
+    func setTokenRefresher(_ refresher: TokenRefresher) {
+        self.tokenRefresher = refresher
     }
 
     private var provider: MoyaProvider<Target> {
@@ -81,6 +86,10 @@ final class NetworkServiceImpl {
         provider.request(target) { result in
             switch result {
             case .success(let response):
+                #if DEBUG
+                print("\n--> Request: \(response.request!)")
+                print("\n<-- Response: \(String(data: response.data, encoding: .utf8) ?? "")\n *")
+                #endif
                 do {
                     let filteredResponse = try response.filterSuccessfulStatusCodes()
                     let decoder = JSONDecoder()
@@ -116,6 +125,10 @@ final class NetworkServiceImpl {
         provider.request(target) { result in
             switch result {
             case .success(let response):
+                #if DEBUG
+                print("\n--> Request: \(response.request!)")
+                print("\n<-- Response: \(String(data: response.data, encoding: .utf8) ?? "")\n *")
+                #endif
                 do {
                     let _ = try response.filterSuccessfulStatusCodes()
                     completion(.success(Void()))
@@ -153,6 +166,47 @@ extension NetworkServiceImpl: NetworkService {
         _ target: Target,
         priority: TaskPriority?
     ) async throws -> D {
+        do {
+            return try await performRequest(target, priority: priority)
+        } catch let original as NetworkError where shouldRetry(for: target, error: original) {
+            do {
+                try await tokenRefresher?.refresh()
+            } catch {
+                throw original
+            }
+            return try await performRequest(target, priority: priority)
+        }
+    }
+
+    func request(
+        _ target: Target,
+        priority: TaskPriority?
+    ) async throws {
+        do {
+            try await performRequest(target, priority: priority)
+        } catch let original as NetworkError where shouldRetry(for: target, error: original) {
+            do {
+                try await tokenRefresher?.refresh()
+            } catch {
+                throw original
+            }
+            try await performRequest(target, priority: priority)
+        }
+    }
+
+    private func shouldRetry(for target: Target, error: NetworkError) -> Bool {
+        guard tokenRefresher != nil,
+              target.authorizationType != nil,
+              error.code == 401 else {
+            return false
+        }
+        return true
+    }
+
+    private func performRequest<D: Decodable>(
+        _ target: Target,
+        priority: TaskPriority?
+    ) async throws -> D {
         return try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<D, Error>) in
             _Concurrency.Task(priority: priority) {
                 self.request(target) { (result: Result<D, NetworkError>) in
@@ -168,7 +222,7 @@ extension NetworkServiceImpl: NetworkService {
         }
     }
 
-    func request(
+    private func performRequest(
         _ target: Target,
         priority: TaskPriority?
     ) async throws {

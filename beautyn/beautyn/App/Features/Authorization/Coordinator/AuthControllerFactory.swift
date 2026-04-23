@@ -7,6 +7,7 @@ protocol AuthControllerFactory {
     func makeEmailCheck(transition: EmailCheckViewModel.Transition) -> UIViewController
     func makeLogin(email: String, transition: LoginViewModel.Transition) -> UIViewController
     func makeForgotPassword(email: String, transition: ForgotPasswordViewModel.Transition) -> UIViewController
+    func makeCheckEmailSent(email: String, transition: CheckEmailSentViewModel.Transition) -> UIViewController
     func makeSignUp(email: String, transition: SignUpViewModel.Transition) -> UIViewController
     func makePhoneVerification(transition: PhoneVerificationViewModel.Transition) -> UIViewController
     func makePhoneCode(phone: String, transition: PhoneCodeViewModel.Transition) -> UIViewController
@@ -24,39 +25,42 @@ final class AuthControllerFactoryImpl: AuthControllerFactory {
     }
 
     func makeEmailCheck(transition: EmailCheckViewModel.Transition) -> UIViewController {
-        let useCase: any CheckEmailUseCase = assembler.require((any CheckEmailUseCase).self)
-        let viewModel = EmailCheckViewModel(transition: transition, checkEmailUseCase: useCase)
+        let viewModel = EmailCheckViewModel(transition: transition, checkEmailUseCase: assembler.auth.checkEmailUseCase)
         return EmailCheckController(viewModel: viewModel)
     }
 
     func makeLogin(email: String, transition: LoginViewModel.Transition) -> UIViewController {
-        let useCase: any LoginUseCase = assembler.require((any LoginUseCase).self)
-        let viewModel = LoginViewModel(email: email, transition: transition, loginUseCase: useCase)
+        let viewModel = LoginViewModel(email: email, transition: transition, loginUseCase: assembler.auth.loginUseCase)
         return LoginController(viewModel: viewModel)
     }
 
     func makeForgotPassword(email: String, transition: ForgotPasswordViewModel.Transition) -> UIViewController {
-        let useCase: any ForgotPasswordUseCase = assembler.require((any ForgotPasswordUseCase).self)
-        let viewModel = ForgotPasswordViewModel(email: email, transition: transition, forgotPasswordUseCase: useCase)
+        let viewModel = ForgotPasswordViewModel(email: email, transition: transition, forgotPasswordUseCase: assembler.app.forgotPasswordUseCase)
         return ForgotPasswordController(viewModel: viewModel)
     }
 
+    func makeCheckEmailSent(email: String, transition: CheckEmailSentViewModel.Transition) -> UIViewController {
+        let viewModel = CheckEmailSentViewModel(email: email, transition: transition)
+        return CheckEmailSentController(viewModel: viewModel)
+    }
+
     func makeSignUp(email: String, transition: SignUpViewModel.Transition) -> UIViewController {
-        let useCase: any RegisterUseCase = assembler.require((any RegisterUseCase).self)
-        let viewModel = SignUpViewModel(email: email, transition: transition, registerUseCase: useCase)
+        let viewModel = SignUpViewModel(email: email, transition: transition, registerUseCase: assembler.auth.registerUseCase)
         return SignUpController(viewModel: viewModel)
     }
 
     func makePhoneVerification(transition: PhoneVerificationViewModel.Transition) -> UIViewController {
-        let useCase: any SendPhoneOTPUseCase = assembler.require((any SendPhoneOTPUseCase).self)
-        let viewModel = PhoneVerificationViewModel(transition: transition, sendPhoneOTPUseCase: useCase)
+        let viewModel = PhoneVerificationViewModel(transition: transition, sendPhoneOTPUseCase: assembler.auth.sendPhoneOTPUseCase)
         return PhoneVerificationController(viewModel: viewModel)
     }
 
     func makePhoneCode(phone: String, transition: PhoneCodeViewModel.Transition) -> UIViewController {
-        let verifyUseCase: any VerifyPhoneOTPUseCase = assembler.require((any VerifyPhoneOTPUseCase).self)
-        let sendUseCase: any SendPhoneOTPUseCase = assembler.require((any SendPhoneOTPUseCase).self)
-        let viewModel = PhoneCodeViewModel(phone: phone, transition: transition, verifyPhoneOTPUseCase: verifyUseCase, sendPhoneOTPUseCase: sendUseCase)
+        let viewModel = PhoneCodeViewModel(
+            phone: phone,
+            transition: transition,
+            verifyPhoneOTPUseCase: assembler.auth.verifyPhoneOTPUseCase,
+            sendPhoneOTPUseCase: assembler.auth.sendPhoneOTPUseCase
+        )
         return PhoneCodeController(viewModel: viewModel)
     }
 }

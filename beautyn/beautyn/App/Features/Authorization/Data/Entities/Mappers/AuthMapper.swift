@@ -30,6 +30,24 @@ enum AuthMapper {
         )
     }
 
+    static func mapRefreshSession(_ dto: RefreshResponseDTO) -> AuthSession {
+        AuthSession(
+            accessToken: dto.accessToken,
+            refreshToken: dto.refreshToken,
+            expiresIn: dto.expiresIn,
+            phoneVerificationRequired: false
+        )
+    }
+
+    static func mapResetSession(_ dto: ResetPasswordResponseDTO) -> AuthSession {
+        AuthSession(
+            accessToken: dto.accessToken,
+            refreshToken: dto.refreshToken,
+            expiresIn: dto.expiresIn,
+            phoneVerificationRequired: false
+        )
+    }
+
     static func mapOAuthSession(_ dto: OAuthResponseDTO) -> OAuthSession {
         OAuthSession(
             accessToken: dto.accessToken,

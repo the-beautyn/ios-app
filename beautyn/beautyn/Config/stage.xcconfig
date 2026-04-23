@@ -9,7 +9,7 @@
 ENVIRONMENT_TYPE = Staging
 
 API_SCHEME = https
-API_HOST = stage-api.beautyn.app
+API_HOST = stage.beautyn.com.ua
 API_PATH_PREFIX = api/v1
 
 BUNDLE_DISPLAY_NAME = beautyn (Stage)

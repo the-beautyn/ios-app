@@ -12,6 +12,7 @@ enum AuthTarget {
     case refreshToken(refreshToken: String)
     case logout
     case forgotPassword(email: String)
+    case resetPassword(token: String, newPassword: String)
     case sendPhoneOTP(phone: String)
     case verifyPhoneOTP(phone: String, code: String)
     case resendPhoneOTP(phone: String)
@@ -34,6 +35,7 @@ extension AuthTarget: TargetType {
         case .refreshToken: return "/auth/refresh"
         case .logout: return "/auth/logout"
         case .forgotPassword: return "/auth/forgot-password"
+        case .resetPassword: return "/auth/reset"
         case .sendPhoneOTP: return "/auth/phone/send-otp"
         case .verifyPhoneOTP: return "/auth/phone/verify-otp"
         case .resendPhoneOTP: return "/auth/phone/resend-otp"
@@ -82,7 +84,7 @@ extension AuthTarget: TargetType {
 
         case .refreshToken(let refreshToken):
             return .requestParameters(
-                parameters: ["refreshToken": refreshToken],
+                parameters: ["refresh_token": refreshToken],
                 encoding: JSONEncoding.default
             )
 
@@ -92,6 +94,12 @@ extension AuthTarget: TargetType {
         case .forgotPassword(let email):
             return .requestParameters(
                 parameters: ["email": email],
+                encoding: JSONEncoding.default
+            )
+
+        case .resetPassword(let token, let newPassword):
+            return .requestParameters(
+                parameters: ["otp_token": token, "new_password": newPassword],
                 encoding: JSONEncoding.default
             )
 

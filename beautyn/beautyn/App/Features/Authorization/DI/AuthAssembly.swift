@@ -4,12 +4,6 @@ import Foundation
 
 final class AuthAssembly: Assembly {
     func assemble(container: Container) {
-        container.register((any AuthRepository).self) { resolver in
-            AuthRepositoryImpl(
-                networkService: resolver.require((any NetworkService).self)
-            )
-        }
-
         container.register((any CheckEmailUseCase).self) { resolver in
             CheckEmailUseCaseImpl(
                 repository: resolver.require((any AuthRepository).self)
@@ -40,12 +34,6 @@ final class AuthAssembly: Assembly {
             )
         }
 
-        container.register((any ForgotPasswordUseCase).self) { resolver in
-            ForgotPasswordUseCaseImpl(
-                repository: resolver.require((any AuthRepository).self)
-            )
-        }
-
         container.register((any SendPhoneOTPUseCase).self) { resolver in
             SendPhoneOTPUseCaseImpl(
                 repository: resolver.require((any AuthRepository).self)
@@ -60,6 +48,10 @@ final class AuthAssembly: Assembly {
 
         container.register((any AuthControllerFactory).self) { resolver in
             AuthControllerFactoryImpl(assembler: resolver)
+        }
+
+        container.register((any AuthFactory).self) { resolver in
+            AuthFactoryImpl(resolver: resolver)
         }
     }
 }

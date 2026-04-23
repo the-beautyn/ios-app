@@ -13,12 +13,11 @@ final class AuthCoordinator: BaseCoordinator {
 
     init(parentAssembler: Assembler) {
         let assembler = Assembler([AuthAssembly()], parent: parentAssembler)
-        let resolver = assembler.resolver
         self.router = Router(navigationController: UINavigationController())
-        self.factory = resolver.require((any AuthControllerFactory).self)
-        self.appleSignInService = resolver.require((any AppleSignInService).self)
-        self.googleSignInService = resolver.require((any GoogleSignInService).self)
-        self.oauthSignInUseCase = resolver.require((any OAuthSignInUseCase).self)
+        self.factory = assembler.auth.controllerFactory
+        self.appleSignInService = assembler.app.appleSignInService
+        self.googleSignInService = assembler.app.googleSignInService
+        self.oauthSignInUseCase = assembler.auth.oauthSignInUseCase
     }
 
     override func start() {
@@ -80,10 +79,20 @@ final class AuthCoordinator: BaseCoordinator {
                 self?.onFinish?()
             },
             didSendResetEmail: { [weak self] in
-                self?.router.pop()
+                self?.showCheckEmailSent(email: email)
             }
         )
         let vc = factory.makeForgotPassword(email: email, transition: transition)
+        router.push(vc)
+    }
+
+    private func showCheckEmailSent(email: String) {
+        let transition = CheckEmailSentViewModel.Transition(
+            didClose: { [weak self] in
+                self?.onFinish?()
+            }
+        )
+        let vc = factory.makeCheckEmailSent(email: email, transition: transition)
         router.push(vc)
     }
 

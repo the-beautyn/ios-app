@@ -34,9 +34,21 @@ final class AuthRepositoryImpl: AuthRepository {
         return AuthMapper.mapOAuthSession(response)
     }
 
+    func refresh(refreshToken: String) async throws -> AuthSession {
+        let target = Target(type: AuthTarget.refreshToken(refreshToken: refreshToken))
+        let response: RefreshResponseDTO = try await networkService.request(target)
+        return AuthMapper.mapRefreshSession(response)
+    }
+
     func forgotPassword(email: String) async throws {
         let target = Target(type: AuthTarget.forgotPassword(email: email))
         try await networkService.request(target)
+    }
+
+    func resetPassword(token: String, newPassword: String) async throws -> AuthSession {
+        let target = Target(type: AuthTarget.resetPassword(token: token, newPassword: newPassword))
+        let response: ResetPasswordResponseDTO = try await networkService.request(target)
+        return AuthMapper.mapResetSession(response)
     }
 
     func sendPhoneOTP(phone: String) async throws {

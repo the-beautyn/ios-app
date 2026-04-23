@@ -7,49 +7,32 @@ struct ForgotPasswordView: BaseViewProtocol {
     @StateObject var viewModel: ForgotPasswordViewModel
 
     var contentView: some View {
-        VStack(spacing: 0) {
-            closeButton
-            ScrollView(showsIndicators: false) {
-                VStack(alignment: .leading, spacing: CGFloat.Spacing.lg) {
+        ScrollView(showsIndicators: false) {
+            VStack(alignment: .leading, spacing: CGFloat.Spacing.lg) {
+                VStack(alignment: .leading, spacing: CGFloat.Spacing.sm + 4) {
                     titleSection
                     emailField
-                    sendButton
                 }
-                .padding(.horizontal, CGFloat.Spacing.md)
-                .padding(.top, CGFloat.Spacing.md)
-                .padding(.bottom, CGFloat.Spacing.xxxl)
+                sendButton
             }
+            .padding(.horizontal, CGFloat.Spacing.md)
+            .padding(.top, CGFloat.Spacing.md)
+            .padding(.bottom, CGFloat.Spacing.xxxl)
         }
         .background(Color.App.backgroundLight)
-    }
-
-    // MARK: - Close Button
-
-    private var closeButton: some View {
-        HStack {
-            Spacer()
-            Button(action: viewModel.didTapClose) {
-                Image(systemName: "xmark")
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundStyle(Color.App.text)
-                    .frame(width: 32, height: 32)
-            }
-        }
-        .padding(.horizontal, CGFloat.Spacing.md)
-        .padding(.top, CGFloat.Spacing.sm)
     }
 
     // MARK: - Title Section
 
     private var titleSection: some View {
-        VStack(alignment: .leading, spacing: CGFloat.Spacing.sm) {
+        VStack(alignment: .leading, spacing: CGFloat.Spacing.sm + 4) {
             Text(Localization.forgotPasswordTitle)
-                .font(.App.title1Bold)
+                .font(.App.title1Medium)
                 .foregroundStyle(Color.App.text)
 
             Text(Localization.forgotPasswordSubtitle)
-                .font(.App.body)
-                .foregroundStyle(Color.App.gray2)
+                .font(.App.callout)
+                .foregroundStyle(Color.App.brown1)
         }
     }
 

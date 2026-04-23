@@ -40,6 +40,16 @@ final class SessionManager: ObservableObject {
         authState = .authenticated
     }
 
+    func updateTokens(accessToken: String, refreshToken: String) {
+        keychainService.storeValue(accessToken, for: KeychainKeys.accessToken)
+        keychainService.storeValue(refreshToken, for: KeychainKeys.refreshToken)
+        tokenLock.withLock { $0 = accessToken }
+    }
+
+    var currentRefreshToken: String? {
+        keychainService.retrieveValue(for: KeychainKeys.refreshToken)
+    }
+
     func clearSession() {
         keychainService.removeValue(for: KeychainKeys.accessToken)
         keychainService.removeValue(for: KeychainKeys.refreshToken)
