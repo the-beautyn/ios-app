@@ -20,12 +20,12 @@ final class PhoneCodeViewModel: BaseViewModel {
     @Published var code: String = "" {
         didSet {
             codeError = nil
-            if code.count == 4 {
-                Task { await verifyCode() }
-            }
+            guard oldValue.count < 4, code.count == 4, !isVerifying else { return }
+            Task { await verifyCode() }
         }
     }
     @Published private(set) var codeError: String?
+    private var isVerifying = false
 
     // MARK: - Dependencies
 
@@ -58,6 +58,8 @@ final class PhoneCodeViewModel: BaseViewModel {
     // MARK: - Private
 
     private func verifyCode() async {
+        isVerifying = true
+        defer { isVerifying = false }
         showLoader()
         do {
             let verified = try await verifyPhoneOTPUseCase.execute(phone: phone, code: code)
