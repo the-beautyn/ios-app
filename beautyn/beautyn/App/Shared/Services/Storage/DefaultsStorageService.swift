@@ -26,8 +26,6 @@ struct DefaultsStorageService: StorageService {
     }
 
     func storeValue<T: Codable>(_ value: T, for key: String) {
-        defer { userDefaults.synchronize() }
-
         if PropertyListSerialization.propertyList(value, isValidFor: .xml) {
             userDefaults.set(value, forKey: key)
             return

@@ -1,6 +1,7 @@
 import AuthenticationServices
 import CryptoKit
 import Foundation
+import UIKit
 
 // MARK: - AppleSignInService
 
@@ -39,6 +40,7 @@ final class AppleSignInServiceImpl: NSObject, AppleSignInService {
 
             let controller = ASAuthorizationController(authorizationRequests: [request])
             controller.delegate = self
+            controller.presentationContextProvider = self
 
             // Store raw nonce for later
             objc_setAssociatedObject(controller, &Self.nonceKey, nonce, .OBJC_ASSOCIATION_RETAIN)
@@ -107,6 +109,18 @@ extension AppleSignInServiceImpl: ASAuthorizationControllerDelegate {
     func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
         continuation?.resume(throwing: error)
         continuation = nil
+    }
+}
+
+// MARK: - ASAuthorizationControllerPresentationContextProviding
+
+extension AppleSignInServiceImpl: ASAuthorizationControllerPresentationContextProviding {
+    func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
+        let keyWindow = UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .flatMap(\.windows)
+            .first(where: \.isKeyWindow)
+        return keyWindow ?? ASPresentationAnchor()
     }
 }
 

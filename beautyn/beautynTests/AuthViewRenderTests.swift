@@ -212,7 +212,7 @@ final class AuthViewRenderTests: XCTestCase {
     func testRenderCheckEmailSent() async throws {
         let viewModel = CheckEmailSentViewModel(
             email: "anna@example.com",
-            transition: .init(didClose: {}, didTapBack: {})
+            transition: .init(didClose: {})
         )
         let view = CheckEmailSentView(viewModel: viewModel)
         try await ViewRenderer.render(view, name: "auth_check_email_sent")

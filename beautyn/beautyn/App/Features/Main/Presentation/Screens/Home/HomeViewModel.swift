@@ -52,13 +52,13 @@ final class HomeViewModel: BaseViewModel {
         self.sessionManager = sessionManager
         self.userRepository = userRepository
         super.init()
+        observeAuthState()
     }
 
     // MARK: - Lifecycle
 
     override func onViewTask() async {
         await loadHomeFeed()
-        observeAuthState()
     }
 
     private func observeAuthState() {

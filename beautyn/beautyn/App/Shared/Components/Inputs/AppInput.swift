@@ -189,16 +189,21 @@ struct AppSecureField: View {
                         }
                     }
                     .inputTextStyle()
-                    .focused($isFocused)
-                    .applyFocus(externalFocus)
+                    .focused(externalFocus ?? $isFocused)
                 }
 
                 Button {
-                    let wasFocused = isFocused
+                    let wasFocused = externalFocus?.wrappedValue ?? isFocused
                     isRevealed.toggle()
                     if wasFocused {
                         // Re-focus after swapping TextField ↔ SecureField
-                        DispatchQueue.main.async { isFocused = true }
+                        DispatchQueue.main.async {
+                            if let externalFocus {
+                                externalFocus.wrappedValue = true
+                            } else {
+                                isFocused = true
+                            }
+                        }
                     }
                 } label: {
                     Image(systemName: isRevealed ? "eye" : "eye.slash")
