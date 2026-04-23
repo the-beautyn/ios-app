@@ -1,4 +1,5 @@
 import UIKit
+import GoogleSignIn
 
 final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
@@ -12,6 +13,23 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     ) {
         guard let windowScene = scene as? UIWindowScene else { return }
         setupWindow(with: windowScene)
+
+        for userActivity in connectionOptions.userActivities {
+            handleUserActivity(userActivity)
+        }
+
+        for urlContext in connectionOptions.urlContexts {
+            GIDSignIn.sharedInstance.handle(urlContext.url)
+        }
+    }
+
+    func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
+        guard let url = URLContexts.first?.url else { return }
+        GIDSignIn.sharedInstance.handle(url)
+    }
+
+    func scene(_ scene: UIScene, continue userActivity: NSUserActivity) {
+        handleUserActivity(userActivity)
     }
 
     // MARK: - Private
@@ -21,8 +39,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
         let router = Router(navigationController: UINavigationController())
         let assembler = AppDelegate.shared.assembler
-        let factory = assembler.resolver.require((any AppFactory).self)
-        let coordinator = AppCoordinator(router: router, factory: factory, assembler: assembler.resolver)
+        let coordinator = AppCoordinator(router: router, assembler: assembler)
 
         appCoordinator = coordinator
         window.rootViewController = router.rootViewController
@@ -30,5 +47,15 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window.makeKeyAndVisible()
 
         coordinator.start()
+    }
+
+    private func handleUserActivity(_ userActivity: NSUserActivity) {
+        guard
+            userActivity.activityType == NSUserActivityTypeBrowsingWeb,
+            let url = userActivity.webpageURL
+        else { return }
+
+        let deepLinkingService = AppDelegate.shared.assembler.app.deepLinkingService
+        deepLinkingService.handle(url: url)
     }
 }

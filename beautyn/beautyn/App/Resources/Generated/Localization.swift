@@ -36,6 +36,17 @@ public enum Localization {
   }
   public static let errorUnknown = Localization.tr("Localizable", "error_unknown", fallback: "Сталася невідома помилка.")
 
+  // MARK: - Validation
+  public static let validationRequiredField = Localization.tr("Localizable", "validation_required_field", fallback: "Обов'язкове поле")
+  public static let validationPasswordLatinOnly = Localization.tr("Localizable", "validation_password_latin_only", fallback: "Пароль має містити лише латинські літери, цифри та спецсимволи")
+  public static let validationPasswordMinLength = Localization.tr("Localizable", "validation_password_min_length", fallback: "Пароль має містити мінімум 8 символів")
+  public static let validationPasswordMaxLength = Localization.tr("Localizable", "validation_password_max_length", fallback: "Пароль має містити максимум 50 символів")
+  public static let validationPasswordUppercase = Localization.tr("Localizable", "validation_password_uppercase", fallback: "Пароль має містити хоча б одну велику літеру")
+  public static let validationPasswordLowercase = Localization.tr("Localizable", "validation_password_lowercase", fallback: "Пароль має містити хоча б одну малу літеру")
+  public static let validationPasswordDigit = Localization.tr("Localizable", "validation_password_digit", fallback: "Пароль має містити хоча б одну цифру")
+  public static let validationInvalidPhone = Localization.tr("Localizable", "validation_invalid_phone", fallback: "Невірний номер телефону")
+  public static let validationInvalidCode = Localization.tr("Localizable", "validation_invalid_code", fallback: "Невірний код")
+
   // MARK: - Tab Bar
   public static let tabBookings = Localization.tr("Localizable", "tab_bookings", fallback: "Бронювання")
   public static let tabHome = Localization.tr("Localizable", "tab_home", fallback: "Головна")
@@ -45,12 +56,31 @@ public enum Localization {
   // MARK: - Authorization
   public static let authContinueApple = Localization.tr("Localizable", "auth_continue_apple", fallback: "Продовжити з Apple")
   public static let authContinueGoogle = Localization.tr("Localizable", "auth_continue_google", fallback: "Продовжити з Google")
+  public static let authEmailInvalidFormat = Localization.tr("Localizable", "auth_email_invalid_format", fallback: "Невірний формат email")
+  public static func authSocialAccountMessage(_ p1: Any) -> String {
+    return Localization.tr("Localizable", "auth_social_account_message", String(describing: p1), fallback: "Цей аккаунт зареєстрований через %@")
+  }
   public static let authEmailPlaceholder = Localization.tr("Localizable", "auth_email_placeholder", fallback: "Введіть email")
   public static let authSubtitle = Localization.tr("Localizable", "auth_subtitle", fallback: "Створи акаунт або увійди.")
   public static let authTitle = Localization.tr("Localizable", "auth_title", fallback: "Авторизація")
   public static let forgotPasswordLink = Localization.tr("Localizable", "forgot_password_link", fallback: "Забули пароль?")
   public static let forgotPasswordSubtitle = Localization.tr("Localizable", "forgot_password_subtitle", fallback: "Ми відправимо на вказану пошту інструкцію по відновленню")
   public static let forgotPasswordTitle = Localization.tr("Localizable", "forgot_password_title", fallback: "Забули пароль?")
+  public static let setNewPasswordTitle = Localization.tr("Localizable", "set_new_password_title", fallback: "Змінити пароль")
+  public static let setNewPasswordEmailLabel = Localization.tr("Localizable", "set_new_password_email_label", fallback: "Твій email")
+  public static let setNewPasswordNewLabel = Localization.tr("Localizable", "set_new_password_new_label", fallback: "Новий пароль")
+  public static let setNewPasswordConfirmLabel = Localization.tr("Localizable", "set_new_password_confirm_label", fallback: "Повторити новий пароль")
+  public static let setNewPasswordMismatch = Localization.tr("Localizable", "set_new_password_mismatch", fallback: "Паролі не збігаються")
+  public static let setNewPasswordExpiredLink = Localization.tr("Localizable", "set_new_password_expired_link", fallback: "Посилання недійсне або застаріле. Запросіть нове.")
+  public static let setNewPasswordRequestNewLink = Localization.tr("Localizable", "set_new_password_request_new_link", fallback: "Запросити нове посилання")
+  public static func setNewPasswordNewLinkSent(_ p1: Any) -> String {
+    return Localization.tr("Localizable", "set_new_password_new_link_sent", String(describing: p1), fallback: "Ми надіслали нове посилання на %@")
+  }
+  public static let checkEmailSentTitle = Localization.tr("Localizable", "check_email_sent_title", fallback: "Перевірте вашу пошту")
+  public static func checkEmailSentSubtitle(_ p1: Any) -> String {
+    return Localization.tr("Localizable", "check_email_sent_subtitle", String(describing: p1), fallback: "Ми надіслали інструкцію на %@")
+  }
+  public static let checkEmailSentBack = Localization.tr("Localizable", "check_email_sent_back", fallback: "Повернутись на вхід")
   public static let loginPasswordPlaceholder = Localization.tr("Localizable", "login_password_placeholder", fallback: "Введіть пароль")
   public static func loginSubtitle(_ p1: Any) -> String {
     return Localization.tr("Localizable", "login_subtitle", String(describing: p1), fallback: "Введіть пароль від аккаунту зареєстрованого за поштою %@")
@@ -61,6 +91,17 @@ public enum Localization {
   public static let signUpPasswordPlaceholder = Localization.tr("Localizable", "sign_up_password_placeholder", fallback: "Створіть пароль")
   public static let signUpSubtitle = Localization.tr("Localizable", "sign_up_subtitle", fallback: "Додайте інформацію про себе")
   public static let signUpTitle = Localization.tr("Localizable", "sign_up_title", fallback: "Створення аккаунту")
+
+  // MARK: - Phone Verification
+  public static let phoneVerificationTitle = Localization.tr("Localizable", "phone_verification_title", fallback: "Веріфікуй свій номер телефону")
+  public static let phoneVerificationSubtitle = Localization.tr("Localizable", "phone_verification_subtitle", fallback: "Для завершення реєстрації будь ласка, підтвердить ваш номер телефону")
+  public static let phoneVerificationSendCode = Localization.tr("Localizable", "phone_verification_send_code", fallback: "Відправити код")
+  public static let phoneVerificationLegal = Localization.tr("Localizable", "phone_verification_legal", fallback: "Натискаючи \"Відправити код\", ви погоджуєтесь з Умовами використання та Політикою конфіденційності")
+  public static func phoneCodeSubtitle(_ p1: Any) -> String {
+    return Localization.tr("Localizable", "phone_code_subtitle", String(describing: p1), fallback: "Введіть 4 значний код який ми відправили на %@")
+  }
+  public static let phoneCodeResend = Localization.tr("Localizable", "phone_code_resend", fallback: "Відправити ще раз")
+  public static let phoneCodeChangeNumber = Localization.tr("Localizable", "phone_code_change_number", fallback: "Змінити номер")
 
   // MARK: - Home
   public static func homeGreeting(_ p1: Any) -> String {

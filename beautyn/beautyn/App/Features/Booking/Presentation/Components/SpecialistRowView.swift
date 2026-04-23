@@ -28,16 +28,10 @@ struct SpecialistRowView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: CGFloat.Spacing.sm) {
             HStack(spacing: CGFloat.Spacing.sm) {
-                AsyncImage(url: specialist.imageURL) { phase in
-                    switch phase {
-                    case .success(let image): image.resizable().scaledToFill()
-                    default:
-                        Color.App.beige2
-                            .overlay(Image(systemName: "person.fill").foregroundStyle(Color.App.brown2))
-                    }
-                }
-                .frame(width: avatarSize, height: avatarSize)
-                .clipShape(Circle())
+                CachedImage.avatar(
+                    url: specialist.imageURL,
+                    size: CGSize(width: avatarSize, height: avatarSize)
+                )
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(specialist.name)

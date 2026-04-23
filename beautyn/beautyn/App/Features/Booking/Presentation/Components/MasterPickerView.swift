@@ -47,21 +47,10 @@ struct MasterPickerView: View {
         } label: {
             VStack(spacing: CGFloat.Spacing.xs) {
                 ZStack {
-                    AsyncImage(url: imageURL) { phase in
-                        switch phase {
-                        case .success(let image):
-                            image.resizable().scaledToFill()
-                        default:
-                            Color.App.beige2
-                                .overlay(
-                                    Image(systemName: "person.fill")
-                                        .foregroundStyle(Color.App.brown2)
-                                        .font(.system(size: 22))
-                                )
-                        }
-                    }
-                    .frame(width: avatarSize, height: avatarSize)
-                    .clipShape(Circle())
+                    CachedImage.avatar(
+                        url: imageURL,
+                        size: CGSize(width: avatarSize, height: avatarSize)
+                    )
 
                     if isSelected {
                         Circle()

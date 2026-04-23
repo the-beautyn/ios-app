@@ -19,5 +19,9 @@ final class MainAssembly: Assembly {
         container.register((any MainControllerFactory).self) { resolver in
             MainControllerFactoryImpl(assembler: resolver)
         }
+
+        container.register((any MainFactory).self) { resolver in
+            MainFactoryImpl(resolver: resolver)
+        }
     }
 }

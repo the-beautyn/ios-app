@@ -9,8 +9,11 @@
 ENVIRONMENT_TYPE = Staging
 
 API_SCHEME = https
-API_HOST = stage-api.beautyn.app
+API_HOST = stage.beautyn.com.ua
 API_PATH_PREFIX = api/v1
 
 BUNDLE_DISPLAY_NAME = beautyn (Stage)
 PRODUCT_BUNDLE_IDENTIFIER = com.beautyn.app.stage
+
+GID_CLIENT_ID = 939341919013-vaji8gmvrb08uf6hpu5blqvplhlnter3.apps.googleusercontent.com
+GID_URL_SCHEME = com.googleusercontent.apps.939341919013-vaji8gmvrb08uf6hpu5blqvplhlnter3

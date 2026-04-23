@@ -8,9 +8,12 @@ final class MainCoordinator: BaseCoordinator {
     private let router: Router
     private let factory: MainControllerFactory
 
-    init(router: Router, factory: MainControllerFactory) {
+    var onRequireAuth: (() -> Void)?
+
+    init(router: Router, parentAssembler: Assembler) {
+        let assembler = Assembler([MainAssembly()], parent: parentAssembler)
+        self.factory = assembler.main.controllerFactory
         self.router = router
-        self.factory = factory
     }
 
     override func start() {
@@ -41,6 +44,9 @@ final class MainCoordinator: BaseCoordinator {
             },
             didTapCategory: { [weak self] categoryId in
                 self?.navigateToCategory(categoryId: categoryId)
+            },
+            didRequireAuth: { [weak self] in
+                self?.onRequireAuth?()
             }
         )
 

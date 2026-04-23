@@ -9,8 +9,11 @@
 ENVIRONMENT_TYPE = Development
 
 API_SCHEME = https
-API_HOST = dev-api.beautyn.app
+API_HOST = dev.beautyn.com.ua
 API_PATH_PREFIX = api/v1
 
 BUNDLE_DISPLAY_NAME = beautyn (Dev)
 PRODUCT_BUNDLE_IDENTIFIER = com.beautyn.app.dev
+
+GID_CLIENT_ID = 939341919013-6pov0ptgbq0clluk5q6nvc74p64g4h4n.apps.googleusercontent.com
+GID_URL_SCHEME = com.googleusercontent.apps.939341919013-6pov0ptgbq0clluk5q6nvc74p64g4h4n

@@ -11,6 +11,8 @@ The pipeline exists because Xcode SwiftUI Previews aren't accessible from the CL
 
 ## When to use this
 
+**IMPORTANT: Always ask the user for permission before running any build or render. Never run xcodebuild automatically.** Ask something like "Want me to build and render a preview?" and wait for confirmation.
+
 - **After any UI change** — new screen, modified view, updated component, layout fix
 - **After implementing a Figma design** — render and compare against the Figma screenshot
 - **When the user asks** — "show me how it looks", "render preview", "check the UI"
@@ -18,23 +20,65 @@ The pipeline exists because Xcode SwiftUI Previews aren't accessible from the CL
 
 ## Step 1: Run render tests
 
+### Important performance rules
+- **NEVER pipe xcodebuild output** (`| grep`, `| tail`) — it buffers stdout and hides results. Always log to file, then grep the file.
+- **Use iPhone 17 Pro Max** — it's typically already booted, saving ~60s of simulator cold boot.
+- **For re-renders** (no source changes, just re-running): use `test-without-building` to skip compilation entirely.
+
+### First run (builds + tests):
 ```bash
 cd /Users/dmytropogrebniak/projects/beautyn/ios-app/beautyn
 
 xcodebuild test \
   -scheme beautyn-Production \
-  -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
+  -destination 'platform=iOS Simulator,name=iPhone 17 Pro Max' \
   -only-testing:beautynTests/HomeViewRenderTests \
-  2>&1 | grep -E "error:|✅|passed|failed|TEST SUCCEEDED|TEST FAILED"
+  2>&1 > /tmp/render_build.log; \
+  echo "EXIT: $?"; \
+  grep -E "✅|error:|TEST SUCCEEDED|TEST FAILED|Executed" /tmp/render_build.log
 ```
 
-Adjust `-only-testing:` to target the specific test class for the screen you changed. Current render test classes:
+### Fast re-render (skip build, ~3-5 seconds):
+```bash
+xcodebuild test-without-building \
+  -scheme beautyn-Production \
+  -destination 'platform=iOS Simulator,name=iPhone 17 Pro Max' \
+  -only-testing:beautynTests/HomeViewRenderTests \
+  2>&1 > /tmp/render_build.log; \
+  echo "EXIT: $?"; \
+  grep -E "✅|error:|TEST SUCCEEDED|TEST FAILED|Executed" /tmp/render_build.log
+```
+
+### Pre-build shortcut (build once, test many):
+```bash
+# Build once:
+xcodebuild build-for-testing \
+  -scheme beautyn-Production \
+  -destination 'platform=iOS Simulator,name=iPhone 17 Pro Max' \
+  2>&1 > /tmp/render_build.log
+
+# Then render any screen instantly:
+xcodebuild test-without-building \
+  -scheme beautyn-Production \
+  -destination 'platform=iOS Simulator,name=iPhone 17 Pro Max' \
+  -only-testing:beautynTests/AuthViewRenderTests/testRenderEmailCheck \
+  2>&1 > /tmp/render_build.log; \
+  grep -E "✅|error:|TEST SUCCEEDED|TEST FAILED" /tmp/render_build.log
+```
+
+Adjust `-only-testing:` to target the specific test class (or individual test method) for the screen you changed. Current render test classes:
 
 | Screen | Test class | Output files |
 |--------|-----------|-------------|
 | Home | `HomeViewRenderTests` | `home_unauthorized.png`, `home_authorized.png` |
+| Auth: EmailCheck | `AuthViewRenderTests/testRenderEmailCheck*` | `auth_email_check.png`, `auth_email_check_filled.png` |
+| Auth: Login | `AuthViewRenderTests/testRenderLogin*` | `auth_login.png`, `auth_login_filled.png` |
+| Auth: ForgotPassword | `AuthViewRenderTests/testRenderForgotPassword` | `auth_forgot_password.png` |
+| Auth: SignUp | `AuthViewRenderTests/testRenderSignUp*` | `auth_sign_up.png`, `auth_sign_up_filled.png` |
+| Auth: PhoneVerification | `AuthViewRenderTests/testRenderPhoneVerification*` | `auth_phone_verification.png`, `auth_phone_verification_filled.png` |
+| Auth: PhoneCode | `AuthViewRenderTests/testRenderPhoneCode*` | `auth_phone_code.png`, `auth_phone_code_partial.png` |
 
-If **TEST FAILED**, check the full build output (remove the `grep` filter) to see compiler errors, then fix and re-run.
+If **TEST FAILED**, read the full log: `cat /tmp/render_build.log | grep "error:"` to see compiler errors, then fix and re-run.
 
 ## Step 2: Read the screenshots
 

@@ -17,6 +17,7 @@ final class HomeViewModel: BaseViewModel {
         let didTapSeeAllSection: (_ sectionId: String) -> Void
         let didTapAppointmentDetails: (_ bookingId: String) -> Void
         let didTapCategory: (_ categoryId: String) -> Void
+        let didRequireAuth: () -> Void
     }
 
     // MARK: - Section UI Model
@@ -39,19 +40,38 @@ final class HomeViewModel: BaseViewModel {
 
     private let transition: Transition
     private let getHomeFeedUseCase: GetHomeFeedUseCase
+    private let sessionManager: SessionManager
+    private let userRepository: UserRepository
+    private var cancellables = Set<AnyCancellable>()
 
     // MARK: - Init
 
-    init(transition: Transition, getHomeFeedUseCase: GetHomeFeedUseCase) {
+    init(transition: Transition, getHomeFeedUseCase: GetHomeFeedUseCase, sessionManager: SessionManager, userRepository: UserRepository) {
         self.transition = transition
         self.getHomeFeedUseCase = getHomeFeedUseCase
+        self.sessionManager = sessionManager
+        self.userRepository = userRepository
         super.init()
+        observeAuthState()
     }
 
     // MARK: - Lifecycle
 
     override func onViewTask() async {
         await loadHomeFeed()
+    }
+
+    private func observeAuthState() {
+        sessionManager.$authState
+            .dropFirst()
+            .removeDuplicates()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                Task { [weak self] in
+                    await self?.loadHomeFeed()
+                }
+            }
+            .store(in: &cancellables)
     }
 
     // MARK: - Intents
@@ -86,6 +106,10 @@ final class HomeViewModel: BaseViewModel {
     }
 
     func didTapFavorite(salonId: String) {
+        guard sessionManager.isAuthenticated else {
+            transition.didRequireAuth()
+            return
+        }
         // TODO: Implement favorite toggle via use case
     }
 
@@ -112,10 +136,11 @@ final class HomeViewModel: BaseViewModel {
     }
 
     private func mapFeedToState(_ feed: HomeFeed) {
-        // Greeting — unauthorized shows "Привіт!", authorized shows "Привіт, {name}!"
-        // The home feed API doesn't return user name; for now always show unauthorized greeting.
-        // When auth is implemented, this will use the user's name from session.
-        greeting = Localization.homeGreetingUnauthorized
+        if let name = userRepository.getCachedProfile()?.name, !name.isEmpty {
+            greeting = Localization.homeGreeting(name)
+        } else {
+            greeting = Localization.homeGreetingUnauthorized
+        }
 
         // Categories (unauthorized only — when categories are present)
         categories = feed.categories.sorted(by: { ($0.sortOrder ?? 0) < ($1.sortOrder ?? 0) }).map { cat in

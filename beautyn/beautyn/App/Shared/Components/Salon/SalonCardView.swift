@@ -53,14 +53,11 @@ struct SalonCardView: View {
             .frame(maxWidth: .infinity)
             .frame(height: imageHeight)
             .overlay {
-                AsyncImage(url: salon.imageURL) { phase in
-                    switch phase {
-                    case .success(let image):
-                        image.resizable().scaledToFill()
-                    default:
-                        Color.App.beige2
-                    }
-                }
+                CachedImage(
+                    url: salon.imageURL,
+                    size: CGSize(width: style == .horizontal ? 280 : 430, height: imageHeight),
+                    clipShape: Rectangle()
+                )
             }
             .overlay(Color.App.brown1.opacity(0.2))
             .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))

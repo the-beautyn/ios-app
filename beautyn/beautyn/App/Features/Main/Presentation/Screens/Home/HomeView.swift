@@ -158,9 +158,12 @@ struct HomeView: BaseViewProtocol {
                 didTapSeeAllSaved: {},
                 didTapSeeAllSection: { _ in },
                 didTapAppointmentDetails: { _ in },
-                didTapCategory: { _ in }
+                didTapCategory: { _ in },
+                didRequireAuth: {}
             ),
-            getHomeFeedUseCase: PreviewGetHomeFeedUseCase()
+            getHomeFeedUseCase: PreviewGetHomeFeedUseCase(),
+            sessionManager: SessionManager(keychainService: KeychainServiceImpl(), defaultsService: DefaultsStorageService()),
+            userRepository: UserRepositoryImpl(networkService: NetworkServiceImpl(), defaultsService: DefaultsStorageService())
         )
     )
 }

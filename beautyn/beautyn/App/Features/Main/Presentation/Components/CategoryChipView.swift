@@ -24,16 +24,11 @@ struct CategoryChipView: View {
     var body: some View {
         Button(action: onTap) {
             VStack(spacing: CGFloat.Spacing.xs) {
-                AsyncImage(url: category.imageURL) { phase in
-                    switch phase {
-                    case .success(let image):
-                        image.resizable().scaledToFill()
-                    default:
-                        Color.App.beige2
-                    }
-                }
-                .frame(width: imageSize, height: imageSize)
-                .clipShape(Circle())
+                CachedImage(
+                    url: category.imageURL,
+                    size: CGSize(width: imageSize, height: imageSize),
+                    clipShape: Circle()
+                )
 
                 Text(category.title)
                     .font(.App.caption2)

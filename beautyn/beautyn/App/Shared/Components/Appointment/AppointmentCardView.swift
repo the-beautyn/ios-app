@@ -50,30 +50,22 @@ struct AppointmentCardView: View {
     // MARK: - Map thumbnail
 
     private func mapThumbnail(url: URL) -> some View {
-        AsyncImage(url: url) { phase in
-            switch phase {
-            case .success(let image): image.resizable().scaledToFill()
-            default: Color.App.beige2
-            }
-        }
-        .frame(maxWidth: .infinity)
-        .frame(height: 120)
-        .clipped()
+        CachedImage(
+            url: url,
+            size: CGSize(width: 430, height: 120),
+            clipShape: Rectangle()
+        )
     }
 
     // MARK: - Salon row
 
     private var salonRow: some View {
         HStack(spacing: CGFloat.Spacing.sm) {
-            AsyncImage(url: appointment.salonImageURL) { phase in
-                switch phase {
-                case .success(let image): image.resizable().scaledToFill()
-                default: Color.App.beige2
-                }
-            }
-            .frame(width: 68, height: 68)
-            .clipped()
-            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+            CachedImage(
+                url: appointment.salonImageURL,
+                size: CGSize(width: 68, height: 68),
+                clipShape: RoundedRectangle(cornerRadius: 12, style: .continuous)
+            )
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(appointment.salonName)

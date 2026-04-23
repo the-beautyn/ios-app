@@ -2,33 +2,25 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>CFBundleDisplayName</key>
-	<string>$(BUNDLE_DISPLAY_NAME)</string>
-	<key>EnvironmentType</key>
-	<string>$(ENVIRONMENT_TYPE)</string>
-	<key>ApiScheme</key>
-	<string>$(API_SCHEME)</string>
 	<key>ApiHost</key>
 	<string>$(API_HOST)</string>
 	<key>ApiPathPrefix</key>
 	<string>$(API_PATH_PREFIX)</string>
-	<key>UIApplicationSceneManifest</key>
-	<dict>
-		<key>UIApplicationSupportsMultipleScenes</key>
-		<false/>
-		<key>UISceneConfigurations</key>
+	<key>ApiScheme</key>
+	<string>$(API_SCHEME)</string>
+	<key>CFBundleURLTypes</key>
+	<array>
 		<dict>
-			<key>UIWindowSceneSessionRoleApplication</key>
+			<key>CFBundleURLSchemes</key>
 			<array>
-				<dict>
-					<key>UISceneConfigurationName</key>
-					<string>Default Configuration</string>
-					<key>UISceneDelegateClassName</key>
-					<string>$(PRODUCT_MODULE_NAME).SceneDelegate</string>
-				</dict>
+				<string>$(GID_URL_SCHEME)</string>
 			</array>
 		</dict>
-	</dict>
+	</array>
+	<key>EnvironmentType</key>
+	<string>$(ENVIRONMENT_TYPE)</string>
+	<key>GIDClientID</key>
+	<string>$(GID_CLIENT_ID)</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>AeonikProTRIAL-Air.otf</string>
@@ -48,5 +40,24 @@
 		<string>AeonikProTRIAL-Thin.otf</string>
 		<string>AeonikProTRIAL-ThinItalic.otf</string>
 	</array>
+	<key>UIApplicationSceneManifest</key>
+	<dict>
+		<key>UIApplicationSupportsMultipleScenes</key>
+		<false/>
+		<key>UISceneConfigurations</key>
+		<dict>
+			<key>UIWindowSceneSessionRoleApplication</key>
+			<array>
+				<dict>
+					<key>UISceneClassName</key>
+					<string>UIWindowScene</string>
+					<key>UISceneConfigurationName</key>
+					<string>Default Configuration</string>
+					<key>UISceneDelegateClassName</key>
+					<string>$(PRODUCT_MODULE_NAME).SceneDelegate</string>
+				</dict>
+			</array>
+		</dict>
+	</dict>
 </dict>
 </plist>
