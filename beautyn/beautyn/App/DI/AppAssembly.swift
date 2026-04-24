@@ -57,18 +57,63 @@ final class AppAssembly: Assembly {
 
         networkServiceImpl.setTokenRefresher(tokenRefresher)
 
+        // MARK: - User
+
+        let userRemoteDataSource = UserRemoteDataSource(networkService: networkService)
+        let userLocalDataSource = UserLocalDataSource(storage: defaultsService)
+
         let userRepository: UserRepository = UserRepositoryImpl(
-            networkService: networkService,
-            defaultsService: defaultsService
+            remote: userRemoteDataSource,
+            local: userLocalDataSource
         )
         container.register((any UserRepository).self) { _ in
             userRepository
         }
 
-        let getMeUseCase: GetMeUseCase = GetMeUseCaseImpl(userRepository: userRepository)
-        container.register((any GetMeUseCase).self) { _ in
-            getMeUseCase
+        let getCurrentUserUseCase: GetCurrentUserUseCase = GetCurrentUserUseCaseImpl(
+            repository: userRepository
+        )
+        container.register((any GetCurrentUserUseCase).self) { _ in
+            getCurrentUserUseCase
         }
+
+        let refreshCurrentUserUseCase: RefreshCurrentUserUseCase = RefreshCurrentUserUseCaseImpl(
+            repository: userRepository
+        )
+        container.register((any RefreshCurrentUserUseCase).self) { _ in
+            refreshCurrentUserUseCase
+        }
+
+        let clearUserUseCase: ClearUserUseCase = ClearUserUseCaseImpl(
+            repository: userRepository
+        )
+        container.register((any ClearUserUseCase).self) { _ in
+            clearUserUseCase
+        }
+
+        // MARK: - User Settings
+
+        let userSettingsRepository: UserSettingsRepository = UserSettingsRepositoryImpl(
+            networkService: networkService
+        )
+        container.register((any UserSettingsRepository).self) { _ in
+            userSettingsRepository
+        }
+
+        let getUserSettingsUseCase: GetUserSettingsUseCase = GetUserSettingsUseCaseImpl(
+            repository: userSettingsRepository
+        )
+        container.register((any GetUserSettingsUseCase).self) { _ in
+            getUserSettingsUseCase
+        }
+
+        let updateNotificationSettingsUseCase: UpdateNotificationSettingsUseCase =
+            UpdateNotificationSettingsUseCaseImpl(repository: userSettingsRepository)
+        container.register((any UpdateNotificationSettingsUseCase).self) { _ in
+            updateNotificationSettingsUseCase
+        }
+
+        // MARK: - OAuth services
 
         container.register((any AppleSignInService).self) { _ in
             AppleSignInServiceImpl(keychainService: keychainService)
@@ -87,7 +132,7 @@ final class AppAssembly: Assembly {
         let resetPasswordUseCase: any ResetPasswordUseCase = ResetPasswordUseCaseImpl(
             repository: authRepository,
             sessionManager: sessionManager,
-            getMeUseCase: getMeUseCase
+            refreshCurrentUserUseCase: refreshCurrentUserUseCase
         )
         container.register((any ResetPasswordUseCase).self) { _ in
             resetPasswordUseCase

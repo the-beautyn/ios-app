@@ -50,8 +50,16 @@ final class HomeViewRenderTests: XCTestCase {
             ),
             getHomeFeedUseCase: MockHomeFeedUseCase(feed: feed),
             sessionManager: SessionManager(keychainService: KeychainServiceImpl(), defaultsService: DefaultsStorageService()),
-            userRepository: UserRepositoryImpl(networkService: NetworkServiceImpl(), defaultsService: DefaultsStorageService())
+            getCurrentUserUseCase: MockGetCurrentUserUseCase()
         )
+    }
+}
+
+// MARK: - MockGetCurrentUserUseCase
+
+private final class MockGetCurrentUserUseCase: GetCurrentUserUseCase {
+    func execute() async throws -> UserProfile {
+        throw URLError(.userAuthenticationRequired)
     }
 }
 

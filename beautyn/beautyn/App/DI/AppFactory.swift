@@ -12,8 +12,11 @@ protocol AppFactory: ResolverInjector {
     var authRepository: any AuthRepository { get }
     var refreshTokenUseCase: any RefreshTokenUseCase { get }
     var tokenRefresher: TokenRefresher { get }
-    var userRepository: any UserRepository { get }
-    var getMeUseCase: any GetMeUseCase { get }
+    var getCurrentUserUseCase: any GetCurrentUserUseCase { get }
+    var refreshCurrentUserUseCase: any RefreshCurrentUserUseCase { get }
+    var clearUserUseCase: any ClearUserUseCase { get }
+    var getUserSettingsUseCase: any GetUserSettingsUseCase { get }
+    var updateNotificationSettingsUseCase: any UpdateNotificationSettingsUseCase { get }
     var appleSignInService: any AppleSignInService { get }
     var googleSignInService: any GoogleSignInService { get }
     var resetPasswordUseCase: any ResetPasswordUseCase { get }
@@ -32,8 +35,11 @@ extension AppFactory {
     var authRepository: any AuthRepository { resolver.require((any AuthRepository).self) }
     var refreshTokenUseCase: any RefreshTokenUseCase { resolver.require((any RefreshTokenUseCase).self) }
     var tokenRefresher: TokenRefresher { resolver.require(TokenRefresher.self) }
-    var userRepository: any UserRepository { resolver.require((any UserRepository).self) }
-    var getMeUseCase: any GetMeUseCase { resolver.require((any GetMeUseCase).self) }
+    var getCurrentUserUseCase: any GetCurrentUserUseCase { resolver.require((any GetCurrentUserUseCase).self) }
+    var refreshCurrentUserUseCase: any RefreshCurrentUserUseCase { resolver.require((any RefreshCurrentUserUseCase).self) }
+    var clearUserUseCase: any ClearUserUseCase { resolver.require((any ClearUserUseCase).self) }
+    var getUserSettingsUseCase: any GetUserSettingsUseCase { resolver.require((any GetUserSettingsUseCase).self) }
+    var updateNotificationSettingsUseCase: any UpdateNotificationSettingsUseCase { resolver.require((any UpdateNotificationSettingsUseCase).self) }
     var appleSignInService: any AppleSignInService { resolver.require((any AppleSignInService).self) }
     var googleSignInService: any GoogleSignInService { resolver.require((any GoogleSignInService).self) }
     var resetPasswordUseCase: any ResetPasswordUseCase { resolver.require((any ResetPasswordUseCase).self) }

@@ -63,7 +63,6 @@ final class SessionManager: ObservableObject {
         phoneVerificationRequired = false
         defaultsService.storeValue(false, for: DefaultsKeys.isAuthenticated)
         defaultsService.removeValue(for: DefaultsKeys.phoneVerificationRequired)
-        defaultsService.removeValue(for: DefaultsKeys.userProfile)
         authState = .unauthenticated
     }
 

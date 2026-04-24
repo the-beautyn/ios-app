@@ -12,12 +12,16 @@ final class RegisterUseCaseImpl: RegisterUseCase {
 
     private let repository: AuthRepository
     private let sessionManager: SessionManager
-    private let getMeUseCase: GetMeUseCase
+    private let refreshCurrentUserUseCase: RefreshCurrentUserUseCase
 
-    init(repository: AuthRepository, sessionManager: SessionManager, getMeUseCase: GetMeUseCase) {
+    init(
+        repository: AuthRepository,
+        sessionManager: SessionManager,
+        refreshCurrentUserUseCase: RefreshCurrentUserUseCase
+    ) {
         self.repository = repository
         self.sessionManager = sessionManager
-        self.getMeUseCase = getMeUseCase
+        self.refreshCurrentUserUseCase = refreshCurrentUserUseCase
     }
 
     func execute(email: String, password: String, name: String, secondName: String) async throws -> AuthSession {
@@ -27,7 +31,7 @@ final class RegisterUseCaseImpl: RegisterUseCase {
             refreshToken: result.refreshToken,
             phoneVerificationRequired: result.phoneVerificationRequired
         )
-        _ = try? await getMeUseCase.execute()
+        _ = try? await refreshCurrentUserUseCase.execute()
         return result
     }
 }

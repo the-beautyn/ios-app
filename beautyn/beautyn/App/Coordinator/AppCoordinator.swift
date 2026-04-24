@@ -29,7 +29,7 @@ final class AppCoordinator: BaseCoordinator {
     // MARK: - Main Flow
 
     private func showMain() {
-        let coordinator = MainCoordinator(router: router, parentAssembler: assembler)
+        let coordinator = MainTabCoordinator(router: router, parentAssembler: assembler)
         coordinator.onRequireAuth = { [weak self] in
             self?.showAuth()
         }

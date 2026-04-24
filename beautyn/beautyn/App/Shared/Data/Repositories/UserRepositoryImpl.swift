@@ -1,30 +1,33 @@
 import Foundation
 
 // MARK: - UserRepositoryImpl
+//
+// Composes `UserRemoteDataSource` and `UserLocalDataSource`. `refresh` is the
+// only path that writes to the cache — keeps the cache always reflecting the
+// latest server response.
 
 final class UserRepositoryImpl: UserRepository {
 
-    private let networkService: NetworkService
-    private let defaultsService: StorageService
+    private let remote: UserRemoteDataSource
+    private let local: UserLocalDataSource
 
-    init(networkService: NetworkService, defaultsService: StorageService) {
-        self.networkService = networkService
-        self.defaultsService = defaultsService
+    init(remote: UserRemoteDataSource, local: UserLocalDataSource) {
+        self.remote = remote
+        self.local = local
     }
 
-    func fetchMe() async throws -> UserProfile {
-        let target = Target(type: UserTarget.getMe)
-        let dto: UserProfileDTO = try await networkService.request(target)
+    func getCached() -> UserProfile? {
+        local.get()
+    }
+
+    func refresh() async throws -> UserProfile {
+        let dto = try await remote.fetchMe()
         let profile = UserProfileMapper.map(dto)
-        defaultsService.storeValue(profile, for: DefaultsKeys.userProfile)
+        local.save(profile)
         return profile
     }
 
-    func getCachedProfile() -> UserProfile? {
-        defaultsService.retrieveValue(for: DefaultsKeys.userProfile)
-    }
-
-    func clearProfile() {
-        defaultsService.removeValue(for: DefaultsKeys.userProfile)
+    func clearCache() {
+        local.clear()
     }
 }

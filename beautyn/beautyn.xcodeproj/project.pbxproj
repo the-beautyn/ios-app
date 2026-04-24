@@ -10,6 +10,7 @@
 		36404A31F78AB6256283BE26 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 706DD12F29F4DA13F9B4F6E1 /* GoogleSignInSwift */; };
 		3B6F8EA3C24FC4BE85F7C18B /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 0B5D3F34767FDC78EB2F0AE7 /* GoogleSignIn */; };
 		54BFDF4C65A3883472B2EA34 /* AuthViewRenderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 346F82F5A94E52E40D559726 /* AuthViewRenderTests.swift */; };
+		54BFDF4C65A3883472B2EA99 /* ProfileViewRenderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 346F82F5A94E52E40D559999 /* ProfileViewRenderTests.swift */; };
 		F1A0B0012FA0000100000521 /* ViewRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A0B0012FA0000100000501 /* ViewRenderer.swift */; };
 		F1A0B0012FA0000100000522 /* HomeViewRenderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A0B0012FA0000100000502 /* HomeViewRenderTests.swift */; };
 		F1B000002FA0000100000003 /* Moya in Frameworks */ = {isa = PBXBuildFile; productRef = F1B000002FA0000100000002 /* Moya */; };
@@ -28,6 +29,7 @@
 
 /* Begin PBXFileReference section */
 		346F82F5A94E52E40D559726 /* AuthViewRenderTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AuthViewRenderTests.swift; sourceTree = "<group>"; };
+		346F82F5A94E52E40D559999 /* ProfileViewRenderTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ProfileViewRenderTests.swift; sourceTree = "<group>"; };
 		F103C3792F65542F00B06B2F /* beautyn.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = beautyn.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F1A0B0012FA0000100000501 /* ViewRenderer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewRenderer.swift; sourceTree = "<group>"; };
 		F1A0B0012FA0000100000502 /* HomeViewRenderTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HomeViewRenderTests.swift; sourceTree = "<group>"; };
@@ -106,6 +108,7 @@
 				F1A0B0012FA0000100000501 /* ViewRenderer.swift */,
 				F1A0B0012FA0000100000502 /* HomeViewRenderTests.swift */,
 				346F82F5A94E52E40D559726 /* AuthViewRenderTests.swift */,
+				346F82F5A94E52E40D559999 /* ProfileViewRenderTests.swift */,
 			);
 			path = beautynTests;
 			sourceTree = "<group>";
@@ -246,6 +249,7 @@
 				F1A0B0012FA0000100000521 /* ViewRenderer.swift in Sources */,
 				F1A0B0012FA0000100000522 /* HomeViewRenderTests.swift in Sources */,
 				54BFDF4C65A3883472B2EA34 /* AuthViewRenderTests.swift in Sources */,
+				54BFDF4C65A3883472B2EA99 /* ProfileViewRenderTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
