@@ -35,33 +35,11 @@ struct ProfileView: BaseViewProtocol {
     }
 
     private var avatar: some View {
-        ZStack {
-            Circle()
-                .fill(Color.App.beige1.opacity(0.8))
-
-            if let url = viewModel.avatarURL {
-                AsyncImage(url: url) { phase in
-                    switch phase {
-                    case .success(let image):
-                        image
-                            .resizable()
-                            .scaledToFill()
-                    default:
-                        placeholderIcon
-                    }
-                }
-            } else {
-                placeholderIcon
-            }
-        }
-        .frame(width: 44, height: 44)
-        .clipShape(Circle())
-    }
-
-    private var placeholderIcon: some View {
-        Image(systemName: "person.fill")
-            .font(.system(size: 20, weight: .regular))
-            .foregroundStyle(Color.white.opacity(0.9))
+        CachedImage.avatar(
+            url: viewModel.avatarURL,
+            size: CGSize(width: 44, height: 44),
+            iconSize: 44
+        )
     }
 
     // MARK: - Menu list

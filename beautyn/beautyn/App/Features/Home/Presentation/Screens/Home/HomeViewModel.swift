@@ -66,9 +66,8 @@ final class HomeViewModel: BaseViewModel {
     // MARK: - Lifecycle
 
     private func observeAuthState() {
-        sessionManager.$authState
+        sessionManager.isAuthenticatedPublisher
             .dropFirst()
-            .removeDuplicates()
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
                 Task { [weak self] in

@@ -43,7 +43,20 @@ final class ProfileCoordinator: BaseCoordinator {
     // MARK: - Navigation Stubs
 
     private func navigateToPersonalData() {
-        // TODO: Push Personal Data screen
+        let transition = PersonalDataViewModel.Transition(
+            didTapEditProfile: { [weak self] in self?.handleEditProfileTap() },
+            didTapEditAvatar: { [weak self] in self?.handleEditAvatarTap() }
+        )
+        let vc = factory.makePersonalData(transition: transition)
+        router.push(vc, animated: true)
+    }
+
+    private func handleEditProfileTap() {
+        // TODO: Push Edit Profile screen
+    }
+
+    private func handleEditAvatarTap() {
+        // TODO: Present avatar source sheet + upload
     }
 
     private func navigateToSavedSalons() {

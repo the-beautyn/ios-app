@@ -18,17 +18,28 @@ final class SessionManager: ObservableObject {
     @Published private(set) var authState: AuthState = .unknown
     @Published private(set) var phoneVerificationRequired: Bool = false
 
-    var isAuthenticated: Bool {
-        authState == .authenticated && !phoneVerificationRequired
+    private let isAuthenticatedSubject = CurrentValueSubject<Bool, Never>(false)
+
+    var isAuthenticated: Bool { isAuthenticatedSubject.value }
+
+    var isAuthenticatedPublisher: AnyPublisher<Bool, Never> {
+        isAuthenticatedSubject.eraseToAnyPublisher()
     }
 
     private let keychainService: KeychainService
     private let defaultsService: StorageService
     private let tokenLock = OSAllocatedUnfairLock<String?>(initialState: nil)
+    private var cancellables = Set<AnyCancellable>()
 
     init(keychainService: KeychainService, defaultsService: StorageService) {
         self.keychainService = keychainService
         self.defaultsService = defaultsService
+
+        Publishers.CombineLatest($authState, $phoneVerificationRequired)
+            .map { state, pending in state == .authenticated && !pending }
+            .removeDuplicates()
+            .sink { [weak self] in self?.isAuthenticatedSubject.send($0) }
+            .store(in: &cancellables)
     }
 
     func saveSession(accessToken: String, refreshToken: String, phoneVerificationRequired: Bool) {

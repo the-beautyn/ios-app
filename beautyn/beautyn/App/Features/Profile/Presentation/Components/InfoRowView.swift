@@ -3,7 +3,6 @@ import SwiftUI
 // MARK: - InfoRowView
 //
 // Matches Figma Personal Info detail rows.
-// Bold label above, value text below.
 // e.g. "Дата народження" / "21/02/2002"
 
 struct InfoRowView: View {
@@ -14,7 +13,7 @@ struct InfoRowView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: CGFloat.Spacing.xxs) {
             Text(label)
-                .font(.App.headline)
+                .font(.App.body)
                 .foregroundStyle(Color.App.text)
 
             Text(value)

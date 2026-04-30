@@ -143,6 +143,11 @@
 "profile_gender" = "Стать";
 
 "profile_personal_data_title" = "Персональні дані";
+"profile_sex_male" = "Чоловіча";
+"profile_sex_female" = "Жіноча";
+"profile_sex_other" = "Інша";
+"profile_sex_prefer_not_to_say" = "Не вказувати";
+"common_not_specified" = "Не вказано";
 "profile_change_password_title" = "Змінити пароль";
 "profile_old_password_label" = "Старий пароль";
 "profile_new_password_label" = "Новий пароль";

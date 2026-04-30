@@ -5,6 +5,7 @@ import UIKit
 @MainActor
 protocol ProfileControllerFactory {
     func makeProfile(transition: ProfileViewModel.Transition) -> UIViewController
+    func makePersonalData(transition: PersonalDataViewModel.Transition) -> UIViewController
 }
 
 // MARK: - ProfileControllerFactoryImpl
@@ -26,5 +27,13 @@ final class ProfileControllerFactoryImpl: ProfileControllerFactory {
             updateNotificationSettingsUseCase: assembler.app.updateNotificationSettingsUseCase
         )
         return ProfileController(viewModel: viewModel)
+    }
+
+    func makePersonalData(transition: PersonalDataViewModel.Transition) -> UIViewController {
+        let viewModel = PersonalDataViewModel(
+            transition: transition,
+            getCurrentUserUseCase: assembler.app.getCurrentUserUseCase
+        )
+        return PersonalDataController(viewModel: viewModel)
     }
 }

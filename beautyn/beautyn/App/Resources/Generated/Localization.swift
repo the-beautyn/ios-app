@@ -14,6 +14,7 @@ public enum Localization {
   // MARK: - Common
   public static let addButton = Localization.tr("Localizable", "add_button", fallback: "Додати")
   public static let addedButton = Localization.tr("Localizable", "added_button", fallback: "Додано")
+  public static let commonNotSpecified = Localization.tr("Localizable", "common_not_specified", fallback: "Не вказано")
   public static let continueButton = Localization.tr("Localizable", "continue_button", fallback: "Продовжити")
   public static let detailsButton = Localization.tr("Localizable", "details_button", fallback: "Деталі")
   public static let errorTitle = Localization.tr("Localizable", "error_title", fallback: "Помилка")
@@ -186,6 +187,10 @@ public enum Localization {
   public static let profileOldPasswordLabel = Localization.tr("Localizable", "profile_old_password_label", fallback: "Старий пароль")
   public static let profilePersonalDataTitle = Localization.tr("Localizable", "profile_personal_data_title", fallback: "Персональні дані")
   public static let profilePhoneNumber = Localization.tr("Localizable", "profile_phone_number", fallback: "Номер телефону")
+  public static let profileSexFemale = Localization.tr("Localizable", "profile_sex_female", fallback: "Жіноча")
+  public static let profileSexMale = Localization.tr("Localizable", "profile_sex_male", fallback: "Чоловіча")
+  public static let profileSexOther = Localization.tr("Localizable", "profile_sex_other", fallback: "Інша")
+  public static let profileSexPreferNotToSay = Localization.tr("Localizable", "profile_sex_prefer_not_to_say", fallback: "Не вказувати")
   public static let profileTitle = Localization.tr("Localizable", "profile_title", fallback: "Профайл")
 }
 // swiftlint:enable explicit_type_interface function_parameter_count identifier_name line_length

@@ -35,7 +35,8 @@ struct ProfileMenuRowView: View {
 
                 trailingView
             }
-            .frame(height: 68)
+            .frame(maxWidth: .infinity, minHeight: 68)
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
     }
