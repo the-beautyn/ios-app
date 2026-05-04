@@ -1,3 +1,4 @@
+import Combine
 import SwiftUI
 import XCTest
 @testable import beautyn
@@ -49,6 +50,9 @@ final class HomeViewRenderTests: XCTestCase {
                 didRequireAuth: {}
             ),
             getHomeFeedUseCase: MockHomeFeedUseCase(feed: feed),
+            saveSalonUseCase: MockSaveSalonUseCase(),
+            unsaveSalonUseCase: MockUnsaveSalonUseCase(),
+            savedSalonsEventBus: MockSavedSalonsEventBus(),
             sessionManager: SessionManager(keychainService: KeychainServiceImpl(), defaultsService: DefaultsStorageService()),
             getCurrentUserUseCase: MockGetCurrentUserUseCase()
         )
@@ -61,6 +65,19 @@ private final class MockGetCurrentUserUseCase: GetCurrentUserUseCase {
     func execute() async throws -> UserProfile {
         throw URLError(.userAuthenticationRequired)
     }
+}
+
+private final class MockSaveSalonUseCase: SaveSalonUseCase {
+    func execute(salonId: String) async throws {}
+}
+
+private final class MockUnsaveSalonUseCase: UnsaveSalonUseCase {
+    func execute(salonId: String) async throws {}
+}
+
+private final class MockSavedSalonsEventBus: SavedSalonsEventBus {
+    var changes: AnyPublisher<SavedSalonChange, Never> { Empty().eraseToAnyPublisher() }
+    func notify(_ change: SavedSalonChange) {}
 }
 
 // MARK: - MockHomeFeedUseCase

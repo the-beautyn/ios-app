@@ -22,6 +22,9 @@ final class HomeControllerFactoryImpl: HomeControllerFactory {
         let viewModel = HomeViewModel(
             transition: transition,
             getHomeFeedUseCase: assembler.home.getHomeFeedUseCase,
+            saveSalonUseCase: assembler.require((any SaveSalonUseCase).self),
+            unsaveSalonUseCase: assembler.require((any UnsaveSalonUseCase).self),
+            savedSalonsEventBus: assembler.require((any SavedSalonsEventBus).self),
             sessionManager: assembler.app.sessionManager,
             getCurrentUserUseCase: assembler.app.getCurrentUserUseCase
         )

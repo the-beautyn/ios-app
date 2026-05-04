@@ -11,5 +11,11 @@ final class ProfileAssembly: Assembly {
         container.register((any ProfileFactory).self) { resolver in
             ProfileFactoryImpl(resolver: resolver)
         }
+
+        container.register((any GetSavedSalonsUseCase).self) { resolver in
+            GetSavedSalonsUseCaseImpl(
+                repository: resolver.require((any SavedSalonsRepository).self)
+            )
+        }
     }
 }

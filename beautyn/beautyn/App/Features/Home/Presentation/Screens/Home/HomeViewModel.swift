@@ -40,6 +40,9 @@ final class HomeViewModel: BaseViewModel {
 
     private let transition: Transition
     private let getHomeFeedUseCase: GetHomeFeedUseCase
+    private let saveSalonUseCase: any SaveSalonUseCase
+    private let unsaveSalonUseCase: any UnsaveSalonUseCase
+    private let savedSalonsEventBus: any SavedSalonsEventBus
     private let sessionManager: SessionManager
     private let getCurrentUserUseCase: any GetCurrentUserUseCase
     private var cancellables = Set<AnyCancellable>()
@@ -49,15 +52,22 @@ final class HomeViewModel: BaseViewModel {
     init(
         transition: Transition,
         getHomeFeedUseCase: GetHomeFeedUseCase,
+        saveSalonUseCase: any SaveSalonUseCase,
+        unsaveSalonUseCase: any UnsaveSalonUseCase,
+        savedSalonsEventBus: any SavedSalonsEventBus,
         sessionManager: SessionManager,
         getCurrentUserUseCase: any GetCurrentUserUseCase
     ) {
         self.transition = transition
         self.getHomeFeedUseCase = getHomeFeedUseCase
+        self.saveSalonUseCase = saveSalonUseCase
+        self.unsaveSalonUseCase = unsaveSalonUseCase
+        self.savedSalonsEventBus = savedSalonsEventBus
         self.sessionManager = sessionManager
         self.getCurrentUserUseCase = getCurrentUserUseCase
         super.init()
         observeAuthState()
+        observeSavedSalonsBus()
         Task { [weak self] in
             await self?.loadHomeFeed()
         }
@@ -75,6 +85,42 @@ final class HomeViewModel: BaseViewModel {
                 }
             }
             .store(in: &cancellables)
+    }
+
+    private func observeSavedSalonsBus() {
+        savedSalonsEventBus.changes
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] change in
+                self?.applySavedChange(change)
+            }
+            .store(in: &cancellables)
+    }
+
+    private func applySavedChange(_ change: SavedSalonChange) {
+        sections = sections.map { section in
+            SectionUI(
+                id: section.id,
+                title: section.title,
+                items: section.items.map { item in
+                    guard item.id == change.salonId, item.isFavorited != change.isSaved else { return item }
+                    var updated = item
+                    updated.isFavorited = change.isSaved
+                    return updated
+                }
+            )
+        }
+
+        if change.isSaved {
+            if !savedSalons.contains(where: { $0.id == change.salonId }),
+               let card = sections.lazy.flatMap(\.items).first(where: { $0.id == change.salonId }) {
+                savedSalons.insert(
+                    SavedSalonUI(id: card.id, salonName: card.name, imageURL: card.imageURL),
+                    at: 0
+                )
+            }
+        } else {
+            savedSalons.removeAll { $0.id == change.salonId }
+        }
     }
 
     // MARK: - Intents
@@ -113,7 +159,43 @@ final class HomeViewModel: BaseViewModel {
             transition.didRequireAuth()
             return
         }
-        // TODO: Implement favorite toggle via use case
+        guard let location = locateCard(salonId: salonId) else { return }
+        let wasFavorited = sections[location.section].items[location.item].isFavorited
+        setFavorited(!wasFavorited, at: location)
+
+        Task { [weak self] in
+            guard let self else { return }
+            do {
+                if wasFavorited {
+                    try await self.unsaveSalonUseCase.execute(salonId: salonId)
+                } else {
+                    try await self.saveSalonUseCase.execute(salonId: salonId)
+                }
+            } catch {
+                if let revertLocation = self.locateCard(salonId: salonId) {
+                    self.setFavorited(wasFavorited, at: revertLocation)
+                }
+                self.showError(error)
+            }
+        }
+    }
+
+    private func locateCard(salonId: String) -> (section: Int, item: Int)? {
+        for (sectionIndex, section) in sections.enumerated() {
+            if let itemIndex = section.items.firstIndex(where: { $0.id == salonId }) {
+                return (sectionIndex, itemIndex)
+            }
+        }
+        return nil
+    }
+
+    private func setFavorited(_ isFavorited: Bool, at location: (section: Int, item: Int)) {
+        var sectionsCopy = sections
+        var items = sectionsCopy[location.section].items
+        items[location.item].isFavorited = isFavorited
+        let original = sectionsCopy[location.section]
+        sectionsCopy[location.section] = SectionUI(id: original.id, title: original.title, items: items)
+        sections = sectionsCopy
     }
 
     // MARK: - Testing Support

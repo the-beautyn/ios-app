@@ -1,3 +1,4 @@
+import Combine
 import SwiftUI
 
 // MARK: - HomeView
@@ -162,6 +163,9 @@ struct HomeView: BaseViewProtocol {
                 didRequireAuth: {}
             ),
             getHomeFeedUseCase: PreviewGetHomeFeedUseCase(),
+            saveSalonUseCase: PreviewSaveSalonUseCase(),
+            unsaveSalonUseCase: PreviewUnsaveSalonUseCase(),
+            savedSalonsEventBus: PreviewSavedSalonsEventBus(),
             sessionManager: SessionManager(keychainService: KeychainServiceImpl(), defaultsService: DefaultsStorageService()),
             getCurrentUserUseCase: PreviewGetCurrentUserUseCase()
         )
@@ -172,6 +176,19 @@ private final class PreviewGetHomeFeedUseCase: GetHomeFeedUseCase {
     func execute(latitude: Double?, longitude: Double?) async throws -> HomeFeed {
         HomeFeed(categories: [], nextBooking: nil, savedSalons: nil, sections: [])
     }
+}
+
+private final class PreviewSaveSalonUseCase: SaveSalonUseCase {
+    func execute(salonId: String) async throws {}
+}
+
+private final class PreviewUnsaveSalonUseCase: UnsaveSalonUseCase {
+    func execute(salonId: String) async throws {}
+}
+
+private final class PreviewSavedSalonsEventBus: SavedSalonsEventBus {
+    var changes: AnyPublisher<SavedSalonChange, Never> { Empty().eraseToAnyPublisher() }
+    func notify(_ change: SavedSalonChange) {}
 }
 
 private final class PreviewGetCurrentUserUseCase: GetCurrentUserUseCase {

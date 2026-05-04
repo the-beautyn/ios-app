@@ -14,6 +14,8 @@ public enum Localization {
   // MARK: - Common
   public static let addButton = Localization.tr("Localizable", "add_button", fallback: "Додати")
   public static let addedButton = Localization.tr("Localizable", "added_button", fallback: "Додано")
+  public static let commonCancel = Localization.tr("Localizable", "common_cancel", fallback: "Скасувати")
+  public static let commonDone = Localization.tr("Localizable", "common_done", fallback: "Готово")
   public static let commonNotSpecified = Localization.tr("Localizable", "common_not_specified", fallback: "Не вказано")
   public static let continueButton = Localization.tr("Localizable", "continue_button", fallback: "Продовжити")
   public static let detailsButton = Localization.tr("Localizable", "details_button", fallback: "Деталі")
@@ -192,6 +194,31 @@ public enum Localization {
   public static let profileSexOther = Localization.tr("Localizable", "profile_sex_other", fallback: "Інша")
   public static let profileSexPreferNotToSay = Localization.tr("Localizable", "profile_sex_prefer_not_to_say", fallback: "Не вказувати")
   public static let profileTitle = Localization.tr("Localizable", "profile_title", fallback: "Профайл")
+
+  // MARK: - Edit Profile
+  public static let editProfileTitle = Localization.tr("Localizable", "edit_profile_title", fallback: "Редагування профілю")
+  public static let editProfileFirstNameLabel = Localization.tr("Localizable", "edit_profile_first_name_label", fallback: "І'мя")
+  public static let editProfileLastNameLabel = Localization.tr("Localizable", "edit_profile_last_name_label", fallback: "Призвіще")
+  public static let editProfileBirthDateLabel = Localization.tr("Localizable", "edit_profile_birth_date_label", fallback: "Дата народження")
+  public static let editProfilePhoneLabel = Localization.tr("Localizable", "edit_profile_phone_label", fallback: "Номер телефону")
+  public static let editProfileCityLabel = Localization.tr("Localizable", "edit_profile_city_label", fallback: "Місто")
+  public static let editProfileSexLabel = Localization.tr("Localizable", "edit_profile_sex_label", fallback: "Стать")
+  public static let editProfileBirthDateDayPlaceholder = Localization.tr("Localizable", "edit_profile_birth_date_day_placeholder", fallback: "ДД")
+  public static let editProfileBirthDateMonthPlaceholder = Localization.tr("Localizable", "edit_profile_birth_date_month_placeholder", fallback: "ММ")
+  public static let editProfileBirthDateYearPlaceholder = Localization.tr("Localizable", "edit_profile_birth_date_year_placeholder", fallback: "РРРР")
+  public static let editProfilePhoneChangeTitle = Localization.tr("Localizable", "edit_profile_phone_change_title", fallback: "Зміна номера телефону")
+  public static let editProfilePhoneChangeMessage = Localization.tr("Localizable", "edit_profile_phone_change_message", fallback: "Якщо ви зміните номер, його потрібно буде підтвердити заново.")
+
+  // MARK: - Location Picker
+  public static let locationPickerTitle = Localization.tr("Localizable", "location_picker_title", fallback: "Локація")
+  public static let locationPickerSearchPlaceholder = Localization.tr("Localizable", "location_picker_search_placeholder", fallback: "Уведить адресу або місто")
+  public static let locationPickerMyGeolocation = Localization.tr("Localizable", "location_picker_my_geolocation", fallback: "Моя геолокація")
+  public static let locationPickerPermissionDenied = Localization.tr("Localizable", "location_picker_permission_denied", fallback: "Відкрийте Налаштування, щоб дозволити доступ до геолокації")
+
+  // MARK: - Saved Salons
+  public static let savedSalonsTitle = Localization.tr("Localizable", "saved_salons_title", fallback: "Обрані салони")
+  public static let savedSalonsSearchPlaceholder = Localization.tr("Localizable", "saved_salons_search_placeholder", fallback: "Уведить назву салону")
+  public static let savedSalonsEmpty = Localization.tr("Localizable", "saved_salons_empty", fallback: "Ви ще не додали жоден салон")
 }
 // swiftlint:enable explicit_type_interface function_parameter_count identifier_name line_length
 // swiftlint:enable nesting type_body_length type_name vertical_whitespace_opening_braces

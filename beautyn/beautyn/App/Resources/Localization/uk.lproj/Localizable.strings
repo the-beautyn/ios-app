@@ -10,6 +10,8 @@
 "ok_button" = "OK";
 "error_title" = "Помилка";
 "input_phone_placeholder" = "номер телефону";
+"common_cancel" = "Скасувати";
+"common_done" = "Готово";
 
 // MARK: - Errors
 "error_invalid_response" = "Невірна відповідь сервера.";
@@ -152,3 +154,28 @@
 "profile_old_password_label" = "Старий пароль";
 "profile_new_password_label" = "Новий пароль";
 "profile_confirm_password_label" = "Повторити новий пароль";
+
+// MARK: - Edit Profile
+"edit_profile_title" = "Редагування профілю";
+"edit_profile_first_name_label" = "І'мя";
+"edit_profile_last_name_label" = "Призвіще";
+"edit_profile_birth_date_label" = "Дата народження";
+"edit_profile_phone_label" = "Номер телефону";
+"edit_profile_city_label" = "Місто";
+"edit_profile_sex_label" = "Стать";
+"edit_profile_birth_date_day_placeholder" = "ДД";
+"edit_profile_birth_date_month_placeholder" = "ММ";
+"edit_profile_birth_date_year_placeholder" = "РРРР";
+"edit_profile_phone_change_title" = "Зміна номера телефону";
+"edit_profile_phone_change_message" = "Якщо ви зміните номер, його потрібно буде підтвердити заново.";
+
+// MARK: - Location Picker
+"location_picker_title" = "Локація";
+"location_picker_search_placeholder" = "Уведить адресу або місто";
+"location_picker_my_geolocation" = "Моя геолокація";
+"location_picker_permission_denied" = "Відкрийте Налаштування, щоб дозволити доступ до геолокації";
+
+// MARK: - Saved Salons
+"saved_salons_title" = "Обрані салони";
+"saved_salons_search_placeholder" = "Уведить назву салону";
+"saved_salons_empty" = "Ви ще не додали жоден салон";

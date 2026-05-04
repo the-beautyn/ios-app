@@ -52,7 +52,11 @@ final class ProfileCoordinator: BaseCoordinator {
     }
 
     private func handleEditProfileTap() {
-        // TODO: Push Edit Profile screen
+        let transition = EditProfileViewModel.Transition(
+            didFinishEditing: { [weak self] in self?.router.pop(animated: true) }
+        )
+        let vc = factory.makeEditProfile(transition: transition)
+        router.push(vc, animated: true)
     }
 
     private func handleEditAvatarTap() {
@@ -60,7 +64,16 @@ final class ProfileCoordinator: BaseCoordinator {
     }
 
     private func navigateToSavedSalons() {
-        // TODO: Push Saved Salons screen
+        let transition = SavedSalonsViewModel.Transition(
+            didTapSalon: { [weak self] salonId in self?.navigateToSalon(salonId: salonId) },
+            didTapBack:  { [weak self] in self?.router.pop(animated: true) }
+        )
+        let vc = factory.makeSavedSalons(transition: transition)
+        router.push(vc, animated: true)
+    }
+
+    private func navigateToSalon(salonId: String) {
+        // TODO: Push Salon Profile screen
     }
 
     private func navigateToSettings() {

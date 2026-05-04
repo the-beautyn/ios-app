@@ -91,6 +91,13 @@ final class AppAssembly: Assembly {
             clearUserUseCase
         }
 
+        let updateUserProfileUseCase: UpdateUserProfileUseCase = UpdateUserProfileUseCaseImpl(
+            repository: userRepository
+        )
+        container.register((any UpdateUserProfileUseCase).self) { _ in
+            updateUserProfileUseCase
+        }
+
         // MARK: - User Settings
 
         let userSettingsRepository: UserSettingsRepository = UserSettingsRepositoryImpl(
@@ -111,6 +118,36 @@ final class AppAssembly: Assembly {
             UpdateNotificationSettingsUseCaseImpl(repository: userSettingsRepository)
         container.register((any UpdateNotificationSettingsUseCase).self) { _ in
             updateNotificationSettingsUseCase
+        }
+
+        // MARK: - Saved Salons (shared — Home consumes save/unsave for the heart toggle)
+
+        let savedSalonsRepository: SavedSalonsRepository = SavedSalonsRepositoryImpl(
+            networkService: networkService
+        )
+        container.register((any SavedSalonsRepository).self) { _ in
+            savedSalonsRepository
+        }
+
+        let savedSalonsEventBus: any SavedSalonsEventBus = SavedSalonsEventBusImpl()
+        container.register((any SavedSalonsEventBus).self) { _ in
+            savedSalonsEventBus
+        }
+
+        let saveSalonUseCase: SaveSalonUseCase = SaveSalonUseCaseImpl(
+            repository: savedSalonsRepository,
+            eventBus: savedSalonsEventBus
+        )
+        container.register((any SaveSalonUseCase).self) { _ in
+            saveSalonUseCase
+        }
+
+        let unsaveSalonUseCase: UnsaveSalonUseCase = UnsaveSalonUseCaseImpl(
+            repository: savedSalonsRepository,
+            eventBus: savedSalonsEventBus
+        )
+        container.register((any UnsaveSalonUseCase).self) { _ in
+            unsaveSalonUseCase
         }
 
         // MARK: - OAuth services
