@@ -27,6 +27,13 @@ final class UserRepositoryImpl: UserRepository {
         return profile
     }
 
+    func update(_ patch: UserProfilePatch) async throws -> UserProfile {
+        let dto = try await remote.update(UserProfilePatchMapper.map(patch))
+        let profile = UserProfileMapper.map(dto)
+        local.save(profile)
+        return profile
+    }
+
     func clearCache() {
         local.clear()
     }

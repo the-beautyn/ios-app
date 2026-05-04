@@ -8,6 +8,7 @@ enum UserTarget {
     case getMe
     case getSettings
     case updateNotifications(UpdateNotificationSettingsRequest)
+    case update(UserProfilePatchDTO)
 }
 
 // MARK: - TargetType
@@ -23,13 +24,14 @@ extension UserTarget: TargetType {
         case .getMe: return "/user/me"
         case .getSettings: return "/user/settings"
         case .updateNotifications: return "/user/settings/notifications"
+        case .update: return "/user/update"
         }
     }
 
     var method: Moya.Method {
         switch self {
         case .getMe, .getSettings: return .get
-        case .updateNotifications: return .patch
+        case .updateNotifications, .update: return .patch
         }
     }
 
@@ -38,6 +40,8 @@ extension UserTarget: TargetType {
         case .getMe, .getSettings:
             return .requestPlain
         case .updateNotifications(let body):
+            return .requestJSONEncodable(body)
+        case .update(let body):
             return .requestJSONEncodable(body)
         }
     }

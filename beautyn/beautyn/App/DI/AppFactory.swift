@@ -15,6 +15,7 @@ protocol AppFactory: ResolverInjector {
     var getCurrentUserUseCase: any GetCurrentUserUseCase { get }
     var refreshCurrentUserUseCase: any RefreshCurrentUserUseCase { get }
     var clearUserUseCase: any ClearUserUseCase { get }
+    var updateUserProfileUseCase: any UpdateUserProfileUseCase { get }
     var getUserSettingsUseCase: any GetUserSettingsUseCase { get }
     var updateNotificationSettingsUseCase: any UpdateNotificationSettingsUseCase { get }
     var appleSignInService: any AppleSignInService { get }
@@ -38,6 +39,7 @@ extension AppFactory {
     var getCurrentUserUseCase: any GetCurrentUserUseCase { resolver.require((any GetCurrentUserUseCase).self) }
     var refreshCurrentUserUseCase: any RefreshCurrentUserUseCase { resolver.require((any RefreshCurrentUserUseCase).self) }
     var clearUserUseCase: any ClearUserUseCase { resolver.require((any ClearUserUseCase).self) }
+    var updateUserProfileUseCase: any UpdateUserProfileUseCase { resolver.require((any UpdateUserProfileUseCase).self) }
     var getUserSettingsUseCase: any GetUserSettingsUseCase { resolver.require((any GetUserSettingsUseCase).self) }
     var updateNotificationSettingsUseCase: any UpdateNotificationSettingsUseCase { resolver.require((any UpdateNotificationSettingsUseCase).self) }
     var appleSignInService: any AppleSignInService { resolver.require((any AppleSignInService).self) }

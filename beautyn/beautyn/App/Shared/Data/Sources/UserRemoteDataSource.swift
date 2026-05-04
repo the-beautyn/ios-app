@@ -18,4 +18,9 @@ final class UserRemoteDataSource {
         let target = Target(type: UserTarget.getMe)
         return try await networkService.request(target)
     }
+
+    func update(_ patch: UserProfilePatchDTO) async throws -> UserProfileDTO {
+        let target = Target(type: UserTarget.update(patch))
+        return try await networkService.request(target)
+    }
 }

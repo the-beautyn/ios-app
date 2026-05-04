@@ -53,7 +53,12 @@ final class PersonalDataViewModel: BaseViewModel {
         self.transition = transition
         self.getCurrentUserUseCase = getCurrentUserUseCase
         super.init()
-        Task { [weak self] in await self?.loadProfile() }
+    }
+
+    // MARK: - Lifecycle
+
+    override func onViewTask() async {
+        await loadProfile()
     }
 
     // MARK: - Actions

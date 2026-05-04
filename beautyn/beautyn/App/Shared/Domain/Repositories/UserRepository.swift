@@ -14,6 +14,11 @@ protocol UserRepository {
     @discardableResult
     func refresh() async throws -> UserProfile
 
+    /// PATCHes the current user with `patch`, writes the server's response
+    /// through to the cache, and returns the updated domain entity.
+    @discardableResult
+    func update(_ patch: UserProfilePatch) async throws -> UserProfile
+
     /// Clears the cached profile only. Does not touch session/tokens — those
     /// are owned by `SessionManager`.
     func clearCache()

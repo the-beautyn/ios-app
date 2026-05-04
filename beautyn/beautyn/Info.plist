@@ -21,6 +21,8 @@
 	<string>$(ENVIRONMENT_TYPE)</string>
 	<key>GIDClientID</key>
 	<string>$(GID_CLIENT_ID)</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Доступ до геолокації потрібен, щоб автоматично заповнити ваше місто у профілі.</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>AeonikProTRIAL-Air.otf</string>
