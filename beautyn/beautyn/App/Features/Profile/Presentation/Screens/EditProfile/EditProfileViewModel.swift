@@ -10,6 +10,7 @@ final class EditProfileViewModel: BaseViewModel {
 
     struct Transition {
         let didFinishEditing: () -> Void
+        let didChangePhone: (_ phone: String) -> Void
     }
 
     // MARK: - Published
@@ -155,7 +156,11 @@ final class EditProfileViewModel: BaseViewModel {
             defer { self.hideLoader() }
             do {
                 _ = try await self.updateUserProfileUseCase.execute(patch)
-                self.transition.didFinishEditing()
+                if let newPhone = patch.phone {
+                    self.transition.didChangePhone(newPhone)
+                } else {
+                    self.transition.didFinishEditing()
+                }
             } catch {
                 self.showError(error)
             }

@@ -9,8 +9,6 @@ protocol AuthControllerFactory {
     func makeForgotPassword(email: String, transition: ForgotPasswordViewModel.Transition) -> UIViewController
     func makeCheckEmailSent(email: String, transition: CheckEmailSentViewModel.Transition) -> UIViewController
     func makeSignUp(email: String, transition: SignUpViewModel.Transition) -> UIViewController
-    func makePhoneVerification(transition: PhoneVerificationViewModel.Transition) -> UIViewController
-    func makePhoneCode(phone: String, transition: PhoneCodeViewModel.Transition) -> UIViewController
 }
 
 // MARK: - AuthControllerFactoryImpl
@@ -47,20 +45,5 @@ final class AuthControllerFactoryImpl: AuthControllerFactory {
     func makeSignUp(email: String, transition: SignUpViewModel.Transition) -> UIViewController {
         let viewModel = SignUpViewModel(email: email, transition: transition, registerUseCase: assembler.auth.registerUseCase)
         return SignUpController(viewModel: viewModel)
-    }
-
-    func makePhoneVerification(transition: PhoneVerificationViewModel.Transition) -> UIViewController {
-        let viewModel = PhoneVerificationViewModel(transition: transition, sendPhoneOTPUseCase: assembler.auth.sendPhoneOTPUseCase)
-        return PhoneVerificationController(viewModel: viewModel)
-    }
-
-    func makePhoneCode(phone: String, transition: PhoneCodeViewModel.Transition) -> UIViewController {
-        let viewModel = PhoneCodeViewModel(
-            phone: phone,
-            transition: transition,
-            verifyPhoneOTPUseCase: assembler.auth.verifyPhoneOTPUseCase,
-            sendPhoneOTPUseCase: assembler.auth.sendPhoneOTPUseCase
-        )
-        return PhoneCodeController(viewModel: viewModel)
     }
 }

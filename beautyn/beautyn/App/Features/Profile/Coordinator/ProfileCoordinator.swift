@@ -7,11 +7,13 @@ final class ProfileCoordinator: BaseCoordinator {
 
     private let router: Router
     private let factory: ProfileControllerFactory
+    private let parentAssembler: Assembler
 
     init(router: Router, parentAssembler: Assembler) {
         let assembler = Assembler([ProfileAssembly()], parent: parentAssembler)
         self.factory = assembler.profile.controllerFactory
         self.router = router
+        self.parentAssembler = parentAssembler
     }
 
     override func start() {
@@ -53,10 +55,26 @@ final class ProfileCoordinator: BaseCoordinator {
 
     private func handleEditProfileTap() {
         let transition = EditProfileViewModel.Transition(
-            didFinishEditing: { [weak self] in self?.router.pop(animated: true) }
+            didFinishEditing: { [weak self] in self?.router.pop(animated: true) },
+            didChangePhone: { [weak self] phone in self?.showPhoneVerification(phone: phone) }
         )
         let vc = factory.makeEditProfile(transition: transition)
         router.push(vc, animated: true)
+    }
+
+    private func showPhoneVerification(phone: String) {
+        let coordinator = PhoneVerificationCoordinator(
+            parentAssembler: parentAssembler,
+            router: router,
+            initialPhone: phone
+        )
+        coordinator.onFinish = { [weak self, weak coordinator] in
+            guard let self, let coordinator else { return }
+            self.router.popTo(PersonalDataController.self, animated: true)
+            self.removeChild(coordinator)
+        }
+        addChild(coordinator)
+        coordinator.start()
     }
 
     private func handleEditAvatarTap() {
@@ -77,10 +95,29 @@ final class ProfileCoordinator: BaseCoordinator {
     }
 
     private func navigateToSettings() {
-        // TODO: Push Settings screen
+        let transition = ProfileSettingsViewModel.Transition(
+            didTapChangePassword: { [weak self] in self?.handleChangePasswordTap() },
+            didConfirmLogout: { [weak self] in self?.handleLogoutConfirmed() },
+            didConfirmDeleteAccount: { [weak self] in self?.handleDeleteAccountConfirmed() }
+        )
+        let vc = factory.makeProfileSettings(transition: transition)
+        router.push(vc, animated: true)
+    }
+
+    private func handleChangePasswordTap() {
+        // TODO: Push Change Password screen
+    }
+
+    private func handleLogoutConfirmed() {
+        // TODO: Invoke logout flow once available
+    }
+
+    private func handleDeleteAccountConfirmed() {
+        // TODO: Invoke delete-account flow once available
     }
 
     private func navigateToLanguage() {
-        // TODO: Push Language screen
+        guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
+        UIApplication.shared.open(url)
     }
 }

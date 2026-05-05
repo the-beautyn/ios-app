@@ -18,7 +18,7 @@ final class PhoneVerificationViewModel: BaseViewModel, ButtonLoadableViewModel {
     @Published var phoneNumber: String = ""
     @Published private(set) var phoneError: String?
     @Published var isButtonLoading: Bool = false
-    var countryCode: String = "+38"
+    var countryCode: String = "+380"
 
     var isSendEnabled: Bool {
         isValidPhone && !isButtonLoading
@@ -31,10 +31,17 @@ final class PhoneVerificationViewModel: BaseViewModel, ButtonLoadableViewModel {
 
     // MARK: - Init
 
-    init(transition: Transition, sendPhoneOTPUseCase: any SendPhoneOTPUseCase) {
+    init(
+        transition: Transition,
+        sendPhoneOTPUseCase: any SendPhoneOTPUseCase,
+        initialPhone: String? = nil
+    ) {
         self.transition = transition
         self.sendPhoneOTPUseCase = sendPhoneOTPUseCase
         super.init()
+        if let initialPhone {
+            phoneNumber = Self.stripCountryCode(from: initialPhone)
+        }
     }
 
     // MARK: - Intents
@@ -54,11 +61,19 @@ final class PhoneVerificationViewModel: BaseViewModel, ButtonLoadableViewModel {
 
     private var isValidPhone: Bool {
         let digits = phoneNumber.filter(\.isNumber)
-        return digits.count >= 9
+        return digits.count == 9
     }
 
     private var fullPhoneNumber: String {
         countryCode + phoneNumber.filter(\.isNumber)
+    }
+
+    private static func stripCountryCode(from phone: String) -> String {
+        let digits = phone.filter(\.isNumber)
+        if digits.count >= 12, digits.hasPrefix("380") {
+            return String(digits.suffix(digits.count - 3))
+        }
+        return digits
     }
 
     private func sendCode() async {

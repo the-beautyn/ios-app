@@ -24,7 +24,8 @@ final class EditProfileViewRenderTests: XCTestCase {
     private func makeViewModel() -> EditProfileViewModel {
         EditProfileViewModel(
             transition: .init(
-                didFinishEditing: {}
+                didFinishEditing: {},
+                didChangePhone: { _ in }
             ),
             getCurrentUserUseCase: MockEditProfileGetCurrentUserUseCase(),
             updateUserProfileUseCase: MockEditProfileUpdateUserProfileUseCase()

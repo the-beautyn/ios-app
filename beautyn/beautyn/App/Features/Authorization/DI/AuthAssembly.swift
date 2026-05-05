@@ -34,19 +34,6 @@ final class AuthAssembly: Assembly {
             )
         }
 
-        container.register((any SendPhoneOTPUseCase).self) { resolver in
-            SendPhoneOTPUseCaseImpl(
-                repository: resolver.require((any AuthRepository).self)
-            )
-        }
-
-        container.register((any VerifyPhoneOTPUseCase).self) { resolver in
-            VerifyPhoneOTPUseCaseImpl(
-                repository: resolver.require((any AuthRepository).self),
-                sessionManager: resolver.require(SessionManager.self)
-            )
-        }
-
         container.register((any AuthControllerFactory).self) { resolver in
             AuthControllerFactoryImpl(assembler: resolver)
         }

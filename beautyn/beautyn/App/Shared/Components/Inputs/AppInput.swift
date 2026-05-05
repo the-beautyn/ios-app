@@ -230,7 +230,7 @@ struct AppSecureField: View {
 
 struct AppPhoneField: View {
 
-    var countryCode: String = "+38"
+    var countryCode: String = "+380"
     @Binding var text: String
     var errorMessage: String?        = nil
     var isDisabled: Bool             = false
