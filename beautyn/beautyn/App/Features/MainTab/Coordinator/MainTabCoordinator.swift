@@ -83,6 +83,11 @@ final class MainTabCoordinator: BaseCoordinator {
         router.setRoot(tabBarController, animated: false)
     }
 
+    func selectHomeTab() {
+        guard let homeNav else { return }
+        tabBarController.selectedViewController = homeNav
+    }
+
     // MARK: - Private
 
     private var isAuthenticated: Bool {

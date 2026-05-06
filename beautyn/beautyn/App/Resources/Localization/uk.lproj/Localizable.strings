@@ -31,6 +31,9 @@
 "validation_password_digit" = "Пароль має містити хоча б одну цифру";
 "validation_invalid_phone" = "Невірний номер телефону";
 "validation_invalid_code" = "Невірний код";
+"validation_passwords_dont_match" = "Паролі не співпадають";
+"validation_old_password_incorrect" = "Старий пароль невірний";
+"validation_new_password_same_as_old" = "Новий пароль має відрізнятися від старого";
 
 // MARK: - Tab Bar
 "tab_home" = "Головна";
@@ -154,6 +157,20 @@
 "profile_old_password_label" = "Старий пароль";
 "profile_new_password_label" = "Новий пароль";
 "profile_confirm_password_label" = "Повторити новий пароль";
+
+// MARK: - Profile Settings
+"profile_settings_title" = "Налаштування";
+"profile_settings_terms_of_service" = "Terms of Service";
+"profile_settings_privacy_policy" = "Privacy Policy";
+"profile_settings_change_password" = "Змінити пароль";
+"profile_settings_logout" = "Вийти з акаунту";
+"profile_settings_delete_account" = "Видалити акаунт";
+"profile_settings_logout_alert_title" = "Вийти з акаунту?";
+"profile_settings_logout_alert_message" = "Ви вийдете з облікового запису. Щоб продовжити користуватися застосунком, потрібно буде увійти знову.";
+"profile_settings_logout_alert_confirm" = "Вийти";
+"profile_settings_delete_account_alert_title" = "Видалити акаунт?";
+"profile_settings_delete_account_alert_message" = "Цю дію неможливо скасувати. Ваш профіль, історія записів і всі особисті дані будуть остаточно видалені.";
+"profile_settings_delete_account_alert_confirm" = "Видалити";
 
 // MARK: - Edit Profile
 "edit_profile_title" = "Редагування профілю";

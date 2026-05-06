@@ -11,8 +11,10 @@ enum AuthTarget {
     case oauth(provider: String, idToken: String, nonce: String?, name: String?, secondName: String?)
     case refreshToken(refreshToken: String)
     case logout
+    case deleteAccount
     case forgotPassword(email: String)
     case resetPassword(token: String, newPassword: String)
+    case changePassword(currentPassword: String, newPassword: String)
     case sendPhoneOTP(phone: String)
     case verifyPhoneOTP(phone: String, code: String)
     case resendPhoneOTP(phone: String)
@@ -34,8 +36,10 @@ extension AuthTarget: TargetType {
         case .oauth: return "/auth/oauth"
         case .refreshToken: return "/auth/refresh"
         case .logout: return "/auth/logout"
+        case .deleteAccount: return "/auth/account"
         case .forgotPassword: return "/auth/forgot-password"
         case .resetPassword: return "/auth/reset"
+        case .changePassword: return "/user/change-password"
         case .sendPhoneOTP: return "/auth/phone/send-otp"
         case .verifyPhoneOTP: return "/auth/phone/verify-otp"
         case .resendPhoneOTP: return "/auth/phone/resend-otp"
@@ -43,7 +47,10 @@ extension AuthTarget: TargetType {
     }
 
     var method: Moya.Method {
-        return .post
+        switch self {
+        case .deleteAccount: return .delete
+        default:             return .post
+        }
     }
 
     var task: Moya.Task {
@@ -91,6 +98,9 @@ extension AuthTarget: TargetType {
         case .logout:
             return .requestPlain
 
+        case .deleteAccount:
+            return .requestPlain
+
         case .forgotPassword(let email):
             return .requestParameters(
                 parameters: ["email": email],
@@ -100,6 +110,12 @@ extension AuthTarget: TargetType {
         case .resetPassword(let token, let newPassword):
             return .requestParameters(
                 parameters: ["otp_token": token, "new_password": newPassword],
+                encoding: JSONEncoding.default
+            )
+
+        case .changePassword(let currentPassword, let newPassword):
+            return .requestParameters(
+                parameters: ["current_password": currentPassword, "new_password": newPassword],
                 encoding: JSONEncoding.default
             )
 
@@ -134,7 +150,7 @@ extension AuthTarget: AccessTokenAuthorizable {
 
     var authorizationType: AuthorizationType? {
         switch self {
-        case .logout, .sendPhoneOTP, .verifyPhoneOTP, .resendPhoneOTP:
+        case .logout, .deleteAccount, .sendPhoneOTP, .verifyPhoneOTP, .resendPhoneOTP, .changePassword:
             return .bearer
         default:
             return nil

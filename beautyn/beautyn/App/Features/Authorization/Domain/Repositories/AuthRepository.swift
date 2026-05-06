@@ -8,8 +8,10 @@ protocol AuthRepository {
     func refresh(refreshToken: String) async throws -> AuthSession
     func forgotPassword(email: String) async throws
     func resetPassword(token: String, newPassword: String) async throws -> AuthSession
+    func changePassword(currentPassword: String, newPassword: String) async throws -> AuthSession
     func sendPhoneOTP(phone: String) async throws
     func verifyPhoneOTP(phone: String, code: String) async throws -> Bool
     func resendPhoneOTP(phone: String) async throws
     func logout() async throws
+    func deleteAccount() async throws
 }

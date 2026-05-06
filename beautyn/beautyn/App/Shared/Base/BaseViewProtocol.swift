@@ -17,6 +17,13 @@ extension BaseViewProtocol {
             .handleError(errorMessage: viewModel.errorMessage) {
                 viewModel.errorMessage = nil
             }
+            .sheet(
+                item: Binding<WebPagePresentation?>(
+                    get: { viewModel.webPagePresentation },
+                    set: { viewModel.webPagePresentation = $0 }
+                ),
+                content: WebPageView.init
+            )
             .onAppear {
                 viewModel.onAppear()
             }

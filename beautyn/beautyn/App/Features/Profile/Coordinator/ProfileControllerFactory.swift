@@ -8,6 +8,8 @@ protocol ProfileControllerFactory {
     func makePersonalData(transition: PersonalDataViewModel.Transition) -> UIViewController
     func makeEditProfile(transition: EditProfileViewModel.Transition) -> UIViewController
     func makeSavedSalons(transition: SavedSalonsViewModel.Transition) -> UIViewController
+    func makeProfileSettings(transition: ProfileSettingsViewModel.Transition) -> UIViewController
+    func makeChangePassword(transition: ChangePasswordViewModel.Transition) -> UIViewController
 }
 
 // MARK: - ProfileControllerFactoryImpl
@@ -57,5 +59,22 @@ final class ProfileControllerFactoryImpl: ProfileControllerFactory {
             savedSalonsEventBus: assembler.require((any SavedSalonsEventBus).self)
         )
         return SavedSalonsController(viewModel: viewModel)
+    }
+
+    func makeProfileSettings(transition: ProfileSettingsViewModel.Transition) -> UIViewController {
+        let viewModel = ProfileSettingsViewModel(
+            transition: transition,
+            logoutUseCase: assembler.app.logoutUseCase,
+            deleteAccountUseCase: assembler.app.deleteAccountUseCase
+        )
+        return ProfileSettingsController(viewModel: viewModel)
+    }
+
+    func makeChangePassword(transition: ChangePasswordViewModel.Transition) -> UIViewController {
+        let viewModel = ChangePasswordViewModel(
+            transition: transition,
+            changePasswordUseCase: assembler.require((any ChangePasswordUseCase).self)
+        )
+        return ChangePasswordController(viewModel: viewModel)
     }
 }

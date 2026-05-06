@@ -49,6 +49,9 @@ public enum Localization {
   public static let validationPasswordDigit = Localization.tr("Localizable", "validation_password_digit", fallback: "Пароль має містити хоча б одну цифру")
   public static let validationInvalidPhone = Localization.tr("Localizable", "validation_invalid_phone", fallback: "Невірний номер телефону")
   public static let validationInvalidCode = Localization.tr("Localizable", "validation_invalid_code", fallback: "Невірний код")
+  public static let validationPasswordsDontMatch = Localization.tr("Localizable", "validation_passwords_dont_match", fallback: "Паролі не співпадають")
+  public static let validationOldPasswordIncorrect = Localization.tr("Localizable", "validation_old_password_incorrect", fallback: "Старий пароль невірний")
+  public static let validationNewPasswordSameAsOld = Localization.tr("Localizable", "validation_new_password_same_as_old", fallback: "Новий пароль має відрізнятися від старого")
 
   // MARK: - Tab Bar
   public static let tabBookings = Localization.tr("Localizable", "tab_bookings", fallback: "Бронювання")
@@ -194,6 +197,20 @@ public enum Localization {
   public static let profileSexOther = Localization.tr("Localizable", "profile_sex_other", fallback: "Інша")
   public static let profileSexPreferNotToSay = Localization.tr("Localizable", "profile_sex_prefer_not_to_say", fallback: "Не вказувати")
   public static let profileTitle = Localization.tr("Localizable", "profile_title", fallback: "Профайл")
+
+  // MARK: - Profile Settings
+  public static let profileSettingsTitle = Localization.tr("Localizable", "profile_settings_title", fallback: "Налаштування")
+  public static let profileSettingsTermsOfService = Localization.tr("Localizable", "profile_settings_terms_of_service", fallback: "Terms of Service")
+  public static let profileSettingsPrivacyPolicy = Localization.tr("Localizable", "profile_settings_privacy_policy", fallback: "Privacy Policy")
+  public static let profileSettingsChangePassword = Localization.tr("Localizable", "profile_settings_change_password", fallback: "Змінити пароль")
+  public static let profileSettingsLogout = Localization.tr("Localizable", "profile_settings_logout", fallback: "Вийти з акаунту")
+  public static let profileSettingsDeleteAccount = Localization.tr("Localizable", "profile_settings_delete_account", fallback: "Видалити акаунт")
+  public static let profileSettingsLogoutAlertTitle = Localization.tr("Localizable", "profile_settings_logout_alert_title", fallback: "Вийти з акаунту?")
+  public static let profileSettingsLogoutAlertMessage = Localization.tr("Localizable", "profile_settings_logout_alert_message", fallback: "Ви вийдете з облікового запису. Щоб продовжити користуватися застосунком, потрібно буде увійти знову.")
+  public static let profileSettingsLogoutAlertConfirm = Localization.tr("Localizable", "profile_settings_logout_alert_confirm", fallback: "Вийти")
+  public static let profileSettingsDeleteAccountAlertTitle = Localization.tr("Localizable", "profile_settings_delete_account_alert_title", fallback: "Видалити акаунт?")
+  public static let profileSettingsDeleteAccountAlertMessage = Localization.tr("Localizable", "profile_settings_delete_account_alert_message", fallback: "Цю дію неможливо скасувати. Ваш профіль, історія записів і всі особисті дані будуть остаточно видалені.")
+  public static let profileSettingsDeleteAccountAlertConfirm = Localization.tr("Localizable", "profile_settings_delete_account_alert_confirm", fallback: "Видалити")
 
   // MARK: - Edit Profile
   public static let editProfileTitle = Localization.tr("Localizable", "edit_profile_title", fallback: "Редагування профілю")

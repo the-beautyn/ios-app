@@ -9,6 +9,7 @@ final class AppCoordinator: BaseCoordinator {
     private let assembler: Assembler
     private var cancellables = Set<AnyCancellable>()
     private weak var authCoordinator: AuthCoordinator?
+    private weak var mainTabCoordinator: MainTabCoordinator?
 
     init(router: Router, assembler: Assembler) {
         self.router = router
@@ -21,6 +22,7 @@ final class AppCoordinator: BaseCoordinator {
         sessionManager.restoreSession()
 
         subscribeToDeepLinks()
+        subscribeToAuthState()
 
         guard sessionManager.authState == .authenticated else { return }
         Task { try? await assembler.app.refreshTokenUseCase.execute() }
@@ -33,6 +35,7 @@ final class AppCoordinator: BaseCoordinator {
         coordinator.onRequireAuth = { [weak self] in
             self?.showAuth()
         }
+        mainTabCoordinator = coordinator
         addChild(coordinator)
         coordinator.start()
     }
@@ -59,6 +62,21 @@ final class AppCoordinator: BaseCoordinator {
         authCoordinator = coordinator
         addChild(coordinator)
         return coordinator
+    }
+
+    // MARK: - Session
+
+    private func subscribeToAuthState() {
+        let sessionManager = assembler.app.sessionManager
+        sessionManager.$authState
+            .removeDuplicates()
+            .scan((nil as AuthState?, nil as AuthState?)) { acc, next in (acc.1, next) }
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] previous, current in
+                guard previous == .authenticated, current == .unauthenticated else { return }
+                self?.mainTabCoordinator?.selectHomeTab()
+            }
+            .store(in: &cancellables)
     }
 
     // MARK: - Deep Links
