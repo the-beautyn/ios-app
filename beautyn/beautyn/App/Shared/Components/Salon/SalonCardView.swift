@@ -56,7 +56,12 @@ struct SalonCardView: View {
                 CachedImage(
                     url: salon.imageURL,
                     size: CGSize(width: style == .horizontal ? 280 : 430, height: imageHeight),
-                    clipShape: Rectangle()
+                    clipShape: Rectangle(),
+                    placeholder: AnyView(
+                        SwiftUI.Image(.salonPlaceholder)
+                            .resizable()
+                            .scaledToFill()
+                    )
                 )
             }
             .overlay(Color.App.brown1.opacity(0.2))

@@ -27,7 +27,12 @@ struct SavedSalonItemView: View {
                 CachedImage(
                     url: salon.imageURL,
                     size: CGSize(width: imageSize, height: imageSize),
-                    clipShape: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    clipShape: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous),
+                    placeholder: AnyView(
+                        SwiftUI.Image(.savedSalonPlaceholder)
+                            .resizable()
+                            .scaledToFill()
+                    )
                 )
                 .overlay(
                     RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)

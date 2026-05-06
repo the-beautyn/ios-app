@@ -27,7 +27,12 @@ struct CategoryChipView: View {
                 CachedImage(
                     url: category.imageURL,
                     size: CGSize(width: imageSize, height: imageSize),
-                    clipShape: Circle()
+                    clipShape: Circle(),
+                    placeholder: AnyView(
+                        SwiftUI.Image(.categoryPlaceholder)
+                            .resizable()
+                            .scaledToFill()
+                    )
                 )
 
                 Text(category.title)
