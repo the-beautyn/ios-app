@@ -84,7 +84,7 @@ final class PhoneVerificationViewModel: BaseViewModel, ButtonLoadableViewModel {
             transition.didSendCode(fullPhoneNumber)
         } catch {
             hideButtonLoader()
-            errorMessage = error.localizedDescription
+            showError(error)
         }
     }
 }

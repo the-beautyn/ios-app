@@ -81,7 +81,7 @@ final class LoginViewModel: BaseViewModel, ButtonLoadableViewModel {
             }
         } catch {
             hideButtonLoader()
-            errorMessage = error.localizedDescription
+            showError(error)
         }
     }
 }

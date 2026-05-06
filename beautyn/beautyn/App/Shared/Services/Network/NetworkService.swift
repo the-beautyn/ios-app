@@ -31,7 +31,7 @@ extension NetworkError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case let .underlying(_, response):
-            return String(data: response.data, encoding: .utf8)
+            return Self.parseServerMessage(from: response.data) ?? "Server error"
 
         case .nilData:
             return "No data"
@@ -43,6 +43,15 @@ extension NetworkError: LocalizedError {
             return "Decoding failed"
             #endif
         }
+    }
+
+    private static func parseServerMessage(from data: Data) -> String? {
+        guard !data.isEmpty,
+              let envelope = try? JSONDecoder().decode(ApiEnvelope<ApiErrorPayload>.self, from: data),
+              let message = envelope.data?.message,
+              !message.isEmpty
+        else { return nil }
+        return message
     }
 
     var description: String {

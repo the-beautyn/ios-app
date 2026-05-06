@@ -52,6 +52,7 @@ final class ProfileSettingsViewModel: BaseViewModel {
         showLoader()
         await logoutUseCase.execute()
         hideLoader()
+        AlertRelay.shared.enqueue(.success(Localization.profileSettingsLogoutSuccess))
         transition.didLogout()
     }
 
@@ -68,6 +69,7 @@ final class ProfileSettingsViewModel: BaseViewModel {
         do {
             try await deleteAccountUseCase.execute()
             hideLoader()
+            AlertRelay.shared.enqueue(.success(Localization.profileSettingsDeleteAccountSuccess))
             transition.didDeleteAccount()
         } catch {
             hideLoader()

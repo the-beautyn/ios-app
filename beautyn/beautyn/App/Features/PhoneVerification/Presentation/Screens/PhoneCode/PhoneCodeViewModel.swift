@@ -82,7 +82,7 @@ final class PhoneCodeViewModel: BaseViewModel {
             hideLoader()
         } catch {
             hideLoader()
-            errorMessage = error.localizedDescription
+            showError(error)
         }
     }
 }

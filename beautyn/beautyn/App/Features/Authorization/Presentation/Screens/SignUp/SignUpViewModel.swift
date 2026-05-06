@@ -97,7 +97,7 @@ final class SignUpViewModel: BaseViewModel, ButtonLoadableViewModel {
             }
         } catch {
             hideButtonLoader()
-            errorMessage = error.localizedDescription
+            showError(error)
         }
     }
 }

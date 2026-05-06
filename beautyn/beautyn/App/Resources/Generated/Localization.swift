@@ -82,6 +82,7 @@ public enum Localization {
   public static func setNewPasswordNewLinkSent(_ p1: Any) -> String {
     return Localization.tr("Localizable", "set_new_password_new_link_sent", String(describing: p1), fallback: "Ми надіслали нове посилання на %@")
   }
+  public static let setNewPasswordSuccess = Localization.tr("Localizable", "set_new_password_success", fallback: "Пароль успішно змінено")
   public static let checkEmailSentTitle = Localization.tr("Localizable", "check_email_sent_title", fallback: "Перевірте вашу пошту")
   public static func checkEmailSentSubtitle(_ p1: Any) -> String {
     return Localization.tr("Localizable", "check_email_sent_subtitle", String(describing: p1), fallback: "Ми надіслали інструкцію на %@")
@@ -211,6 +212,9 @@ public enum Localization {
   public static let profileSettingsDeleteAccountAlertTitle = Localization.tr("Localizable", "profile_settings_delete_account_alert_title", fallback: "Видалити акаунт?")
   public static let profileSettingsDeleteAccountAlertMessage = Localization.tr("Localizable", "profile_settings_delete_account_alert_message", fallback: "Цю дію неможливо скасувати. Ваш профіль, історія записів і всі особисті дані будуть остаточно видалені.")
   public static let profileSettingsDeleteAccountAlertConfirm = Localization.tr("Localizable", "profile_settings_delete_account_alert_confirm", fallback: "Видалити")
+  public static let profileSettingsLogoutSuccess = Localization.tr("Localizable", "profile_settings_logout_success", fallback: "Ви вийшли з акаунту")
+  public static let profileSettingsDeleteAccountSuccess = Localization.tr("Localizable", "profile_settings_delete_account_success", fallback: "Акаунт видалено")
+  public static let profileChangePasswordSuccess = Localization.tr("Localizable", "profile_change_password_success", fallback: "Пароль оновлено")
 
   // MARK: - Edit Profile
   public static let editProfileTitle = Localization.tr("Localizable", "edit_profile_title", fallback: "Редагування профілю")

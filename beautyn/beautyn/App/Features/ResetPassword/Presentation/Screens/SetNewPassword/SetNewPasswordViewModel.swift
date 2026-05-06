@@ -112,13 +112,14 @@ final class SetNewPasswordViewModel: BaseViewModel, ButtonLoadableViewModel {
         do {
             try await resetPasswordUseCase.execute(token: code, newPassword: newPassword)
             hideButtonLoader()
+            AlertRelay.shared.enqueue(.success(Localization.setNewPasswordSuccess))
             transition.didResetPassword()
         } catch {
             hideButtonLoader()
             if let networkError = error as? NetworkError, networkError.code == 400 {
                 expiredLinkError = Localization.setNewPasswordExpiredLink
             } else {
-                errorMessage = error.localizedDescription
+                showError(error)
             }
         }
     }
@@ -131,7 +132,7 @@ final class SetNewPasswordViewModel: BaseViewModel, ButtonLoadableViewModel {
             expiredLinkError = nil
             newLinkSentMessage = Localization.setNewPasswordNewLinkSent(email)
         } catch {
-            errorMessage = error.localizedDescription
+            showError(error)
         }
     }
 }

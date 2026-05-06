@@ -5,7 +5,7 @@ import Combine
 class BaseViewModel: ObservableObject {
 
     @Published private(set) var isLoading: Bool = false
-    @Published var errorMessage: String?
+    @Published var alert: BeautynAlertContent?
     @Published var webPagePresentation: WebPagePresentation?
 
     func onAppear() {}
@@ -24,11 +24,23 @@ extension BaseViewModel: LoadableViewModel {
     func hideLoader() { isLoading = false }
 }
 
-// MARK: - ErrorableViewModel
+// MARK: - AlertableViewModel
 
-extension BaseViewModel: ErrorableViewModel {
+extension BaseViewModel: AlertableViewModel {
     func showError(_ error: Error) {
-        errorMessage = error.localizedDescription
+        alert = .error(error.localizedDescription)
+    }
+
+    func showError(_ message: String) {
+        alert = .error(message)
+    }
+
+    func showWarning(_ message: String) {
+        alert = .warning(message)
+    }
+
+    func showSuccess(title: String, message: String) {
+        alert = .success(title: title, message: message)
     }
 }
 

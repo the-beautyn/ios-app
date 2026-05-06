@@ -91,6 +91,7 @@ final class ChangePasswordViewModel: BaseViewModel {
                     newPassword: self.newPassword
                 )
                 self.hideLoader()
+                AlertRelay.shared.enqueue(.success(Localization.profileChangePasswordSuccess))
                 self.transition.didFinishChanging()
             } catch let error as NetworkError where error.code == 401 {
                 self.hideLoader()
