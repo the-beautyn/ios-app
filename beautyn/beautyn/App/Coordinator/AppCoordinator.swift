@@ -25,7 +25,10 @@ final class AppCoordinator: BaseCoordinator {
         subscribeToAuthState()
 
         guard sessionManager.authState == .authenticated else { return }
-        Task { try? await assembler.app.refreshTokenUseCase.execute() }
+        Task {
+            try? await assembler.app.refreshTokenUseCase.execute()
+            _ = try? await assembler.app.refreshCurrentUserUseCase.execute()
+        }
     }
 
     // MARK: - Main Flow

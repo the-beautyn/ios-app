@@ -27,20 +27,31 @@ extension BaseViewModel: LoadableViewModel {
 // MARK: - AlertableViewModel
 
 extension BaseViewModel: AlertableViewModel {
-    func showError(_ error: Error) {
-        alert = .error(error.localizedDescription)
+    func showError(_ error: Error, scope: AlertScope) {
+        present(.error(error.localizedDescription), scope: scope)
     }
 
-    func showError(_ message: String) {
-        alert = .error(message)
+    func showError(_ message: String, scope: AlertScope) {
+        present(.error(message), scope: scope)
     }
 
-    func showWarning(_ message: String) {
-        alert = .warning(message)
+    func showWarning(_ message: String, scope: AlertScope) {
+        present(.warning(message), scope: scope)
     }
 
-    func showSuccess(title: String, message: String) {
-        alert = .success(title: title, message: message)
+    func showSuccess(_ message: String, scope: AlertScope) {
+        present(.success(message), scope: scope)
+    }
+
+    func showSuccess(title: String, message: String, scope: AlertScope) {
+        present(.success(title: title, message: message), scope: scope)
+    }
+
+    private func present(_ content: BeautynAlertContent, scope: AlertScope) {
+        switch scope {
+        case .current: alert = content
+        case .global: AlertRelay.shared.enqueue(content)
+        }
     }
 }
 

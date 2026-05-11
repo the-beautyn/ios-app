@@ -13,10 +13,16 @@ final class DeleteAccountUseCaseImpl: DeleteAccountUseCase {
 
     private let repository: AuthRepository
     private let sessionManager: SessionManager
+    private let clearUserUseCase: ClearUserUseCase
 
-    init(repository: AuthRepository, sessionManager: SessionManager) {
+    init(
+        repository: AuthRepository,
+        sessionManager: SessionManager,
+        clearUserUseCase: ClearUserUseCase
+    ) {
         self.repository = repository
         self.sessionManager = sessionManager
+        self.clearUserUseCase = clearUserUseCase
     }
 
     func execute() async throws {
@@ -25,5 +31,6 @@ final class DeleteAccountUseCaseImpl: DeleteAccountUseCase {
         // would lie to the user about an irreversible action.
         try await repository.deleteAccount()
         sessionManager.clearSession()
+        clearUserUseCase.execute()
     }
 }

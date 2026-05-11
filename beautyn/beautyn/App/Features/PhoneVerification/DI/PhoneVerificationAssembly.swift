@@ -13,7 +13,8 @@ final class PhoneVerificationAssembly: Assembly {
         container.register((any VerifyPhoneOTPUseCase).self) { resolver in
             VerifyPhoneOTPUseCaseImpl(
                 repository: resolver.require((any AuthRepository).self),
-                sessionManager: resolver.require(SessionManager.self)
+                sessionManager: resolver.require(SessionManager.self),
+                refreshCurrentUserUseCase: resolver.require((any RefreshCurrentUserUseCase).self)
             )
         }
 

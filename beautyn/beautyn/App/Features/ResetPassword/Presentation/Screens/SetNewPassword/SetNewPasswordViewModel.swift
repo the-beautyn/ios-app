@@ -112,7 +112,7 @@ final class SetNewPasswordViewModel: BaseViewModel, ButtonLoadableViewModel {
         do {
             try await resetPasswordUseCase.execute(token: code, newPassword: newPassword)
             hideButtonLoader()
-            AlertRelay.shared.enqueue(.success(Localization.setNewPasswordSuccess))
+            showSuccess(Localization.setNewPasswordSuccess, scope: .global)
             transition.didResetPassword()
         } catch {
             hideButtonLoader()

@@ -96,9 +96,7 @@ final class ProfileCoordinator: BaseCoordinator {
 
     private func navigateToSettings() {
         let transition = ProfileSettingsViewModel.Transition(
-            didTapChangePassword: { [weak self] in self?.handleChangePasswordTap() },
-            didLogout: { [weak self] in self?.handleLogoutCompleted() },
-            didDeleteAccount: { [weak self] in self?.handleDeleteAccountCompleted() }
+            didTapChangePassword: { [weak self] in self?.handleChangePasswordTap() }
         )
         let vc = factory.makeProfileSettings(transition: transition)
         router.push(vc, animated: true)
@@ -109,14 +107,6 @@ final class ProfileCoordinator: BaseCoordinator {
             didFinishChanging: { [weak self] in self?.router.pop(animated: true) }
         )
         router.push(factory.makeChangePassword(transition: transition), animated: true)
-    }
-
-    private func handleLogoutCompleted() {
-        router.popToRoot(animated: true)
-    }
-
-    private func handleDeleteAccountCompleted() {
-        router.popToRoot(animated: true)
     }
 
     private func navigateToLanguage() {

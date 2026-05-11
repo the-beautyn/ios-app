@@ -172,7 +172,6 @@
 "profile_settings_delete_account_alert_title" = "Видалити акаунт?";
 "profile_settings_delete_account_alert_message" = "Цю дію неможливо скасувати. Ваш профіль, історія записів і всі особисті дані будуть остаточно видалені.";
 "profile_settings_delete_account_alert_confirm" = "Видалити";
-"profile_settings_logout_success" = "Ви вийшли з акаунту";
 "profile_settings_delete_account_success" = "Акаунт видалено";
 "profile_change_password_success" = "Пароль оновлено";
 

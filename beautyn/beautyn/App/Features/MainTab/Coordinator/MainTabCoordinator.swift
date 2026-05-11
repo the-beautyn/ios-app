@@ -85,6 +85,11 @@ final class MainTabCoordinator: BaseCoordinator {
 
     func selectHomeTab() {
         guard let homeNav else { return }
+        // Profile-stack screens like ProfileSettings use
+        // `hidesBottomBarWhenPushed`. If we switch tabs while one is still on
+        // top, the tab bar stays hidden on the new tab. Pop the profile stack
+        // first so visibility recomputes against the profile root.
+        profileNav?.popToRootViewController(animated: false)
         tabBarController.selectedViewController = homeNav
     }
 

@@ -13,10 +13,16 @@ final class LogoutUseCaseImpl: LogoutUseCase {
 
     private let repository: AuthRepository
     private let sessionManager: SessionManager
+    private let clearUserUseCase: ClearUserUseCase
 
-    init(repository: AuthRepository, sessionManager: SessionManager) {
+    init(
+        repository: AuthRepository,
+        sessionManager: SessionManager,
+        clearUserUseCase: ClearUserUseCase
+    ) {
         self.repository = repository
         self.sessionManager = sessionManager
+        self.clearUserUseCase = clearUserUseCase
     }
 
     func execute() async {
@@ -24,5 +30,6 @@ final class LogoutUseCaseImpl: LogoutUseCase {
         // 401, and 5xx all leave the local token dead — clear unconditionally.
         try? await repository.logout()
         sessionManager.clearSession()
+        clearUserUseCase.execute()
     }
 }

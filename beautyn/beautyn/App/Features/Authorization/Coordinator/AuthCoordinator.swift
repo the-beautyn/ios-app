@@ -163,9 +163,9 @@ final class AuthCoordinator: BaseCoordinator {
                 let session = try await oauthSignInUseCase.execute(
                     provider: "google",
                     idToken: result.idToken,
-                    nonce: nil,
-                    name: nil,
-                    secondName: nil
+                    nonce: result.nonce,
+                    name: result.givenName,
+                    secondName: result.familyName
                 )
                 if session.phoneVerificationRequired {
                     showPhoneVerification()

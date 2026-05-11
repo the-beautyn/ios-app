@@ -212,7 +212,6 @@ public enum Localization {
   public static let profileSettingsDeleteAccountAlertTitle = Localization.tr("Localizable", "profile_settings_delete_account_alert_title", fallback: "Видалити акаунт?")
   public static let profileSettingsDeleteAccountAlertMessage = Localization.tr("Localizable", "profile_settings_delete_account_alert_message", fallback: "Цю дію неможливо скасувати. Ваш профіль, історія записів і всі особисті дані будуть остаточно видалені.")
   public static let profileSettingsDeleteAccountAlertConfirm = Localization.tr("Localizable", "profile_settings_delete_account_alert_confirm", fallback: "Видалити")
-  public static let profileSettingsLogoutSuccess = Localization.tr("Localizable", "profile_settings_logout_success", fallback: "Ви вийшли з акаунту")
   public static let profileSettingsDeleteAccountSuccess = Localization.tr("Localizable", "profile_settings_delete_account_success", fallback: "Акаунт видалено")
   public static let profileChangePasswordSuccess = Localization.tr("Localizable", "profile_change_password_success", fallback: "Пароль оновлено")
 

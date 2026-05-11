@@ -57,22 +57,6 @@ final class AppAssembly: Assembly {
 
         networkServiceImpl.setTokenRefresher(tokenRefresher)
 
-        let logoutUseCase: LogoutUseCase = LogoutUseCaseImpl(
-            repository: authRepository,
-            sessionManager: sessionManager
-        )
-        container.register((any LogoutUseCase).self) { _ in
-            logoutUseCase
-        }
-
-        let deleteAccountUseCase: DeleteAccountUseCase = DeleteAccountUseCaseImpl(
-            repository: authRepository,
-            sessionManager: sessionManager
-        )
-        container.register((any DeleteAccountUseCase).self) { _ in
-            deleteAccountUseCase
-        }
-
         // MARK: - User
 
         let userRemoteDataSource = UserRemoteDataSource(networkService: networkService)
@@ -105,6 +89,24 @@ final class AppAssembly: Assembly {
         )
         container.register((any ClearUserUseCase).self) { _ in
             clearUserUseCase
+        }
+
+        let logoutUseCase: LogoutUseCase = LogoutUseCaseImpl(
+            repository: authRepository,
+            sessionManager: sessionManager,
+            clearUserUseCase: clearUserUseCase
+        )
+        container.register((any LogoutUseCase).self) { _ in
+            logoutUseCase
+        }
+
+        let deleteAccountUseCase: DeleteAccountUseCase = DeleteAccountUseCaseImpl(
+            repository: authRepository,
+            sessionManager: sessionManager,
+            clearUserUseCase: clearUserUseCase
+        )
+        container.register((any DeleteAccountUseCase).self) { _ in
+            deleteAccountUseCase
         }
 
         let updateUserProfileUseCase: UpdateUserProfileUseCase = UpdateUserProfileUseCaseImpl(
