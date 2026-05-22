@@ -57,18 +57,118 @@ final class AppAssembly: Assembly {
 
         networkServiceImpl.setTokenRefresher(tokenRefresher)
 
+        // MARK: - User
+
+        let userRemoteDataSource = UserRemoteDataSource(networkService: networkService)
+        let userLocalDataSource = UserLocalDataSource(storage: defaultsService)
+
         let userRepository: UserRepository = UserRepositoryImpl(
-            networkService: networkService,
-            defaultsService: defaultsService
+            remote: userRemoteDataSource,
+            local: userLocalDataSource
         )
         container.register((any UserRepository).self) { _ in
             userRepository
         }
 
-        let getMeUseCase: GetMeUseCase = GetMeUseCaseImpl(userRepository: userRepository)
-        container.register((any GetMeUseCase).self) { _ in
-            getMeUseCase
+        let getCurrentUserUseCase: GetCurrentUserUseCase = GetCurrentUserUseCaseImpl(
+            repository: userRepository
+        )
+        container.register((any GetCurrentUserUseCase).self) { _ in
+            getCurrentUserUseCase
         }
+
+        let refreshCurrentUserUseCase: RefreshCurrentUserUseCase = RefreshCurrentUserUseCaseImpl(
+            repository: userRepository
+        )
+        container.register((any RefreshCurrentUserUseCase).self) { _ in
+            refreshCurrentUserUseCase
+        }
+
+        let clearUserUseCase: ClearUserUseCase = ClearUserUseCaseImpl(
+            repository: userRepository
+        )
+        container.register((any ClearUserUseCase).self) { _ in
+            clearUserUseCase
+        }
+
+        let logoutUseCase: LogoutUseCase = LogoutUseCaseImpl(
+            repository: authRepository,
+            sessionManager: sessionManager,
+            clearUserUseCase: clearUserUseCase
+        )
+        container.register((any LogoutUseCase).self) { _ in
+            logoutUseCase
+        }
+
+        let deleteAccountUseCase: DeleteAccountUseCase = DeleteAccountUseCaseImpl(
+            repository: authRepository,
+            sessionManager: sessionManager,
+            clearUserUseCase: clearUserUseCase
+        )
+        container.register((any DeleteAccountUseCase).self) { _ in
+            deleteAccountUseCase
+        }
+
+        let updateUserProfileUseCase: UpdateUserProfileUseCase = UpdateUserProfileUseCaseImpl(
+            repository: userRepository
+        )
+        container.register((any UpdateUserProfileUseCase).self) { _ in
+            updateUserProfileUseCase
+        }
+
+        // MARK: - User Settings
+
+        let userSettingsRepository: UserSettingsRepository = UserSettingsRepositoryImpl(
+            networkService: networkService
+        )
+        container.register((any UserSettingsRepository).self) { _ in
+            userSettingsRepository
+        }
+
+        let getUserSettingsUseCase: GetUserSettingsUseCase = GetUserSettingsUseCaseImpl(
+            repository: userSettingsRepository
+        )
+        container.register((any GetUserSettingsUseCase).self) { _ in
+            getUserSettingsUseCase
+        }
+
+        let updateNotificationSettingsUseCase: UpdateNotificationSettingsUseCase =
+            UpdateNotificationSettingsUseCaseImpl(repository: userSettingsRepository)
+        container.register((any UpdateNotificationSettingsUseCase).self) { _ in
+            updateNotificationSettingsUseCase
+        }
+
+        // MARK: - Saved Salons (shared — Home consumes save/unsave for the heart toggle)
+
+        let savedSalonsRepository: SavedSalonsRepository = SavedSalonsRepositoryImpl(
+            networkService: networkService
+        )
+        container.register((any SavedSalonsRepository).self) { _ in
+            savedSalonsRepository
+        }
+
+        let savedSalonsEventBus: any SavedSalonsEventBus = SavedSalonsEventBusImpl()
+        container.register((any SavedSalonsEventBus).self) { _ in
+            savedSalonsEventBus
+        }
+
+        let saveSalonUseCase: SaveSalonUseCase = SaveSalonUseCaseImpl(
+            repository: savedSalonsRepository,
+            eventBus: savedSalonsEventBus
+        )
+        container.register((any SaveSalonUseCase).self) { _ in
+            saveSalonUseCase
+        }
+
+        let unsaveSalonUseCase: UnsaveSalonUseCase = UnsaveSalonUseCaseImpl(
+            repository: savedSalonsRepository,
+            eventBus: savedSalonsEventBus
+        )
+        container.register((any UnsaveSalonUseCase).self) { _ in
+            unsaveSalonUseCase
+        }
+
+        // MARK: - OAuth services
 
         container.register((any AppleSignInService).self) { _ in
             AppleSignInServiceImpl(keychainService: keychainService)
@@ -87,7 +187,7 @@ final class AppAssembly: Assembly {
         let resetPasswordUseCase: any ResetPasswordUseCase = ResetPasswordUseCaseImpl(
             repository: authRepository,
             sessionManager: sessionManager,
-            getMeUseCase: getMeUseCase
+            refreshCurrentUserUseCase: refreshCurrentUserUseCase
         )
         container.register((any ResetPasswordUseCase).self) { _ in
             resetPasswordUseCase
@@ -98,6 +198,15 @@ final class AppAssembly: Assembly {
         )
         container.register((any ForgotPasswordUseCase).self) { _ in
             forgotPasswordUseCase
+        }
+
+        let changePasswordUseCase: any ChangePasswordUseCase = ChangePasswordUseCaseImpl(
+            repository: authRepository,
+            sessionManager: sessionManager,
+            refreshCurrentUserUseCase: refreshCurrentUserUseCase
+        )
+        container.register((any ChangePasswordUseCase).self) { _ in
+            changePasswordUseCase
         }
     }
 }

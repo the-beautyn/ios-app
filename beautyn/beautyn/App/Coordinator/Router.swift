@@ -28,6 +28,13 @@ final class Router {
         navigationController.popToRootViewController(animated: animated)
     }
 
+    func popTo<T: UIViewController>(_ type: T.Type, animated: Bool = true) {
+        guard let target = navigationController.viewControllers.last(where: { $0 is T }) else {
+            return
+        }
+        navigationController.popToViewController(target, animated: animated)
+    }
+
     func present(
         _ viewController: UIViewController,
         animated: Bool = true,

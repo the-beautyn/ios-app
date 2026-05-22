@@ -63,7 +63,7 @@ final class EmailCheckViewModel: BaseViewModel, ButtonLoadableViewModel {
             transition.didCheckEmail(email, status)
         } catch {
             hideButtonLoader()
-            errorMessage = error.localizedDescription
+            showError(error)
         }
     }
 

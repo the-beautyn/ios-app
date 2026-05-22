@@ -639,3 +639,43 @@ Before marking any generated code as complete, verify:
 
 **For refactoring existing code:**
 - Ask the agent to audit against the Quality Checklists (Section 16) and Common Mistakes (Section 17).
+
+---
+
+## 19. Visual Fidelity & Design Tokens
+
+UI code must source every visual primitive from the design system. No hardcoded fonts, colors, spacings, or sizes — the system is the single source of truth for the look of the app.
+
+### 19.1 Hard rules
+
+- **Fonts**: only `Font.App.*` (defined in `Shared/DesignSystem/AppTypography.swift`).
+  Never `Font.system(...)`, never `.font(.title)`, never `Font.custom("Aeonik…")` inline.
+- **Letter-spacing**: only `CGFloat.Tracking.*`, applied via `.tracking(...)`. Pair tracking with the matching font tier (e.g. `title1Medium` + `Tracking.title1`).
+- **Colors**: only `Color.App.*` (backed by `Colors.xcassets`). Never raw hex, never `Color(red:green:blue:)`, never `Color(.systemBackground)` in feature code — wrap in `Color.App.*` first if needed.
+- **Spacing**: only `CGFloat.Spacing.*` (`xxs`, `xs`, `sm`, `md`, `lg`, `xl`, …). Never magic numbers like `12`, `16` directly in `.padding(...)` or `spacing:`.
+- **Corner radius / icon size / stroke width**: use design-system constants if one exists; otherwise add a justification comment naming the Figma source value.
+- **Strings**: `Localization.*` only. The SwiftGen path is broken in this repo — when adding a key, edit both `Localizable.strings` and the generated `Localization.swift` by hand.
+
+### 19.2 When the design system has no exact match
+
+Don't extend the design system mid-feature. Don't write a magic number either. Instead, **compose from existing tokens**:
+
+```swift
+// Figma says 6pt — closest tokens are xxs (4) and xs (8).
+.padding(.top, CGFloat.Spacing.xxs + 2)
+
+// Figma says 18pt — no exact token; compose.
+.padding(.bottom, CGFloat.Spacing.sm + CGFloat.Spacing.xxs)
+```
+
+The composition makes the relationship to the design system explicit and reviewable. A literal `6` hides that relationship.
+
+If the same composed value appears 3+ times across the app, that's a signal the design system genuinely needs a new token — raise it then, not on first sight.
+
+If a Figma value looks wrong (off-brand, inconsistent with adjacent tokens), flag it with the designer before coding around it.
+
+### 19.3 Self-review before declaring a UI task complete
+
+For every modifier on every view, the answer to "where does this value come from?" must be a design-system token or a documented composition of tokens, not a literal. If you find a literal, fix it or explain why.
+
+For UI work driven from a Figma node, follow the `build-ui-from-figma` skill — it owns the procedure (token-map → implement → static code-vs-Figma review loop → render-preview → audit).

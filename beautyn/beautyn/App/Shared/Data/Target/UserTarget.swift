@@ -6,6 +6,9 @@ import Foundation
 
 enum UserTarget {
     case getMe
+    case getSettings
+    case updateNotifications(UpdateNotificationSettingsRequest)
+    case update(UserProfilePatchDTO)
 }
 
 // MARK: - TargetType
@@ -19,18 +22,27 @@ extension UserTarget: TargetType {
     var path: String {
         switch self {
         case .getMe: return "/user/me"
+        case .getSettings: return "/user/settings"
+        case .updateNotifications: return "/user/settings/notifications"
+        case .update: return "/user/update"
         }
     }
 
     var method: Moya.Method {
         switch self {
-        case .getMe: return .get
+        case .getMe, .getSettings: return .get
+        case .updateNotifications, .update: return .patch
         }
     }
 
     var task: Moya.Task {
         switch self {
-        case .getMe: return .requestPlain
+        case .getMe, .getSettings:
+            return .requestPlain
+        case .updateNotifications(let body):
+            return .requestJSONEncodable(body)
+        case .update(let body):
+            return .requestJSONEncodable(body)
         }
     }
 
@@ -44,8 +56,6 @@ extension UserTarget: TargetType {
 extension UserTarget: AccessTokenAuthorizable {
 
     var authorizationType: AuthorizationType? {
-        switch self {
-        case .getMe: return .bearer
-        }
+        .bearer
     }
 }

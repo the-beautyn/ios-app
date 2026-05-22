@@ -1,7 +1,7 @@
 import UIKit
 import SwiftUI
 
-class BaseHostingViewController<VM: BaseViewModel & ViewModelLifecycle, Content: View>: UIHostingController<Content> {
+class BaseHostingViewController<VM: BaseViewModel & ViewModelLifecycle, Content: View>: UIHostingController<Content>, UIGestureRecognizerDelegate {
 
     private(set) var viewModel: VM
 
@@ -27,6 +27,10 @@ class BaseHostingViewController<VM: BaseViewModel & ViewModelLifecycle, Content:
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         viewModel.onViewDidAppear()
+        // Workaround for iOS 18 issue where an interrupted edge-swipe leaves
+        // _UISystemGestureGateGestureRecognizer stuck and freezes touches on
+        // SwiftUI screens that contain a TextField.
+        navigationController?.interactivePopGestureRecognizer?.delegate = self
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -37,5 +41,9 @@ class BaseHostingViewController<VM: BaseViewModel & ViewModelLifecycle, Content:
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
         viewModel.onViewDidDisappear()
+    }
+
+    func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        (navigationController?.viewControllers.count ?? 0) > 1
     }
 }

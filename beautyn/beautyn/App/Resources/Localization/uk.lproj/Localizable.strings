@@ -10,6 +10,8 @@
 "ok_button" = "OK";
 "error_title" = "Помилка";
 "input_phone_placeholder" = "номер телефону";
+"common_cancel" = "Скасувати";
+"common_done" = "Готово";
 
 // MARK: - Errors
 "error_invalid_response" = "Невірна відповідь сервера.";
@@ -29,6 +31,9 @@
 "validation_password_digit" = "Пароль має містити хоча б одну цифру";
 "validation_invalid_phone" = "Невірний номер телефону";
 "validation_invalid_code" = "Невірний код";
+"validation_passwords_dont_match" = "Паролі не співпадають";
+"validation_old_password_incorrect" = "Старий пароль невірний";
+"validation_new_password_same_as_old" = "Новий пароль має відрізнятися від старого";
 
 // MARK: - Tab Bar
 "tab_home" = "Головна";
@@ -67,6 +72,7 @@
 "set_new_password_expired_link" = "Посилання недійсне або застаріле. Запросіть нове.";
 "set_new_password_request_new_link" = "Запросити нове посилання";
 "set_new_password_new_link_sent" = "Ми надіслали нове посилання на %@";
+"set_new_password_success" = "Пароль успішно змінено";
 
 "check_email_sent_title" = "Перевірте вашу пошту";
 "check_email_sent_subtitle" = "Ми надіслали інструкцію на %@";
@@ -143,7 +149,53 @@
 "profile_gender" = "Стать";
 
 "profile_personal_data_title" = "Персональні дані";
+"profile_sex_male" = "Чоловіча";
+"profile_sex_female" = "Жіноча";
+"profile_sex_other" = "Інша";
+"profile_sex_prefer_not_to_say" = "Не вказувати";
+"common_not_specified" = "Не вказано";
 "profile_change_password_title" = "Змінити пароль";
 "profile_old_password_label" = "Старий пароль";
 "profile_new_password_label" = "Новий пароль";
 "profile_confirm_password_label" = "Повторити новий пароль";
+
+// MARK: - Profile Settings
+"profile_settings_title" = "Налаштування";
+"profile_settings_terms_of_service" = "Terms of Service";
+"profile_settings_privacy_policy" = "Privacy Policy";
+"profile_settings_change_password" = "Змінити пароль";
+"profile_settings_logout" = "Вийти з акаунту";
+"profile_settings_delete_account" = "Видалити акаунт";
+"profile_settings_logout_alert_title" = "Вийти з акаунту?";
+"profile_settings_logout_alert_message" = "Ви вийдете з облікового запису. Щоб продовжити користуватися застосунком, потрібно буде увійти знову.";
+"profile_settings_logout_alert_confirm" = "Вийти";
+"profile_settings_delete_account_alert_title" = "Видалити акаунт?";
+"profile_settings_delete_account_alert_message" = "Цю дію неможливо скасувати. Ваш профіль, історія записів і всі особисті дані будуть остаточно видалені.";
+"profile_settings_delete_account_alert_confirm" = "Видалити";
+"profile_settings_delete_account_success" = "Акаунт видалено";
+"profile_change_password_success" = "Пароль оновлено";
+
+// MARK: - Edit Profile
+"edit_profile_title" = "Редагування профілю";
+"edit_profile_first_name_label" = "І'мя";
+"edit_profile_last_name_label" = "Призвіще";
+"edit_profile_birth_date_label" = "Дата народження";
+"edit_profile_phone_label" = "Номер телефону";
+"edit_profile_city_label" = "Місто";
+"edit_profile_sex_label" = "Стать";
+"edit_profile_birth_date_day_placeholder" = "ДД";
+"edit_profile_birth_date_month_placeholder" = "ММ";
+"edit_profile_birth_date_year_placeholder" = "РРРР";
+"edit_profile_phone_change_title" = "Зміна номера телефону";
+"edit_profile_phone_change_message" = "Якщо ви зміните номер, його потрібно буде підтвердити заново.";
+
+// MARK: - Location Picker
+"location_picker_title" = "Локація";
+"location_picker_search_placeholder" = "Уведить адресу або місто";
+"location_picker_my_geolocation" = "Моя геолокація";
+"location_picker_permission_denied" = "Відкрийте Налаштування, щоб дозволити доступ до геолокації";
+
+// MARK: - Saved Salons
+"saved_salons_title" = "Обрані салони";
+"saved_salons_search_placeholder" = "Уведить назву салону";
+"saved_salons_empty" = "Ви ще не додали жоден салон";

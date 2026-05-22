@@ -11,13 +11,20 @@ protocol AppFactory: ResolverInjector {
     var networkService: any NetworkService { get }
     var authRepository: any AuthRepository { get }
     var refreshTokenUseCase: any RefreshTokenUseCase { get }
+    var logoutUseCase: any LogoutUseCase { get }
+    var deleteAccountUseCase: any DeleteAccountUseCase { get }
     var tokenRefresher: TokenRefresher { get }
-    var userRepository: any UserRepository { get }
-    var getMeUseCase: any GetMeUseCase { get }
+    var getCurrentUserUseCase: any GetCurrentUserUseCase { get }
+    var refreshCurrentUserUseCase: any RefreshCurrentUserUseCase { get }
+    var clearUserUseCase: any ClearUserUseCase { get }
+    var updateUserProfileUseCase: any UpdateUserProfileUseCase { get }
+    var getUserSettingsUseCase: any GetUserSettingsUseCase { get }
+    var updateNotificationSettingsUseCase: any UpdateNotificationSettingsUseCase { get }
     var appleSignInService: any AppleSignInService { get }
     var googleSignInService: any GoogleSignInService { get }
     var resetPasswordUseCase: any ResetPasswordUseCase { get }
     var forgotPasswordUseCase: any ForgotPasswordUseCase { get }
+    var changePasswordUseCase: any ChangePasswordUseCase { get }
 }
 
 // MARK: - Default implementations
@@ -31,13 +38,20 @@ extension AppFactory {
     var networkService: any NetworkService { resolver.require((any NetworkService).self) }
     var authRepository: any AuthRepository { resolver.require((any AuthRepository).self) }
     var refreshTokenUseCase: any RefreshTokenUseCase { resolver.require((any RefreshTokenUseCase).self) }
+    var logoutUseCase: any LogoutUseCase { resolver.require((any LogoutUseCase).self) }
+    var deleteAccountUseCase: any DeleteAccountUseCase { resolver.require((any DeleteAccountUseCase).self) }
     var tokenRefresher: TokenRefresher { resolver.require(TokenRefresher.self) }
-    var userRepository: any UserRepository { resolver.require((any UserRepository).self) }
-    var getMeUseCase: any GetMeUseCase { resolver.require((any GetMeUseCase).self) }
+    var getCurrentUserUseCase: any GetCurrentUserUseCase { resolver.require((any GetCurrentUserUseCase).self) }
+    var refreshCurrentUserUseCase: any RefreshCurrentUserUseCase { resolver.require((any RefreshCurrentUserUseCase).self) }
+    var clearUserUseCase: any ClearUserUseCase { resolver.require((any ClearUserUseCase).self) }
+    var updateUserProfileUseCase: any UpdateUserProfileUseCase { resolver.require((any UpdateUserProfileUseCase).self) }
+    var getUserSettingsUseCase: any GetUserSettingsUseCase { resolver.require((any GetUserSettingsUseCase).self) }
+    var updateNotificationSettingsUseCase: any UpdateNotificationSettingsUseCase { resolver.require((any UpdateNotificationSettingsUseCase).self) }
     var appleSignInService: any AppleSignInService { resolver.require((any AppleSignInService).self) }
     var googleSignInService: any GoogleSignInService { resolver.require((any GoogleSignInService).self) }
     var resetPasswordUseCase: any ResetPasswordUseCase { resolver.require((any ResetPasswordUseCase).self) }
     var forgotPasswordUseCase: any ForgotPasswordUseCase { resolver.require((any ForgotPasswordUseCase).self) }
+    var changePasswordUseCase: any ChangePasswordUseCase { resolver.require((any ChangePasswordUseCase).self) }
 }
 
 // MARK: - Implementation

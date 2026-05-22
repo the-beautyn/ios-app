@@ -9,10 +9,16 @@
 /* Begin PBXBuildFile section */
 		36404A31F78AB6256283BE26 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 706DD12F29F4DA13F9B4F6E1 /* GoogleSignInSwift */; };
 		3B6F8EA3C24FC4BE85F7C18B /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 0B5D3F34767FDC78EB2F0AE7 /* GoogleSignIn */; };
+		54BFDF4C65A3883472B2E555 /* ProfileSettingsViewRenderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 346F82F5A94E52E40D555555 /* ProfileSettingsViewRenderTests.swift */; };
 		54BFDF4C65A3883472B2EA34 /* AuthViewRenderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 346F82F5A94E52E40D559726 /* AuthViewRenderTests.swift */; };
+		54BFDF4C65A3883472B2EA99 /* ProfileViewRenderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 346F82F5A94E52E40D559999 /* ProfileViewRenderTests.swift */; };
+		54BFDF4C65A3883472B2EAED /* EditProfileViewRenderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 346F82F5A94E52E40D55EDED /* EditProfileViewRenderTests.swift */; };
+		54BFDF4C65A3883472B2ECCC /* ChangePasswordViewRenderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 346F82F5A94E52E40D55CCCC /* ChangePasswordViewRenderTests.swift */; };
+		54BFDF4C65A3883472B2EFED /* SavedSalonsViewRenderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 346F82F5A94E52E40D55FEED /* SavedSalonsViewRenderTests.swift */; };
 		F1A0B0012FA0000100000521 /* ViewRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A0B0012FA0000100000501 /* ViewRenderer.swift */; };
 		F1A0B0012FA0000100000522 /* HomeViewRenderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A0B0012FA0000100000502 /* HomeViewRenderTests.swift */; };
 		F1B000002FA0000100000003 /* Moya in Frameworks */ = {isa = PBXBuildFile; productRef = F1B000002FA0000100000002 /* Moya */; };
+		F1E920C12FAB18A40068085B /* PopupView in Frameworks */ = {isa = PBXBuildFile; productRef = F1E920C02FAB18A40068085B /* PopupView */; };
 		F1F78C9F2F87B60900B3E6F1 /* NukeUI in Frameworks */ = {isa = PBXBuildFile; productRef = A1B2C3D4E5F6A7B8C9D0E1F2 /* NukeUI */; };
 /* End PBXBuildFile section */
 
@@ -27,7 +33,12 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		346F82F5A94E52E40D555555 /* ProfileSettingsViewRenderTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ProfileSettingsViewRenderTests.swift; sourceTree = "<group>"; };
 		346F82F5A94E52E40D559726 /* AuthViewRenderTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AuthViewRenderTests.swift; sourceTree = "<group>"; };
+		346F82F5A94E52E40D559999 /* ProfileViewRenderTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ProfileViewRenderTests.swift; sourceTree = "<group>"; };
+		346F82F5A94E52E40D55CCCC /* ChangePasswordViewRenderTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ChangePasswordViewRenderTests.swift; sourceTree = "<group>"; };
+		346F82F5A94E52E40D55EDED /* EditProfileViewRenderTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EditProfileViewRenderTests.swift; sourceTree = "<group>"; };
+		346F82F5A94E52E40D55FEED /* SavedSalonsViewRenderTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SavedSalonsViewRenderTests.swift; sourceTree = "<group>"; };
 		F103C3792F65542F00B06B2F /* beautyn.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = beautyn.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F1A0B0012FA0000100000501 /* ViewRenderer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewRenderer.swift; sourceTree = "<group>"; };
 		F1A0B0012FA0000100000502 /* HomeViewRenderTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HomeViewRenderTests.swift; sourceTree = "<group>"; };
@@ -66,6 +77,7 @@
 			files = (
 				F1F78C9F2F87B60900B3E6F1 /* NukeUI in Frameworks */,
 				F1B000002FA0000100000003 /* Moya in Frameworks */,
+				F1E920C12FAB18A40068085B /* PopupView in Frameworks */,
 				3B6F8EA3C24FC4BE85F7C18B /* GoogleSignIn in Frameworks */,
 				36404A31F78AB6256283BE26 /* GoogleSignInSwift in Frameworks */,
 			);
@@ -87,6 +99,7 @@
 				F1C0F10000000000000000C0 /* Config */,
 				F103C37B2F65542F00B06B2F /* beautyn */,
 				F1A0B0012FA0000100000510 /* beautynTests */,
+				F1E920BF2FAB18A40068085B /* Frameworks */,
 				F103C37A2F65542F00B06B2F /* Products */,
 			);
 			sourceTree = "<group>";
@@ -106,6 +119,11 @@
 				F1A0B0012FA0000100000501 /* ViewRenderer.swift */,
 				F1A0B0012FA0000100000502 /* HomeViewRenderTests.swift */,
 				346F82F5A94E52E40D559726 /* AuthViewRenderTests.swift */,
+				346F82F5A94E52E40D559999 /* ProfileViewRenderTests.swift */,
+				346F82F5A94E52E40D55EDED /* EditProfileViewRenderTests.swift */,
+				346F82F5A94E52E40D555555 /* ProfileSettingsViewRenderTests.swift */,
+				346F82F5A94E52E40D55FEED /* SavedSalonsViewRenderTests.swift */,
+				346F82F5A94E52E40D55CCCC /* ChangePasswordViewRenderTests.swift */,
 			);
 			path = beautynTests;
 			sourceTree = "<group>";
@@ -120,6 +138,13 @@
 			);
 			name = Config;
 			path = beautyn/Config;
+			sourceTree = "<group>";
+		};
+		F1E920BF2FAB18A40068085B /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -146,6 +171,7 @@
 				0B5D3F34767FDC78EB2F0AE7 /* GoogleSignIn */,
 				706DD12F29F4DA13F9B4F6E1 /* GoogleSignInSwift */,
 				A1B2C3D4E5F6A7B8C9D0E1F2 /* NukeUI */,
+				F1E920C02FAB18A40068085B /* PopupView */,
 			);
 			productName = beautyn;
 			productReference = F103C3792F65542F00B06B2F /* beautyn.app */;
@@ -202,6 +228,7 @@
 				F1B000002FA0000100000001 /* XCRemoteSwiftPackageReference "Moya" */,
 				1C47CD8BE9CCD82478D1E92D /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 				A1B2C3D4E5F6A7B8C9D0E1F0 /* XCRemoteSwiftPackageReference "NukeUI" */,
+				F1E920BE2FAB17870068085B /* XCRemoteSwiftPackageReference "PopupView" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = F103C37A2F65542F00B06B2F /* Products */;
@@ -246,6 +273,11 @@
 				F1A0B0012FA0000100000521 /* ViewRenderer.swift in Sources */,
 				F1A0B0012FA0000100000522 /* HomeViewRenderTests.swift in Sources */,
 				54BFDF4C65A3883472B2EA34 /* AuthViewRenderTests.swift in Sources */,
+				54BFDF4C65A3883472B2EA99 /* ProfileViewRenderTests.swift in Sources */,
+				54BFDF4C65A3883472B2EAED /* EditProfileViewRenderTests.swift in Sources */,
+				54BFDF4C65A3883472B2E555 /* ProfileSettingsViewRenderTests.swift in Sources */,
+				54BFDF4C65A3883472B2EFED /* SavedSalonsViewRenderTests.swift in Sources */,
+				54BFDF4C65A3883472B2ECCC /* ChangePasswordViewRenderTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1300,7 +1332,7 @@
 			repositoryURL = "https://github.com/google/GoogleSignIn-iOS.git";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 8.0.0;
+				minimumVersion = 9.0.0;
 			};
 		};
 		A1B2C3D4E5F6A7B8C9D0E1F0 /* XCRemoteSwiftPackageReference "NukeUI" */ = {
@@ -1317,6 +1349,14 @@
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 15.0.3;
+			};
+		};
+		F1E920BE2FAB17870068085B /* XCRemoteSwiftPackageReference "PopupView" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/exyte/PopupView";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 4.2.1;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
@@ -1341,6 +1381,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = F1B000002FA0000100000001 /* XCRemoteSwiftPackageReference "Moya" */;
 			productName = Moya;
+		};
+		F1E920C02FAB18A40068085B /* PopupView */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F1E920BE2FAB17870068085B /* XCRemoteSwiftPackageReference "PopupView" */;
+			productName = PopupView;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

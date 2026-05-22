@@ -37,7 +37,9 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     private func setupWindow(with scene: UIWindowScene) {
         let window = UIWindow(windowScene: scene)
 
-        let router = Router(navigationController: UINavigationController())
+        let rootNav = UINavigationController()
+        rootNav.setNavigationBarHidden(true, animated: false)
+        let router = Router(navigationController: rootNav)
         let assembler = AppDelegate.shared.assembler
         let coordinator = AppCoordinator(router: router, assembler: assembler)
 

@@ -13,12 +13,16 @@ final class ResetPasswordUseCaseImpl: ResetPasswordUseCase {
 
     private let repository: AuthRepository
     private let sessionManager: SessionManager
-    private let getMeUseCase: GetMeUseCase
+    private let refreshCurrentUserUseCase: RefreshCurrentUserUseCase
 
-    init(repository: AuthRepository, sessionManager: SessionManager, getMeUseCase: GetMeUseCase) {
+    init(
+        repository: AuthRepository,
+        sessionManager: SessionManager,
+        refreshCurrentUserUseCase: RefreshCurrentUserUseCase
+    ) {
         self.repository = repository
         self.sessionManager = sessionManager
-        self.getMeUseCase = getMeUseCase
+        self.refreshCurrentUserUseCase = refreshCurrentUserUseCase
     }
 
     func execute(token: String, newPassword: String) async throws {
@@ -29,6 +33,6 @@ final class ResetPasswordUseCaseImpl: ResetPasswordUseCase {
             refreshToken: session.refreshToken,
             phoneVerificationRequired: false
         )
-        _ = try? await getMeUseCase.execute()
+        _ = try? await refreshCurrentUserUseCase.execute()
     }
 }

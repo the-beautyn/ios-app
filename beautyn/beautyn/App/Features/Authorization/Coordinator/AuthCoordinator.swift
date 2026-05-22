@@ -8,6 +8,7 @@ final class AuthCoordinator: BaseCoordinator {
     private let appleSignInService: AppleSignInService
     private let googleSignInService: GoogleSignInService
     private let oauthSignInUseCase: any OAuthSignInUseCase
+    private let parentAssembler: Assembler
 
     var rootViewController: UIViewController { router.rootViewController }
 
@@ -18,6 +19,7 @@ final class AuthCoordinator: BaseCoordinator {
         self.appleSignInService = assembler.app.appleSignInService
         self.googleSignInService = assembler.app.googleSignInService
         self.oauthSignInUseCase = assembler.auth.oauthSignInUseCase
+        self.parentAssembler = parentAssembler
     }
 
     override func start() {
@@ -113,32 +115,18 @@ final class AuthCoordinator: BaseCoordinator {
     }
 
     private func showPhoneVerification() {
-        let transition = PhoneVerificationViewModel.Transition(
-            didClose: { [weak self] in
-                self?.onFinish?()
-            },
-            didSendCode: { [weak self] phone in
-                self?.showPhoneCode(phone: phone)
-            }
+        let coordinator = PhoneVerificationCoordinator(
+            parentAssembler: parentAssembler,
+            router: router,
+            initialPhone: nil
         )
-        let vc = factory.makePhoneVerification(transition: transition)
-        router.push(vc)
-    }
-
-    private func showPhoneCode(phone: String) {
-        let transition = PhoneCodeViewModel.Transition(
-            didClose: { [weak self] in
-                self?.onFinish?()
-            },
-            didVerifyPhone: { [weak self] in
-                self?.onFinish?()
-            },
-            didTapChangeNumber: { [weak self] in
-                self?.router.pop()
-            }
-        )
-        let vc = factory.makePhoneCode(phone: phone, transition: transition)
-        router.push(vc)
+        coordinator.onFinish = { [weak self, weak coordinator] in
+            guard let self, let coordinator else { return }
+            self.removeChild(coordinator)
+            self.onFinish?()
+        }
+        addChild(coordinator)
+        coordinator.start()
     }
 
     // MARK: - Social Auth
@@ -175,9 +163,9 @@ final class AuthCoordinator: BaseCoordinator {
                 let session = try await oauthSignInUseCase.execute(
                     provider: "google",
                     idToken: result.idToken,
-                    nonce: nil,
-                    name: nil,
-                    secondName: nil
+                    nonce: result.nonce,
+                    name: result.givenName,
+                    secondName: result.familyName
                 )
                 if session.phoneVerificationRequired {
                     showPhoneVerification()

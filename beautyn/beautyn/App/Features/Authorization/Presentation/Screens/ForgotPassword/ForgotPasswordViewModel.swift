@@ -60,7 +60,7 @@ final class ForgotPasswordViewModel: BaseViewModel, ButtonLoadableViewModel {
             transition.didSendResetEmail()
         } catch {
             hideButtonLoader()
-            errorMessage = error.localizedDescription
+            showError(error)
         }
     }
 

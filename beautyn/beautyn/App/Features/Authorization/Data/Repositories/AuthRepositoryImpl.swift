@@ -51,6 +51,12 @@ final class AuthRepositoryImpl: AuthRepository {
         return AuthMapper.mapResetSession(response)
     }
 
+    func changePassword(currentPassword: String, newPassword: String) async throws -> AuthSession {
+        let target = Target(type: AuthTarget.changePassword(currentPassword: currentPassword, newPassword: newPassword))
+        let response: ResetPasswordResponseDTO = try await networkService.request(target)
+        return AuthMapper.mapResetSession(response)
+    }
+
     func sendPhoneOTP(phone: String) async throws {
         let target = Target(type: AuthTarget.sendPhoneOTP(phone: phone))
         try await networkService.request(target)
@@ -69,6 +75,11 @@ final class AuthRepositoryImpl: AuthRepository {
 
     func logout() async throws {
         let target = Target(type: AuthTarget.logout)
+        try await networkService.request(target)
+    }
+
+    func deleteAccount() async throws {
+        let target = Target(type: AuthTarget.deleteAccount)
         try await networkService.request(target)
     }
 }

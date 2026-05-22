@@ -64,19 +64,17 @@ extension CachedImage where ClipShape == Circle {
     static func avatar(
         url: URL?,
         size: CGSize,
-        iconSize: CGFloat = 22
+        iconSize: CGFloat = 100
     ) -> CachedImage<Circle> {
         CachedImage<Circle>(
             url: url,
             size: size,
             clipShape: Circle(),
             placeholder: AnyView(
-                Color.App.beige2
-                    .overlay(
-                        Image(systemName: "person.fill")
-                            .foregroundStyle(Color.App.brown2)
-                            .font(.system(size: iconSize))
-                    )
+                SwiftUI.Image(.avatarPlaceholder)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: iconSize, height: iconSize)
             )
         )
     }

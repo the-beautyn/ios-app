@@ -14,7 +14,7 @@ final class AuthAssembly: Assembly {
             LoginUseCaseImpl(
                 repository: resolver.require((any AuthRepository).self),
                 sessionManager: resolver.require(SessionManager.self),
-                getMeUseCase: resolver.require((any GetMeUseCase).self)
+                refreshCurrentUserUseCase: resolver.require((any RefreshCurrentUserUseCase).self)
             )
         }
 
@@ -22,7 +22,7 @@ final class AuthAssembly: Assembly {
             RegisterUseCaseImpl(
                 repository: resolver.require((any AuthRepository).self),
                 sessionManager: resolver.require(SessionManager.self),
-                getMeUseCase: resolver.require((any GetMeUseCase).self)
+                refreshCurrentUserUseCase: resolver.require((any RefreshCurrentUserUseCase).self)
             )
         }
 
@@ -30,20 +30,7 @@ final class AuthAssembly: Assembly {
             OAuthSignInUseCaseImpl(
                 repository: resolver.require((any AuthRepository).self),
                 sessionManager: resolver.require(SessionManager.self),
-                getMeUseCase: resolver.require((any GetMeUseCase).self)
-            )
-        }
-
-        container.register((any SendPhoneOTPUseCase).self) { resolver in
-            SendPhoneOTPUseCaseImpl(
-                repository: resolver.require((any AuthRepository).self)
-            )
-        }
-
-        container.register((any VerifyPhoneOTPUseCase).self) { resolver in
-            VerifyPhoneOTPUseCaseImpl(
-                repository: resolver.require((any AuthRepository).self),
-                sessionManager: resolver.require(SessionManager.self)
+                refreshCurrentUserUseCase: resolver.require((any RefreshCurrentUserUseCase).self)
             )
         }
 

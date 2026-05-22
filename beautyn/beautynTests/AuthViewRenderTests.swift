@@ -146,11 +146,21 @@ final class AuthViewRenderTests: XCTestCase {
         try await ViewRenderer.render(view, name: "auth_phone_verification_filled")
     }
 
+    func testRenderPhoneVerificationPrefilled() async throws {
+        let viewModel = PhoneVerificationViewModel(
+            transition: .init(didClose: {}, didSendCode: { _ in }),
+            sendPhoneOTPUseCase: MockSendPhoneOTPUseCase(),
+            initialPhone: "+380501234567"
+        )
+        let view = PhoneVerificationView(viewModel: viewModel)
+        try await ViewRenderer.render(view, name: "auth_phone_verification_prefilled")
+    }
+
     // MARK: - 6. Phone Code
 
     func testRenderPhoneCode() async throws {
         let viewModel = PhoneCodeViewModel(
-            phone: "+38501234567",
+            phone: "+380501234567",
             transition: .init(
                 didClose: {},
                 didVerifyPhone: {},
@@ -165,7 +175,7 @@ final class AuthViewRenderTests: XCTestCase {
 
     func testRenderPhoneCodePartial() async throws {
         let viewModel = PhoneCodeViewModel(
-            phone: "+38501234567",
+            phone: "+380501234567",
             transition: .init(
                 didClose: {},
                 didVerifyPhone: {},

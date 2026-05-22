@@ -14,10 +14,21 @@ extension BaseViewProtocol {
     var body: some View {
         contentView
             .loader(isLoading: viewModel.isLoading)
-            .handleError(errorMessage: viewModel.errorMessage) {
-                viewModel.errorMessage = nil
-            }
+            .alertable(alert: Binding(
+                get: { viewModel.alert },
+                set: { viewModel.alert = $0 }
+            ))
+            .sheet(
+                item: Binding<WebPagePresentation?>(
+                    get: { viewModel.webPagePresentation },
+                    set: { viewModel.webPagePresentation = $0 }
+                ),
+                content: WebPageView.init
+            )
             .onAppear {
+                if let pending = AlertRelay.shared.consume() {
+                    viewModel.alert = pending
+                }
                 viewModel.onAppear()
             }
             .task {
