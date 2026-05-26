@@ -14,7 +14,9 @@ final class AuthCoordinator: BaseCoordinator {
 
     init(parentAssembler: Assembler) {
         let assembler = Assembler([AuthAssembly()], parent: parentAssembler)
-        self.router = Router(navigationController: UINavigationController())
+        let nav = UINavigationController()
+        nav.delegate = NavigationBarVisibilityController.shared
+        self.router = Router(navigationController: nav)
         self.factory = assembler.auth.controllerFactory
         self.appleSignInService = assembler.app.appleSignInService
         self.googleSignInService = assembler.app.googleSignInService

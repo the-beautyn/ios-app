@@ -16,6 +16,7 @@ extension Assembler {
     var phoneVerification: any PhoneVerificationFactory { resolver.require((any PhoneVerificationFactory).self) }
     var profile: any ProfileFactory { resolver.require((any ProfileFactory).self) }
     var resetPassword: any ResetPasswordFactory { resolver.require((any ResetPasswordFactory).self) }
+    var salonBooking: any SalonBookingFactory { resolver.require((any SalonBookingFactory).self) }
 }
 
 extension Resolver {
@@ -25,4 +26,5 @@ extension Resolver {
     var phoneVerification: any PhoneVerificationFactory { self.require((any PhoneVerificationFactory).self) }
     var profile: any ProfileFactory { self.require((any ProfileFactory).self) }
     var resetPassword: any ResetPasswordFactory { self.require((any ResetPasswordFactory).self) }
+    var salonBooking: any SalonBookingFactory { self.require((any SalonBookingFactory).self) }
 }

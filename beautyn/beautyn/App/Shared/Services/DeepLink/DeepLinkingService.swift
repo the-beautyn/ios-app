@@ -7,8 +7,13 @@ struct ResetPasswordLinkModel {
     let code: String
 }
 
+struct SalonLinkModel {
+    let salonId: String
+}
+
 protocol DeepLinkingService {
     var resetPasswordPublisher: AnyPublisher<ResetPasswordLinkModel, Never> { get }
+    var salonLinkPublisher: AnyPublisher<SalonLinkModel, Never> { get }
     func handle(url: URL)
 }
 
@@ -20,10 +25,13 @@ final class DeepLinkingServiceImpl: DeepLinkingService {
     ]
 
     private static let resetPasswordPath = "/auth/reset"
+    private static let salonPathPrefix = "/salon/"
 
     private let resetPasswordSubject = PassthroughSubject<ResetPasswordLinkModel, Never>()
+    private let salonLinkSubject = PassthroughSubject<SalonLinkModel, Never>()
 
     lazy var resetPasswordPublisher: AnyPublisher<ResetPasswordLinkModel, Never> = resetPasswordSubject.eraseToAnyPublisher()
+    lazy var salonLinkPublisher: AnyPublisher<SalonLinkModel, Never> = salonLinkSubject.eraseToAnyPublisher()
 
     func handle(url: URL) {
         guard
@@ -37,9 +45,8 @@ final class DeepLinkingServiceImpl: DeepLinkingService {
             #endif
             return
         }
-        
-        switch components.path {
-        case Self.resetPasswordPath:
+
+        if components.path == Self.resetPasswordPath {
             guard
                 let code = components.queryItems?.first(where: { $0.name == "code" })?.value,
                 let email = components.queryItems?.first(where: { $0.name == "email" })?.value
@@ -50,10 +57,23 @@ final class DeepLinkingServiceImpl: DeepLinkingService {
                 return
             }
             resetPasswordSubject.send(ResetPasswordLinkModel(email: email, code: code))
-        default:
-            #if DEBUG
-            os_log("[DeepLink] unknown path: %{public}@", type: .debug, components.path)
-            #endif
+            return
         }
+
+        if components.path.hasPrefix(Self.salonPathPrefix) {
+            let salonId = String(components.path.dropFirst(Self.salonPathPrefix.count))
+            guard !salonId.isEmpty, !salonId.contains("/") else {
+                #if DEBUG
+                os_log("[DeepLink] /salon/* missing or malformed id", type: .debug)
+                #endif
+                return
+            }
+            salonLinkSubject.send(SalonLinkModel(salonId: salonId))
+            return
+        }
+
+        #if DEBUG
+        os_log("[DeepLink] unknown path: %{public}@", type: .debug, components.path)
+        #endif
     }
 }

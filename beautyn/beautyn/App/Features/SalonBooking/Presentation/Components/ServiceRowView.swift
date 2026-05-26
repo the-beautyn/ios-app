@@ -32,8 +32,7 @@ struct ServiceRowView: View {
                     .foregroundStyle(Color.App.text)
 
                 Text(service.description)
-                    .font(.App.caption2)
-                    .tracking(CGFloat.Tracking.caption2)
+                    .font(.App.caption1)
                     .foregroundStyle(Color.App.gray)
                     .lineLimit(2)
             }

@@ -1,9 +1,14 @@
 import UIKit
 import SwiftUI
 
-class BaseHostingViewController<VM: BaseViewModel & ViewModelLifecycle, Content: View>: UIHostingController<Content>, UIGestureRecognizerDelegate {
+class BaseHostingViewController<VM: BaseViewModel & ViewModelLifecycle, Content: View>: UIHostingController<Content>, UIGestureRecognizerDelegate, NavigationBarPreferring {
 
     private(set) var viewModel: VM
+
+    /// Screens are bar-hidden by default; override to reveal the navigation bar.
+    /// Applied automatically by `NavigationBarVisibilityController` on the nav
+    /// controllers that install it.
+    var prefersNavigationBarHidden: Bool { true }
 
     init(viewModel: VM, rootView: Content) {
         self.viewModel = viewModel

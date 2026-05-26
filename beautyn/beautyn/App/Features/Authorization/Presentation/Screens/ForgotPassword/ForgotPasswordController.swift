@@ -15,6 +15,8 @@ final class ForgotPasswordController: BaseHostingViewController<ForgotPasswordVi
         fatalError("init(coder:) has not been implemented")
     }
 
+    override var prefersNavigationBarHidden: Bool { false }
+
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationItem.rightBarButtonItem = UIBarButtonItem(

@@ -117,6 +117,10 @@
 "salon_book_button" = "Записатись";
 "salon_options_count" = "%d опцій";
 "salon_specialist_nearest_date" = "Найближча дата запису %@:";
+"salon_profile_search_placeholder" = "Пошук";
+"salon_profile_nothing_found" = "Нічого не знайдено";
+"salon_profile_coming_soon_title" = "Скоро";
+"salon_profile_coming_soon_message" = "Онлайн-запис у застосунку буде доступний найближчим часом.";
 
 // MARK: - Booking
 "booking_date_picker_title" = "Оберіть час та дату";

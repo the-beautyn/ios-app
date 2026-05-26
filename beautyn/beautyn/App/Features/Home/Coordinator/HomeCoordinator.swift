@@ -7,6 +7,7 @@ final class HomeCoordinator: BaseCoordinator {
 
     private let router: Router
     private let factory: HomeControllerFactory
+    private let parentAssembler: Assembler
 
     var onRequireAuth: (() -> Void)?
 
@@ -14,6 +15,7 @@ final class HomeCoordinator: BaseCoordinator {
         let assembler = Assembler([HomeAssembly()], parent: parentAssembler)
         self.factory = assembler.home.controllerFactory
         self.router = router
+        self.parentAssembler = parentAssembler
     }
 
     override func start() {
@@ -28,10 +30,10 @@ final class HomeCoordinator: BaseCoordinator {
                 self?.navigateToSearch()
             },
             didTapSalonCard: { [weak self] salonId in
-                self?.navigateToSalonProfile(salonId: salonId)
+                self?.navigateToSalonBooking(salonId: salonId)
             },
             didTapSavedSalon: { [weak self] salonId in
-                self?.navigateToSalonProfile(salonId: salonId)
+                self?.navigateToSalonBooking(salonId: salonId)
             },
             didTapSeeAllSaved: { [weak self] in
                 self?.navigateToSavedSalons()
@@ -60,8 +62,19 @@ final class HomeCoordinator: BaseCoordinator {
         // TODO: Switch to Search tab or push Search screen
     }
 
-    private func navigateToSalonProfile(salonId: String) {
-        // TODO: Push SalonProfile screen
+    func navigateToSalonBooking(salonId: String) {
+        let coordinator = SalonBookingCoordinator(
+            parentAssembler: parentAssembler,
+            router: router,
+            salonId: salonId
+        )
+        coordinator.onRequireAuth = { [weak self] in self?.onRequireAuth?() }
+        coordinator.onFinish = { [weak self, weak coordinator] in
+            guard let self, let coordinator else { return }
+            self.removeChild(coordinator)
+        }
+        addChild(coordinator)
+        coordinator.start()
     }
 
     private func navigateToSavedSalons() {

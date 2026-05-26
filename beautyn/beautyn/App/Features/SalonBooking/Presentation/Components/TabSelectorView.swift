@@ -35,8 +35,8 @@ struct TabSelectorView: View {
         } label: {
             VStack(spacing: 0) {
                 Text(title)
-                    .font(isSelected ? .App.headline : .App.subheadline)
-                    .foregroundStyle(isSelected ? Color.App.text : Color.App.gray2)
+                    .font(.App.footnote)
+                    .foregroundStyle(isSelected ? Color.App.brown1 : Color.App.gray2)
                     .padding(.horizontal, CGFloat.Spacing.md)
                     .padding(.vertical, CGFloat.Spacing.sm)
 

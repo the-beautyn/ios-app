@@ -13,13 +13,10 @@ final class ProfileSettingsController: BaseHostingViewController<ProfileSettings
         fatalError("init(coder:) has not been implemented")
     }
 
+    override var prefersNavigationBarHidden: Bool { false }
+
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationItem.backButtonDisplayMode = .minimal
-    }
-
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        navigationController?.setNavigationBarHidden(false, animated: animated)
     }
 }

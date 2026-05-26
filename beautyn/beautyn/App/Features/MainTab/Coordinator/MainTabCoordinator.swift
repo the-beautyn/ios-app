@@ -93,6 +93,11 @@ final class MainTabCoordinator: BaseCoordinator {
         tabBarController.selectedViewController = homeNav
     }
 
+    func openSalonBooking(salonId: String) {
+        selectHomeTab()
+        homeCoordinator?.navigateToSalonBooking(salonId: salonId)
+    }
+
     // MARK: - Private
 
     private var isAuthenticated: Bool {
@@ -104,6 +109,7 @@ final class MainTabCoordinator: BaseCoordinator {
         icon: UIImage
     ) -> UINavigationController {
         let nav = UINavigationController()
+        nav.delegate = NavigationBarVisibilityController.shared
         nav.setNavigationBarHidden(true, animated: false)
         nav.tabBarItem = makeTabItem(title: title, icon: icon)
         return nav

@@ -25,17 +25,14 @@ final class EditProfileController: BaseHostingViewController<EditProfileViewMode
         fatalError("init(coder:) has not been implemented")
     }
 
+    override var prefersNavigationBarHidden: Bool { false }
+
     override func viewDidLoad() {
         super.viewDidLoad()
         title = Localization.editProfileTitle
         navigationItem.backButtonDisplayMode = .minimal
         bindConfirmButton()
         updateConfirmButton()
-    }
-
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        navigationController?.setNavigationBarHidden(false, animated: animated)
     }
 
     // MARK: - Confirm button

@@ -19,6 +19,8 @@ final class SetNewPasswordController: BaseHostingViewController<SetNewPasswordVi
         fatalError("init(coder:) has not been implemented")
     }
 
+    override var prefersNavigationBarHidden: Bool { false }
+
     override func viewDidLoad() {
         super.viewDidLoad()
         configureNavigationBar()

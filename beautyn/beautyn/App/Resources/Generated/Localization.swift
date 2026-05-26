@@ -157,6 +157,10 @@ public enum Localization {
   }
   public static let salonTabServices = Localization.tr("Localizable", "salon_tab_services", fallback: "Послуги")
   public static let salonTabSpecialists = Localization.tr("Localizable", "salon_tab_specialists", fallback: "Спеціалісти")
+  public static let salonProfileSearchPlaceholder = Localization.tr("Localizable", "salon_profile_search_placeholder", fallback: "Пошук")
+  public static let salonProfileNothingFound = Localization.tr("Localizable", "salon_profile_nothing_found", fallback: "Нічого не знайдено")
+  public static let salonProfileComingSoonTitle = Localization.tr("Localizable", "salon_profile_coming_soon_title", fallback: "Скоро")
+  public static let salonProfileComingSoonMessage = Localization.tr("Localizable", "salon_profile_coming_soon_message", fallback: "Онлайн-запис у застосунку буде доступний найближчим часом.")
 
   // MARK: - Booking
   public static let bookingAnyMaster = Localization.tr("Localizable", "booking_any_master", fallback: "Будь-який")

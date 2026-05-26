@@ -24,9 +24,7 @@ final class ProfileSettingsViewRenderTests: XCTestCase {
     private func makeViewModel() -> ProfileSettingsViewModel {
         ProfileSettingsViewModel(
             transition: .init(
-                didTapChangePassword: {},
-                didLogout: {},
-                didDeleteAccount: {}
+                didTapChangePassword: {}
             ),
             logoutUseCase: MockLogoutUseCase(),
             deleteAccountUseCase: MockDeleteAccountUseCase()

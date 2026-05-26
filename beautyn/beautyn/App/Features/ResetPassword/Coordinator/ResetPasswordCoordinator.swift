@@ -12,7 +12,9 @@ final class ResetPasswordCoordinator: BaseCoordinator {
 
     init(parentAssembler: Assembler) {
         let assembler = Assembler([ResetPasswordAssembly()], parent: parentAssembler)
-        self.router = Router(navigationController: UINavigationController())
+        let nav = UINavigationController()
+        nav.delegate = NavigationBarVisibilityController.shared
+        self.router = Router(navigationController: nav)
         self.factory = assembler.resetPassword.controllerFactory
     }
 
