@@ -22,8 +22,6 @@ struct SalonProfileView: BaseViewProtocol {
 
     var contentView: some View {
         ZStack(alignment: .top) {
-            Color.App.beige2
-
             SalonCoverCarouselView(
                 imageUrls: coverImageUrls,
                 height: Self.coverHeight,
