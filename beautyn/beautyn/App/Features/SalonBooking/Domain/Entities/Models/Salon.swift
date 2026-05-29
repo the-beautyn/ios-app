@@ -5,6 +5,8 @@ import Foundation
 struct Salon: Identifiable {
     let id: String
     let name: String
+    let provider: SalonBookingProvider
+    let bookingUrl: URL?
     let addressLine: String?
     let city: String?
     let phone: String?

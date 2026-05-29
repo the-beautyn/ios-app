@@ -66,10 +66,12 @@ struct SalonProfileView: BaseViewProtocol {
 
     private var coverImageUrls: [URL] {
         guard let salon = viewModel.salon else { return [] }
-        if salon.imageUrls.isEmpty {
-            return [salon.coverImageUrl].compactMap { $0 }.compactMap(URL.init(string:))
-        }
-        return salon.imageUrls.compactMap(URL.init(string:))
+        // Lead with the cover, then the gallery — deduped so a cover that also
+        // appears in the gallery isn't shown twice. Order is otherwise preserved.
+        var seen = Set<String>()
+        return ([salon.coverImageUrl].compactMap { $0 } + salon.imageUrls)
+            .filter { seen.insert($0).inserted }
+            .compactMap(URL.init(string:))
     }
 
     // MARK: - Sheet Content
@@ -137,6 +139,7 @@ struct SalonProfileView: BaseViewProtocol {
                 ForEach(viewModel.filteredServices) { service in
                     ServiceRowView(
                         service: viewModel.serviceRowModel(for: service),
+                        showsActionButton: viewModel.showsRowActions,
                         onAdd: { }
                     )
                 }
@@ -147,6 +150,7 @@ struct SalonProfileView: BaseViewProtocol {
                     SpecialistRowView(
                         specialist: viewModel.specialistRowModel(for: worker),
                         selectedTimeSlot: .constant(nil),
+                        showsActionButton: viewModel.showsRowActions,
                         onSelect: { }
                     )
                 }
@@ -213,6 +217,8 @@ private extension Salon {
     static let previewWithTag = Salon(
         id: "s1",
         name: "Nail bar: Glossy Room",
+        provider: .easyweek,
+        bookingUrl: URL(string: "https://booking.easyweek.com.ua/glossy-room"),
         addressLine: "вул. Зеленицька, 15, 05-091",
         city: "Київ",
         phone: nil,
@@ -236,6 +242,8 @@ private extension Salon {
     static let previewWithoutTag = Salon(
         id: "s2",
         name: "Beauty Studio Kyiv",
+        provider: .altegio,
+        bookingUrl: nil,
         addressLine: "вул. Франка, 10",
         city: "Київ",
         phone: nil,

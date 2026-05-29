@@ -104,6 +104,8 @@ extension Salon {
     static let previewWithTag = Salon(
         id: "s1",
         name: "Nail bar: Glossy Room",
+        provider: .easyweek,
+        bookingUrl: URL(string: "https://booking.easyweek.com.ua/glossy-room"),
         addressLine: "вул. Зеленицька, 15, 05-091",
         city: "Київ",
         phone: nil,
@@ -128,6 +130,8 @@ extension Salon {
     static let previewWithoutTag = Salon(
         id: "s2",
         name: "Beauty Studio Kyiv",
+        provider: .altegio,
+        bookingUrl: nil,
         addressLine: "вул. Франка, 10",
         city: "Київ",
         phone: nil,

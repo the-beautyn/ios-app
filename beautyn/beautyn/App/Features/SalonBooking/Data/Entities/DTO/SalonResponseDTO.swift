@@ -13,6 +13,7 @@ struct SalonResponseDTO: Decodable {
     let phone: String?
     let email: String?
     let provider: String?
+    let bookingUrl: String?
     let description: String?
     let ratingAvg: Double?
     let ratingCount: Int?
@@ -36,6 +37,7 @@ struct SalonResponseDTO: Decodable {
         case phone
         case email
         case provider
+        case bookingUrl = "booking_url"
         case description
         case ratingAvg = "rating_avg"
         case ratingCount = "rating_count"

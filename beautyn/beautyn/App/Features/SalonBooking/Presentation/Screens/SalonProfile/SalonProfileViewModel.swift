@@ -96,6 +96,12 @@ final class SalonProfileViewModel: BaseViewModel {
         }
     }
 
+    // EasyWeek salons are browse-only in-app (booking happens in the web widget),
+    // so per-row "Add"/"Select" actions are hidden for them.
+    var showsRowActions: Bool {
+        salon?.provider != .easyweek
+    }
+
     var optionsCount: Int {
         switch selectedTab {
         case 0: return filteredServices.count
@@ -136,6 +142,20 @@ final class SalonProfileViewModel: BaseViewModel {
     }
 
     func didTapBook() {
+        switch salon?.provider {
+        case .easyweek:
+            if let url = salon?.bookingUrl {
+                openWebView(url: url, title: salon?.name)
+            } else {
+                showComingSoon()
+            }
+        default:
+            // Altegio (in-app booking page not built yet) and unknown/nil providers.
+            showComingSoon()
+        }
+    }
+
+    private func showComingSoon() {
         showSuccess(
             title: Localization.salonProfileComingSoonTitle,
             message: Localization.salonProfileComingSoonMessage,

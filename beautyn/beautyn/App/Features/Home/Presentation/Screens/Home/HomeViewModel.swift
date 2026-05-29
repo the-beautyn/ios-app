@@ -211,7 +211,16 @@ final class HomeViewModel: BaseViewModel {
     private func loadHomeFeed() async {
         showLoader()
         defer { hideLoader() }
+        await fetchFeed()
+    }
 
+    // Pull-to-refresh: reuses the feed fetch but relies on the system refresh
+    // control's own spinner instead of the full-screen loader.
+    func refresh() async {
+        await fetchFeed()
+    }
+
+    private func fetchFeed() async {
         do {
             let feed = try await getHomeFeedUseCase.execute(latitude: nil, longitude: nil)
             mapFeedToState(feed)

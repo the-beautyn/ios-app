@@ -20,6 +20,7 @@ struct ServiceModel: Identifiable {
 struct ServiceRowView: View {
 
     let service: ServiceModel
+    var showsActionButton: Bool = true
     var onAdd: () -> Void
 
     private let thumbnailSize: CGFloat = 36
@@ -62,7 +63,9 @@ struct ServiceRowView: View {
 
                 Spacer()
 
-                AppButton.secondaryOutlined(title: service.isAdded ? Localization.addedButton : Localization.addButton, size: .small, action: onAdd)
+                if showsActionButton {
+                    AppButton.secondaryOutlined(title: service.isAdded ? Localization.addedButton : Localization.addButton, size: .small, action: onAdd)
+                }
             }
         }
         .padding(.vertical, CGFloat.Spacing.sm)

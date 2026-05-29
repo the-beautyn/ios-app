@@ -10,6 +10,8 @@ enum SalonMapper {
         Salon(
             id: dto.id,
             name: dto.name,
+            provider: SalonBookingProvider(rawValue: dto.provider),
+            bookingUrl: dto.bookingUrl.flatMap(URL.init(string:)),
             addressLine: dto.addressLine,
             city: dto.city,
             phone: dto.phone,
@@ -36,8 +38,9 @@ enum SalonMapper {
             categoryId: dto.categoryId,
             name: dto.name,
             description: dto.description,
-            durationMinutes: dto.duration,
-            price: dto.price,
+            // Backend sends duration in seconds and price in cents.
+            durationMinutes: dto.duration / 60,
+            price: dto.price / 100,
             currency: dto.currency,
             isActive: dto.isActive,
             sortOrder: dto.sortOrder,

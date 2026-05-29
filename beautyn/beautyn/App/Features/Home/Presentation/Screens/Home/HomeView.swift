@@ -108,6 +108,9 @@ struct HomeView: BaseViewProtocol {
             .padding(.top, CGFloat.Spacing.lg)
             .padding(.bottom, CGFloat.Spacing.xxxl)
         }
+        .refreshable {
+            await viewModel.refresh()
+        }
     }
 
     // MARK: - Saved Salons Row

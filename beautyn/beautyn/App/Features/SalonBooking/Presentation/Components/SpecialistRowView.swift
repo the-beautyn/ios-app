@@ -21,6 +21,7 @@ struct SpecialistRowView: View {
 
     let specialist: SpecialistModel
     @Binding var selectedTimeSlot: String?
+    var showsActionButton: Bool = true
     var onSelect: () -> Void
 
     private let avatarSize: CGFloat = 40
@@ -46,7 +47,9 @@ struct SpecialistRowView: View {
 
                 Spacer()
 
-                AppButton.secondaryOutlined(title: Localization.selectButton, size: .small, action: onSelect)
+                if showsActionButton {
+                    AppButton.secondaryOutlined(title: Localization.selectButton, size: .small, action: onSelect)
+                }
             }
 
             if let nearestDate = specialist.nearestDate {
