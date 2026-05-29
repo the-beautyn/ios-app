@@ -56,6 +56,14 @@ struct SalonProfileView: BaseViewProtocol {
         .animation(.easeInOut(duration: 0.25), value: isSearching)
         .ignoresSafeArea(edges: .top)
         .background(Color.App.beige2.ignoresSafeArea())
+        // Dismiss the search keyboard when the user changes tab (tap or swipe) —
+        // but only after the page-slide + tab-scroll animations settle, since
+        // dismissing mid-animation cancels them.
+        .onChange(of: viewModel.selectedTab) { _, _ in
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                UIApplication.shared.endEditing()
+            }
+        }
         .safeAreaInset(edge: .bottom, spacing: 0) {
             SalonStickyActionBar(
                 optionsCount: viewModel.optionsCount,
@@ -292,7 +300,7 @@ private func makePreviewViewModel(salon: Salon) -> SalonProfileViewModel {
         transition: .init(
             didTapBack: {},
             didRequireAuth: {},
-            didRequestBooking: { _ in }
+            didRequestBooking: { _, _ in }
         ),
         getSalonByIdUseCase: PreviewGetSalonByIdUseCase(salon: salon),
         getSalonShareUseCase: PreviewGetSalonShareUseCase(),

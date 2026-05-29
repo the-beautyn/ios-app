@@ -1,0 +1,213 @@
+// MARK: - Common
+"continue_button" = "Continue";
+"details_button" = "Details";
+"or" = "or";
+"send_button" = "Send";
+"add_button" = "Add";
+"added_button" = "Added";
+"select_button" = "Select";
+"search_hint" = "Enter salon or specialist name";
+"ok_button" = "OK";
+"error_title" = "Error";
+"input_phone_placeholder" = "phone number";
+"common_cancel" = "Cancel";
+"common_done" = "Done";
+
+// MARK: - Errors
+"error_invalid_response" = "Invalid server response.";
+"error_server" = "Server error (%d).";
+"error_no_connection" = "No internet connection.";
+"error_timeout" = "The request timed out.";
+"error_data" = "Data error: %@";
+"error_unknown" = "An unknown error occurred.";
+
+// MARK: - Validation
+"validation_required_field" = "Required field";
+"validation_password_latin_only" = "Password must contain only Latin letters, digits, and special characters";
+"validation_password_min_length" = "Password must be at least 8 characters long";
+"validation_password_max_length" = "Password must be at most 50 characters long";
+"validation_password_uppercase" = "Password must contain at least one uppercase letter";
+"validation_password_lowercase" = "Password must contain at least one lowercase letter";
+"validation_password_digit" = "Password must contain at least one digit";
+"validation_invalid_phone" = "Invalid phone number";
+"validation_invalid_code" = "Invalid code";
+"validation_passwords_dont_match" = "Passwords don't match";
+"validation_old_password_incorrect" = "Current password is incorrect";
+"validation_new_password_same_as_old" = "New password must differ from the current one";
+
+// MARK: - Tab Bar
+"tab_home" = "Home";
+"tab_search" = "Search";
+"tab_bookings" = "Bookings";
+"tab_profile" = "Profile";
+
+// MARK: - Authorization
+"auth_title" = "Sign in";
+"auth_subtitle" = "Create an account or sign in.";
+"auth_email_placeholder" = "Enter email";
+"auth_continue_apple" = "Continue with Apple";
+"auth_continue_google" = "Continue with Google";
+"auth_email_invalid_format" = "Invalid email format";
+"auth_social_account_message" = "This account is registered via %@";
+
+"sign_up_title" = "Create account";
+"sign_up_subtitle" = "Tell us a bit about yourself";
+"sign_up_first_name_placeholder" = "Enter first name";
+"sign_up_last_name_placeholder" = "Enter last name";
+"sign_up_password_placeholder" = "Create a password";
+
+"login_title" = "Sign in to your account";
+"login_subtitle" = "Enter the password for the account registered with %@";
+"login_password_placeholder" = "Enter password";
+"forgot_password_link" = "Forgot password?";
+
+"forgot_password_title" = "Forgot password?";
+"forgot_password_subtitle" = "We'll send recovery instructions to the email you provide";
+
+"set_new_password_title" = "Change password";
+"set_new_password_email_label" = "Your email";
+"set_new_password_new_label" = "New password";
+"set_new_password_confirm_label" = "Repeat new password";
+"set_new_password_mismatch" = "Passwords don't match";
+"set_new_password_expired_link" = "The link is invalid or expired. Please request a new one.";
+"set_new_password_request_new_link" = "Request a new link";
+"set_new_password_new_link_sent" = "We've sent a new link to %@";
+"set_new_password_success" = "Password reset successfully";
+
+"check_email_sent_title" = "Check your email";
+"check_email_sent_subtitle" = "We've sent instructions to %@";
+"check_email_sent_back" = "Back to sign in";
+
+// MARK: - Phone Verification
+"phone_verification_title" = "Verify your phone number";
+"phone_verification_subtitle" = "To finish signing up, please verify your phone number";
+"phone_verification_send_code" = "Send code";
+"phone_verification_legal" = "By tapping \"Send code\" you agree to the Terms of Use and Privacy Policy";
+"phone_code_subtitle" = "Enter the 4-digit code we sent to %@";
+"phone_code_resend" = "Resend code";
+"phone_code_change_number" = "Change number";
+
+// MARK: - Home
+"home_greeting" = "Hi, %@!";
+"home_greeting_unauthorized" = "Hi!";
+"home_section_next_appointment" = "Next appointment";
+"home_section_saved" = "Saved 🩷";
+"home_section_popular" = "Popular ⭐️";
+"home_section_available_today" = "Nails available today 💅🏼";
+"home_section_nearby" = "Stylists near you 💇🏻‍♀️";
+
+"home_appointment_price" = "%@ UAH";
+"home_appointment_duration" = "%@ min";
+
+// MARK: - Search
+"search_filter_service_type" = "Service type";
+"search_filter_sort" = "Sort";
+"search_filter_price" = "Price";
+"search_results_count" = "Found: %d places";
+
+// MARK: - Salon Profile
+"salon_tab_services" = "Services";
+"salon_tab_specialists" = "Specialists";
+"salon_tab_reviews" = "Reviews (%d)";
+"salon_tab_portfolio" = "Portfolio";
+"salon_tab_details" = "Details";
+"salon_badge_top_masters" = "Top 10 Masters";
+"salon_price_from" = "from %@ UAH";
+"salon_duration" = "%@ min";
+"salon_book_button" = "Book";
+"salon_options_count" = "%d options";
+"salon_specialist_nearest_date" = "Earliest available date for %@:";
+"salon_profile_search_placeholder" = "Search";
+"salon_profile_nothing_found" = "Nothing found";
+"salon_profile_coming_soon_title" = "Coming soon";
+"salon_profile_coming_soon_message" = "Online booking will be available soon.";
+
+// MARK: - Select Service
+"select_service_title" = "Choose a service";
+"select_service_other_category" = "Other";
+"edit_services_title" = "Added services";
+"edit_services_count" = "%d services";
+"edit_services_total" = "Total";
+"price_uah" = "%@ UAH";
+
+// MARK: - Booking
+"booking_date_picker_title" = "Choose date and time";
+"booking_choose_day" = "Choose day:";
+"booking_choose_time" = "Choose time:";
+"booking_any_master" = "Any";
+"booking_total_price" = "Total: %@ UAH";
+"booking_clear_button" = "Clear";
+"booking_apply_button" = "Apply";
+
+// MARK: - My Bookings
+"bookings_title" = "My bookings";
+"bookings_tab_upcoming" = "Upcoming";
+"bookings_tab_past" = "Past";
+"bookings_tab_cancelled" = "Cancelled";
+"bookings_upcoming_section_title" = "Upcoming appointments";
+
+// MARK: - My Profile
+"profile_title" = "Profile";
+"profile_menu_personal_data" = "Personal data";
+"profile_menu_notifications" = "Notifications";
+"profile_menu_saved_salons" = "Saved salons";
+"profile_menu_settings" = "Settings";
+"profile_menu_language" = "Language";
+"profile_edit_button" = "Edit profile";
+"profile_date_of_birth" = "Date of birth";
+"profile_phone_number" = "Phone number";
+"profile_email" = "Email";
+"profile_city" = "City";
+"profile_gender" = "Gender";
+
+"profile_personal_data_title" = "Personal data";
+"profile_sex_male" = "Male";
+"profile_sex_female" = "Female";
+"profile_sex_other" = "Other";
+"profile_sex_prefer_not_to_say" = "Prefer not to say";
+"common_not_specified" = "Not specified";
+"profile_change_password_title" = "Change password";
+"profile_old_password_label" = "Current password";
+"profile_new_password_label" = "New password";
+"profile_confirm_password_label" = "Repeat new password";
+
+// MARK: - Profile Settings
+"profile_settings_title" = "Settings";
+"profile_settings_terms_of_service" = "Terms of Service";
+"profile_settings_privacy_policy" = "Privacy Policy";
+"profile_settings_change_password" = "Change password";
+"profile_settings_logout" = "Log out";
+"profile_settings_delete_account" = "Delete account";
+"profile_settings_logout_alert_title" = "Log out?";
+"profile_settings_logout_alert_message" = "You will be logged out of your account. To continue using the app, you'll need to log in again.";
+"profile_settings_logout_alert_confirm" = "Log out";
+"profile_settings_delete_account_alert_title" = "Delete account?";
+"profile_settings_delete_account_alert_message" = "This action cannot be undone. Your profile, booking history and all personal data will be permanently deleted.";
+"profile_settings_delete_account_alert_confirm" = "Delete";
+"profile_settings_delete_account_success" = "Account deleted";
+"profile_change_password_success" = "Password updated";
+
+// MARK: - Edit Profile
+"edit_profile_title" = "Edit profile";
+"edit_profile_first_name_label" = "First name";
+"edit_profile_last_name_label" = "Last name";
+"edit_profile_birth_date_label" = "Date of birth";
+"edit_profile_phone_label" = "Phone number";
+"edit_profile_city_label" = "City";
+"edit_profile_sex_label" = "Gender";
+"edit_profile_birth_date_day_placeholder" = "DD";
+"edit_profile_birth_date_month_placeholder" = "MM";
+"edit_profile_birth_date_year_placeholder" = "YYYY";
+"edit_profile_phone_change_title" = "Change phone number";
+"edit_profile_phone_change_message" = "If you change your number, you'll need to verify it again.";
+
+// MARK: - Location Picker
+"location_picker_title" = "Location";
+"location_picker_search_placeholder" = "Enter address or city";
+"location_picker_my_geolocation" = "My location";
+"location_picker_permission_denied" = "Open Settings to allow access to your location";
+
+// MARK: - Saved Salons
+"saved_salons_title" = "Saved salons";
+"saved_salons_search_placeholder" = "Enter salon name";
+"saved_salons_empty" = "You haven't saved any salons yet";

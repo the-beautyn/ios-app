@@ -51,7 +51,7 @@ final class SalonProfileViewRenderTests: XCTestCase {
             transition: .init(
                 didTapBack: {},
                 didRequireAuth: {},
-                didRequestBooking: { _ in }
+                didRequestBooking: { _, _ in }
             ),
             getSalonByIdUseCase: MockGetSalonByIdUseCase(salon: salon),
             getSalonShareUseCase: MockGetSalonShareUseCase(),

@@ -162,6 +162,18 @@ public enum Localization {
   public static let salonProfileComingSoonTitle = Localization.tr("Localizable", "salon_profile_coming_soon_title", fallback: "Скоро")
   public static let salonProfileComingSoonMessage = Localization.tr("Localizable", "salon_profile_coming_soon_message", fallback: "Онлайн-запис у застосунку буде доступний найближчим часом.")
 
+  // MARK: - Select Service
+  public static let selectServiceTitle = Localization.tr("Localizable", "select_service_title", fallback: "Оберіть послугу")
+  public static let selectServiceOtherCategory = Localization.tr("Localizable", "select_service_other_category", fallback: "Інше")
+  public static let editServicesTitle = Localization.tr("Localizable", "edit_services_title", fallback: "Додані послуги")
+  public static func editServicesCount(_ p1: Int) -> String {
+    return Localization.tr("Localizable", "edit_services_count", p1, fallback: "%d послуги")
+  }
+  public static let editServicesTotal = Localization.tr("Localizable", "edit_services_total", fallback: "Всього")
+  public static func priceUAH(_ p1: Any) -> String {
+    return Localization.tr("Localizable", "price_uah", String(describing: p1), fallback: "%@ грн")
+  }
+
   // MARK: - Booking
   public static let bookingAnyMaster = Localization.tr("Localizable", "booking_any_master", fallback: "Будь-який")
   public static let bookingApplyButton = Localization.tr("Localizable", "booking_apply_button", fallback: "Застосувати")

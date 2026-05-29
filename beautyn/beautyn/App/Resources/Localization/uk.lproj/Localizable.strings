@@ -122,6 +122,14 @@
 "salon_profile_coming_soon_title" = "Скоро";
 "salon_profile_coming_soon_message" = "Онлайн-запис у застосунку буде доступний найближчим часом.";
 
+// MARK: - Select Service
+"select_service_title" = "Оберіть послугу";
+"select_service_other_category" = "Інше";
+"edit_services_title" = "Додані послуги";
+"edit_services_count" = "%d послуги";
+"edit_services_total" = "Всього";
+"price_uah" = "%@ грн";
+
 // MARK: - Booking
 "booking_date_picker_title" = "Оберіть час та дату";
 "booking_choose_day" = "Оберіть день:";

@@ -12,17 +12,29 @@ struct TabSelectorView: View {
     @Binding var selectedIndex: Int
 
     var body: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 0) {
-                ForEach(tabs.indices, id: \.self) { index in
-                    tabItem(title: tabs[index], index: index)
+        ScrollViewReader { proxy in
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 0) {
+                    ForEach(tabs.indices, id: \.self) { index in
+                        tabItem(title: tabs[index], index: index)
+                            .id(index)
+                    }
                 }
             }
-        }
-        .overlay(alignment: .bottom) {
-            Rectangle()
-                .fill(Color.App.blueTransparency)
-                .frame(height: 1)
+            .overlay(alignment: .bottom) {
+                Rectangle()
+                    .fill(Color.App.blueTransparency)
+                    .frame(height: 1)
+            }
+            // Keep the selected tab fully on screen — long titles (e.g.
+            // "Trichology & Aesthetics") at the trailing edge scroll into view.
+            // Animations stay smooth because the parent defers the keyboard
+            // dismissal until after this (and the page slide) settle.
+            .onChange(of: selectedIndex) { _, newValue in
+                withAnimation(.easeInOut(duration: 0.25)) {
+                    proxy.scrollTo(newValue, anchor: .center)
+                }
+            }
         }
     }
 

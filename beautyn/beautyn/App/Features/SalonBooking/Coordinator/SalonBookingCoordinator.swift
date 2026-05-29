@@ -38,12 +38,18 @@ final class SalonBookingCoordinator: BaseCoordinator {
             didRequireAuth: { [weak self] in
                 self?.onRequireAuth?()
             },
-            didRequestBooking: { _ in
-                // Future: push booking steps (service / slot selection,
-                // confirmation) onto this flow's router.
+            didRequestBooking: { [weak self] salon, entry in
+                self?.showSelectService(salon: salon, entry: entry)
             }
         )
         let vc = factory.makeSalonProfile(salonId: salonId, transition: transition)
+        router.push(vc, animated: true)
+    }
+
+    private func showSelectService(salon: Salon, entry: SalonBookingEntry) {
+        // Back navigation is handled by the system back button on the pushed
+        // controller, so no transition is needed yet.
+        let vc = factory.makeSelectService(salon: salon, entry: entry)
         router.push(vc, animated: true)
     }
 }

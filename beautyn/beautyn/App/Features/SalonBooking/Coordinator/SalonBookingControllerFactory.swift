@@ -8,6 +8,11 @@ protocol SalonBookingControllerFactory {
         salonId: String,
         transition: SalonProfileViewModel.Transition
     ) -> UIViewController
+
+    func makeSelectService(
+        salon: Salon,
+        entry: SalonBookingEntry
+    ) -> UIViewController
 }
 
 // MARK: - SalonBookingControllerFactoryImpl
@@ -36,5 +41,13 @@ final class SalonBookingControllerFactoryImpl: SalonBookingControllerFactory {
             sessionManager: assembler.app.sessionManager
         )
         return SalonProfileController(viewModel: viewModel)
+    }
+
+    func makeSelectService(
+        salon: Salon,
+        entry: SalonBookingEntry
+    ) -> UIViewController {
+        let viewModel = SelectServiceViewModel(salon: salon, entry: entry)
+        return SelectServiceController(viewModel: viewModel)
     }
 }

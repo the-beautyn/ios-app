@@ -12,7 +12,7 @@ final class SalonProfileViewModel: BaseViewModel {
     struct Transition {
         let didTapBack: () -> Void
         let didRequireAuth: () -> Void
-        let didRequestBooking: (_ salonId: String) -> Void
+        let didRequestBooking: (_ salon: Salon, _ entry: SalonBookingEntry) -> Void
     }
 
     // MARK: - Share sheet presentation model
@@ -153,8 +153,11 @@ final class SalonProfileViewModel: BaseViewModel {
             } else {
                 showComingSoon()
             }
+        case .altegio:
+            // In-app booking — start service selection with nothing preselected.
+            if let salon { transition.didRequestBooking(salon, .book) }
         default:
-            // Altegio (in-app booking page not built yet) and unknown/nil providers.
+            // Unknown / nil providers.
             showComingSoon()
         }
     }
@@ -163,12 +166,22 @@ final class SalonProfileViewModel: BaseViewModel {
     // the in-app (Altegio) flow, which requires a signed-in user.
     func didTapAddService(_ service: SalonService) {
         guard requireAuth() else { return }
-        showComingSoon()
+        guard let salon, salon.provider == .altegio else {
+            showComingSoon()
+            return
+        }
+        // Open service selection with this service preselected + its category active.
+        transition.didRequestBooking(salon, .service(id: service.id))
     }
 
     func didTapSelectSpecialist(_ worker: SalonWorker) {
         guard requireAuth() else { return }
-        showComingSoon()
+        guard let salon, salon.provider == .altegio else {
+            showComingSoon()
+            return
+        }
+        // Open service selection, remembering the chosen specialist for later steps.
+        transition.didRequestBooking(salon, .worker(id: worker.id))
     }
 
     private func showComingSoon() {
