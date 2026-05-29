@@ -27,7 +27,8 @@ final class SalonProfileViewModel: BaseViewModel {
 
     @Published private(set) var salon: Salon?
     @Published var selectedTab: Int = 0
-    @Published var searchQuery: String = ""
+    @Published var servicesSearchQuery: String = ""
+    @Published var specialistsSearchQuery: String = ""
     @Published private(set) var isFavorited: Bool = false
     @Published var shareSheet: ShareSheetPresentation?
 
@@ -77,7 +78,7 @@ final class SalonProfileViewModel: BaseViewModel {
 
     var filteredServices: [SalonService] {
         guard let services = salon?.services else { return [] }
-        let q = searchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
+        let q = servicesSearchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !q.isEmpty else { return services }
         return services.filter { service in
             service.name.localizedCaseInsensitiveContains(q)
@@ -87,7 +88,7 @@ final class SalonProfileViewModel: BaseViewModel {
 
     var filteredWorkers: [SalonWorker] {
         guard let workers = salon?.workers else { return [] }
-        let q = searchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
+        let q = specialistsSearchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !q.isEmpty else { return workers }
         return workers.filter { worker in
             let fullName = "\(worker.firstName) \(worker.lastName)"
@@ -142,8 +143,11 @@ final class SalonProfileViewModel: BaseViewModel {
     }
 
     func didTapBook() {
+        // Booking requires a signed-in user regardless of provider.
+        guard requireAuth() else { return }
         switch salon?.provider {
         case .easyweek:
+            // Booking itself happens in the EasyWeek web widget.
             if let url = salon?.bookingUrl {
                 openWebView(url: url, title: salon?.name)
             } else {
@@ -153,6 +157,18 @@ final class SalonProfileViewModel: BaseViewModel {
             // Altegio (in-app booking page not built yet) and unknown/nil providers.
             showComingSoon()
         }
+    }
+
+    // Per-row "Add" (service) / "Обрати" (specialist) actions are only shown for
+    // the in-app (Altegio) flow, which requires a signed-in user.
+    func didTapAddService(_ service: SalonService) {
+        guard requireAuth() else { return }
+        showComingSoon()
+    }
+
+    func didTapSelectSpecialist(_ worker: SalonWorker) {
+        guard requireAuth() else { return }
+        showComingSoon()
     }
 
     private func showComingSoon() {
@@ -176,10 +192,7 @@ final class SalonProfileViewModel: BaseViewModel {
     }
 
     func didTapFavorite() {
-        guard sessionManager.isAuthenticated else {
-            transition.didRequireAuth()
-            return
-        }
+        guard requireAuth() else { return }
         let wasFavorited = isFavorited
         isFavorited = !wasFavorited
         Task { [weak self] in
@@ -198,6 +211,16 @@ final class SalonProfileViewModel: BaseViewModel {
     }
 
     // MARK: - Private
+
+    // Returns true when a user is signed in; otherwise kicks off the auth flow
+    // and returns false so the caller can bail out.
+    private func requireAuth() -> Bool {
+        guard sessionManager.isAuthenticated else {
+            transition.didRequireAuth()
+            return false
+        }
+        return true
+    }
 
     private func loadSalon() async {
         showLoader()

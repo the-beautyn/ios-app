@@ -31,7 +31,11 @@ struct TabSelectorView: View {
         let isSelected = selectedIndex == index
 
         Button {
-            selectedIndex = index
+            // Animate the binding write so a TabView bound to the same index
+            // slides between pages instead of jumping on tap.
+            withAnimation(.easeInOut(duration: 0.25)) {
+                selectedIndex = index
+            }
         } label: {
             VStack(spacing: 0) {
                 Text(title)

@@ -7,7 +7,10 @@ import UIKit
 struct SalonProfileView: BaseViewProtocol {
 
     @StateObject var viewModel: SalonProfileViewModel
-    @FocusState private var searchFocused: Bool
+
+    // True while a tab's search field is focused — collapses the cover so the
+    // search field + results clear the keyboard on compact screens (e.g. SE).
+    @State private var isSearching = false
 
     // Cover/sheet layout constants. Three layers stack on screen:
     //   • Cover photo — full-bleed from y=0 (under status bar) to y=coverHeight
@@ -19,6 +22,14 @@ struct SalonProfileView: BaseViewProtocol {
     private static let sheetTop: CGFloat = 290     // y position of sheet's top, from screen top
     private static let overlap: CGFloat = 100      // sheet curls this far over cover
     private static var coverHeight: CGFloat { sheetTop + overlap }
+
+    // When searching, lift the sheet up near the top so the search field and a
+    // few result rows stay visible above the keyboard.
+    private static let searchingSheetTop: CGFloat = 90
+
+    private var currentSheetTop: CGFloat {
+        isSearching ? Self.searchingSheetTop : Self.sheetTop
+    }
 
     var contentView: some View {
         ZStack(alignment: .top) {
@@ -40,8 +51,9 @@ struct SalonProfileView: BaseViewProtocol {
                     )
                     .fill(Color.App.white)
                 )
-                .padding(.top, Self.sheetTop)
+                .padding(.top, currentSheetTop)
         }
+        .animation(.easeInOut(duration: 0.25), value: isSearching)
         .ignoresSafeArea(edges: .top)
         .background(Color.App.beige2.ignoresSafeArea())
         .safeAreaInset(edge: .bottom, spacing: 0) {
@@ -51,16 +63,13 @@ struct SalonProfileView: BaseViewProtocol {
                 onBook: viewModel.didTapBook
             )
         }
+        // The search field sits high under the tab bar, so the keyboard never
+        // reaches it — opt out of SwiftUI's keyboard avoidance (applied last so
+        // it wraps the sticky action bar too) so the cover, list and bar don't
+        // shift/compress when the keyboard appears.
+        .ignoresSafeArea(.keyboard, edges: .bottom)
         .sheet(item: $viewModel.shareSheet) { presentation in
             ShareSheetRepresentable(items: [presentation.url, presentation.title])
-        }
-        .onChange(of: viewModel.selectedTab) { _, _ in
-            // Switching tabs swaps which list the search filters against, so
-            // any in-progress query becomes meaningless — clear it and drop
-            // keyboard focus so the user sees the freshly switched tab's
-            // full list without lingering filter state.
-            viewModel.searchQuery = ""
-            searchFocused = false
         }
     }
 
@@ -97,72 +106,57 @@ struct SalonProfileView: BaseViewProtocol {
                 )
                 .padding(.horizontal, CGFloat.Spacing.md)
 
-                SalonSearchField(
-                    placeholder: Localization.salonProfileSearchPlaceholder,
-                    text: $viewModel.searchQuery,
-                    isFocused: $searchFocused
-                )
-                .padding(.horizontal, CGFloat.Spacing.md)
-
-                scrollableListContent
+                pagedTabContent
             }
         }
         .padding(.top, CGFloat.Spacing.lg)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
     }
 
-    // MARK: - Scrollable List
+    // MARK: - Paged Tab Content
 
-    @ViewBuilder
-    private var scrollableListContent: some View {
-        if currentListIsEmpty {
-            emptyResultsLabel
-        } else {
-            ScrollView(showsIndicators: false) {
-                listContent
-                    .padding(.horizontal, CGFloat.Spacing.md)
-                    .padding(.bottom, CGFloat.Spacing.md)
-            }
-        }
-    }
-
-    private var currentListIsEmpty: Bool {
-        viewModel.selectedTab == 0
-            ? viewModel.filteredServices.isEmpty
-            : viewModel.filteredWorkers.isEmpty
-    }
-
-    @ViewBuilder
-    private var listContent: some View {
-        if viewModel.selectedTab == 0 {
-            LazyVStack(spacing: 0) {
+    // Two independent lists, one per tab, swipeable left/right. Each carries its
+    // own search field (inside SalonListTab) so queries stay scoped per tab.
+    // The pager and the TabSelectorView above are both bound to `selectedTab`,
+    // so tapping a tab and swiping stay in sync.
+    private var pagedTabContent: some View {
+        TabView(selection: $viewModel.selectedTab) {
+            SalonListTab(
+                placeholder: Localization.salonProfileSearchPlaceholder,
+                searchText: $viewModel.servicesSearchQuery,
+                isEmpty: viewModel.filteredServices.isEmpty,
+                emptyMessage: Localization.salonProfileNothingFound,
+                onFocusChange: { isSearching = $0 }
+            ) {
                 ForEach(viewModel.filteredServices) { service in
                     ServiceRowView(
                         service: viewModel.serviceRowModel(for: service),
                         showsActionButton: viewModel.showsRowActions,
-                        onAdd: { }
+                        onAdd: { viewModel.didTapAddService(service) }
                     )
                 }
             }
-        } else {
-            LazyVStack(spacing: 0) {
+            .tag(0)
+
+            SalonListTab(
+                placeholder: Localization.salonProfileSearchPlaceholder,
+                searchText: $viewModel.specialistsSearchQuery,
+                isEmpty: viewModel.filteredWorkers.isEmpty,
+                emptyMessage: Localization.salonProfileNothingFound,
+                onFocusChange: { isSearching = $0 }
+            ) {
                 ForEach(viewModel.filteredWorkers) { worker in
                     SpecialistRowView(
                         specialist: viewModel.specialistRowModel(for: worker),
                         selectedTimeSlot: .constant(nil),
                         showsActionButton: viewModel.showsRowActions,
-                        onSelect: { }
+                        onSelect: { viewModel.didTapSelectSpecialist(worker) }
                     )
                 }
             }
+            .tag(1)
         }
-    }
-
-    private var emptyResultsLabel: some View {
-        Text(Localization.salonProfileNothingFound)
-            .font(.App.subheadline)
-            .foregroundStyle(Color.App.gray2)
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+        .tabViewStyle(.page(indexDisplayMode: .never))
     }
 
 }
