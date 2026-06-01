@@ -36,8 +36,8 @@ struct SelectServiceView: BaseViewProtocol {
             SelectServiceBottomBar(
                 totalDurationText: viewModel.totalDurationText,
                 totalPriceText: viewModel.totalPriceText,
-                canEdit: viewModel.hasSelection,
-                canContinue: viewModel.hasSelection,
+                canEdit: viewModel.hasSelection && !viewModel.isToggling,
+                canContinue: viewModel.hasSelection && !viewModel.isToggling,
                 onEdit: viewModel.didTapEditServices,
                 onContinue: viewModel.didTapContinue
             )
@@ -79,10 +79,17 @@ struct SelectServiceView: BaseViewProtocol {
                     ForEach(viewModel.filteredServices(for: tab)) { service in
                         SelectServiceRow(
                             service: viewModel.serviceRowModel(for: service),
+                            isLoading: viewModel.pendingServiceId == service.id,
                             onToggle: { viewModel.toggle(service) }
                         )
+                        // While one toggle resolves, block the other rows so the
+                        // selection can't change under a stale availability list.
+                        .disabled(viewModel.isToggling && viewModel.pendingServiceId != service.id)
                         // 12pt gap between cards (SalonListTab's LazyVStack is spacing: 0).
                         .padding(.bottom, CGFloat.Spacing.sm + CGFloat.Spacing.xs)
+                        // Fade the row (and its spacing) in/out when the
+                        // availability list reloads after a refetch.
+                        .transition(.opacity)
                     }
                 }
                 .tag(index)
@@ -148,11 +155,21 @@ private extension Salon {
     ]
 }
 
+private final class PreviewGetAltegioAvailableServicesUseCase: GetAltegioAvailableServicesUseCase {
+    let ids: Set<String>
+    init(ids: Set<String>) { self.ids = ids }
+    func execute(salonId: String, selectedServiceIds: [String], workerId: String?) async throws -> Set<String> { ids }
+}
+
 @MainActor
 private func makePreviewVM(entry: SalonBookingEntry) -> SelectServiceViewModel {
-    SelectServiceViewModel(
-        salon: .previewAltegio(services: Salon.previewServices, categories: Salon.previewCategories),
-        entry: entry
+    let services = Salon.previewServices
+    let ids = Set(services.map { $0.id })
+    return SelectServiceViewModel(
+        salon: .previewAltegio(services: services, categories: Salon.previewCategories),
+        entry: entry,
+        initialAvailableServiceIds: ids,
+        getAltegioAvailableServicesUseCase: PreviewGetAltegioAvailableServicesUseCase(ids: ids)
     )
 }
 

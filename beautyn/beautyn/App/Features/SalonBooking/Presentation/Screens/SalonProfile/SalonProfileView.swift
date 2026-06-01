@@ -132,16 +132,22 @@ struct SalonProfileView: BaseViewProtocol {
             SalonListTab(
                 placeholder: Localization.salonProfileSearchPlaceholder,
                 searchText: $viewModel.servicesSearchQuery,
-                isEmpty: viewModel.filteredServices.isEmpty,
+                isEmpty: viewModel.servicesTabIsEmpty,
                 emptyMessage: Localization.salonProfileNothingFound,
                 onFocusChange: { isSearching = $0 }
             ) {
-                ForEach(viewModel.filteredServices) { service in
-                    ServiceRowView(
-                        service: viewModel.serviceRowModel(for: service),
-                        showsActionButton: viewModel.showsRowActions,
-                        onAdd: { viewModel.didTapAddService(service) }
-                    )
+                if viewModel.isLoadingAvailability {
+                    ProgressView()
+                        .frame(maxWidth: .infinity)
+                        .padding(.top, CGFloat.Spacing.lg)
+                } else {
+                    ForEach(viewModel.filteredServices) { service in
+                        ServiceRowView(
+                            service: viewModel.serviceRowModel(for: service),
+                            showsActionButton: viewModel.showsRowActions,
+                            onAdd: { viewModel.didTapAddService(service) }
+                        )
+                    }
                 }
             }
             .tag(0)
@@ -199,6 +205,10 @@ private final class PreviewGetSalonShareUseCase: GetSalonShareUseCase {
             description: nil
         )
     }
+}
+
+private final class PreviewGetAltegioAvailableServicesUseCase: GetAltegioAvailableServicesUseCase {
+    func execute(salonId: String, selectedServiceIds: [String], workerId: String?) async throws -> Set<String> { [] }
 }
 
 private final class PreviewSaveSalonUseCase: SaveSalonUseCase {
@@ -300,10 +310,11 @@ private func makePreviewViewModel(salon: Salon) -> SalonProfileViewModel {
         transition: .init(
             didTapBack: {},
             didRequireAuth: {},
-            didRequestBooking: { _, _ in }
+            didRequestBooking: { _, _, _ in }
         ),
         getSalonByIdUseCase: PreviewGetSalonByIdUseCase(salon: salon),
         getSalonShareUseCase: PreviewGetSalonShareUseCase(),
+        getAltegioAvailableServicesUseCase: PreviewGetAltegioAvailableServicesUseCase(),
         saveSalonUseCase: PreviewSaveSalonUseCase(),
         unsaveSalonUseCase: PreviewUnsaveSalonUseCase(),
         savedSalonsEventBus: PreviewSavedSalonsEventBus(),

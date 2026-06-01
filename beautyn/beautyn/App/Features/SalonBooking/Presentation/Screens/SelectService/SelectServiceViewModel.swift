@@ -31,28 +31,65 @@ final class SelectServiceViewModel: BaseViewModel {
     @Published private(set) var selectedServiceIds: Set<String> = []
     @Published var isEditingServices: Bool = false
 
+    /// Ids of services the salon can currently book given the selection + worker
+    /// filter. Drives which services/categories are shown — unavailable ones are
+    /// hidden. Seeded from the salon profile, refreshed on appear and whenever
+    /// the selection changes.
+    @Published private(set) var availableServiceIds: Set<String>
+
+    /// Service id whose Add/Remove is currently resolving (availability re-fetch
+    /// in flight). Drives that row's spinner and blocks other taps meanwhile.
+    @Published private(set) var pendingServiceId: String?
+
+    /// True while a toggle's availability re-fetch is in flight.
+    var isToggling: Bool { pendingServiceId != nil }
+
     // MARK: - Dependencies
 
     private let salon: Salon
+    private let entry: SalonBookingEntry
+    private let getAltegioAvailableServicesUseCase: any GetAltegioAvailableServicesUseCase
 
     /// Specialist chosen on the salon profile (entry case 3). Not shown on this
-    /// screen — carried forward to the upcoming date/time step.
+    /// screen — carried forward to the upcoming date/time step, and used to
+    /// filter availability here.
     private(set) var selectedWorkerId: String?
 
-    /// Categories with their active services. Immutable for the salon, so it is
-    /// built once in `init`.
-    let categoryTabs: [CategoryTab]
+    /// In-flight availability refresh; cancelled when a newer one starts.
+    private var availabilityTask: Task<Void, Never>?
 
     private static let allCategoryId = "__all__"
     private static let otherCategoryId = "__other__"
 
     // MARK: - Init
 
-    init(salon: Salon, entry: SalonBookingEntry) {
+    init(
+        salon: Salon,
+        entry: SalonBookingEntry,
+        initialAvailableServiceIds: Set<String>,
+        getAltegioAvailableServicesUseCase: any GetAltegioAvailableServicesUseCase
+    ) {
         self.salon = salon
-        self.categoryTabs = Self.buildCategoryTabs(from: salon)
+        self.entry = entry
+        self.availableServiceIds = initialAvailableServiceIds
+        self.getAltegioAvailableServicesUseCase = getAltegioAvailableServicesUseCase
         super.init()
         applyEntry(entry)
+    }
+
+    // MARK: - Lifecycle
+
+    override func onViewTask() async {
+        // Book entry reuses the set passed from the profile (no fetch) unless it
+        // arrived empty — e.g. the profile's availability hadn't loaded yet.
+        // Service / worker entries always refine with their filter. Routed
+        // through the cancellable refresh so an early toggle can supersede it.
+        switch entry {
+        case .book:
+            if availableServiceIds.isEmpty { scheduleAvailabilityRefresh() }
+        case .service, .worker:
+            scheduleAvailabilityRefresh()
+        }
     }
 
     private func applyEntry(_ entry: SalonBookingEntry) {
@@ -73,16 +110,24 @@ final class SelectServiceViewModel: BaseViewModel {
 
     // MARK: - Category building
 
-    private static func buildCategoryTabs(from salon: Salon) -> [CategoryTab] {
-        let activeServices = salon.services.filter { $0.isActive }
-        guard !activeServices.isEmpty else { return [] }
+    /// A service is shown when it is currently bookable, or already selected (so
+    /// a picked service never disappears mid-flow).
+    private func isServiceVisible(_ service: SalonService) -> Bool {
+        availableServiceIds.contains(service.id) || selectedServiceIds.contains(service.id)
+    }
+
+    /// Built from the salon's services, filtered to the currently-visible ones.
+    /// Categories with nothing left to show are dropped entirely (no tab).
+    var categoryTabs: [CategoryTab] {
+        let visibleServices = salon.services.filter { $0.isActive && isServiceVisible($0) }
+        guard !visibleServices.isEmpty else { return [] }
 
         // No categories at all → a single "Послуги" tab with everything.
         guard !salon.categories.isEmpty else {
             return [CategoryTab(
-                id: allCategoryId,
+                id: Self.allCategoryId,
                 title: Localization.salonTabServices,
-                services: activeServices.sorted(by: serviceOrder)
+                services: visibleServices.sorted(by: Self.serviceOrder)
             )]
         }
 
@@ -94,21 +139,21 @@ final class SelectServiceViewModel: BaseViewModel {
         var categorizedIds = Set<String>()
 
         for category in sortedCategories {
-            let services = activeServices
+            let services = visibleServices
                 .filter { $0.categoryId == category.id }
-                .sorted(by: serviceOrder)
+                .sorted(by: Self.serviceOrder)
             guard !services.isEmpty else { continue }
             categorizedIds.formUnion(services.map { $0.id })
             tabs.append(CategoryTab(id: category.id, title: category.name, services: services))
         }
 
         // Services with no / unmatched category → trailing "Інше" tab.
-        let uncategorized = activeServices
+        let uncategorized = visibleServices
             .filter { !categorizedIds.contains($0.id) }
-            .sorted(by: serviceOrder)
+            .sorted(by: Self.serviceOrder)
         if !uncategorized.isEmpty {
             tabs.append(CategoryTab(
-                id: otherCategoryId,
+                id: Self.otherCategoryId,
                 title: Localization.selectServiceOtherCategory,
                 services: uncategorized
             ))
@@ -197,16 +242,69 @@ final class SelectServiceViewModel: BaseViewModel {
     // MARK: - Intents
 
     func toggle(_ service: SalonService) {
+        // One toggle resolves at a time — the list is blocked while its
+        // availability is re-fetched, so ignore taps that slip through.
+        guard pendingServiceId == nil else { return }
         if selectedServiceIds.contains(service.id) {
             selectedServiceIds.remove(service.id)
         } else {
             selectedServiceIds.insert(service.id)
         }
+        // Spin this row + block the list until the CRM confirms what's still
+        // compatible, so the user can't pick a service that's about to vanish.
+        pendingServiceId = service.id
+        scheduleAvailabilityRefresh()
     }
 
     func removeService(id: String) {
         selectedServiceIds.remove(id)
         if selectedServiceIds.isEmpty { isEditingServices = false }
+        // Refreshed in the background — the edit sheet covers the list, so this
+        // path doesn't block or spin a row.
+        scheduleAvailabilityRefresh()
+    }
+
+    // MARK: - Availability
+
+    // Changing the basket (or the chosen worker) changes what else can be booked
+    // alongside it, so re-ask the CRM and hide anything no longer compatible.
+    private func scheduleAvailabilityRefresh() {
+        availabilityTask?.cancel()
+        availabilityTask = Task { [weak self] in
+            await self?.performAvailabilityFetch()
+        }
+    }
+
+    private func performAvailabilityFetch() async {
+        do {
+            let ids = try await getAltegioAvailableServicesUseCase.execute(
+                salonId: salon.id,
+                selectedServiceIds: Array(selectedServiceIds),
+                workerId: selectedWorkerId
+            )
+            try Task.checkCancellation()
+            // Keep selected services visible even if the CRM omits them. Animate
+            // the change so rows/tabs fade in and out instead of snapping when
+            // the list reloads.
+            withAnimation(.easeInOut(duration: 0.25)) {
+                availableServiceIds = ids.union(selectedServiceIds)
+            }
+            clampSelectedCategoryIndex()
+            pendingServiceId = nil
+        } catch is CancellationError {
+            // Superseded by a newer refresh — let that one own the pending marker.
+        } catch {
+            pendingServiceId = nil
+            showError(error)
+        }
+    }
+
+    // Tabs can disappear when their services become unavailable; keep the paged
+    // selection within range so the screen never lands on a removed tab.
+    private func clampSelectedCategoryIndex() {
+        let count = categoryTabs.count
+        guard count > 0 else { return }
+        selectedCategoryIndex = min(max(selectedCategoryIndex, 0), count - 1)
     }
 
     func didTapEditServices() {

@@ -11,7 +11,8 @@ protocol SalonBookingControllerFactory {
 
     func makeSelectService(
         salon: Salon,
-        entry: SalonBookingEntry
+        entry: SalonBookingEntry,
+        availableServiceIds: Set<String>
     ) -> UIViewController
 }
 
@@ -35,6 +36,7 @@ final class SalonBookingControllerFactoryImpl: SalonBookingControllerFactory {
             transition: transition,
             getSalonByIdUseCase: assembler.salonBooking.getSalonByIdUseCase,
             getSalonShareUseCase: assembler.salonBooking.getSalonShareUseCase,
+            getAltegioAvailableServicesUseCase: assembler.salonBooking.getAltegioAvailableServicesUseCase,
             saveSalonUseCase: assembler.require((any SaveSalonUseCase).self),
             unsaveSalonUseCase: assembler.require((any UnsaveSalonUseCase).self),
             savedSalonsEventBus: assembler.require((any SavedSalonsEventBus).self),
@@ -45,9 +47,15 @@ final class SalonBookingControllerFactoryImpl: SalonBookingControllerFactory {
 
     func makeSelectService(
         salon: Salon,
-        entry: SalonBookingEntry
+        entry: SalonBookingEntry,
+        availableServiceIds: Set<String>
     ) -> UIViewController {
-        let viewModel = SelectServiceViewModel(salon: salon, entry: entry)
+        let viewModel = SelectServiceViewModel(
+            salon: salon,
+            entry: entry,
+            initialAvailableServiceIds: availableServiceIds,
+            getAltegioAvailableServicesUseCase: assembler.salonBooking.getAltegioAvailableServicesUseCase
+        )
         return SelectServiceController(viewModel: viewModel)
     }
 }

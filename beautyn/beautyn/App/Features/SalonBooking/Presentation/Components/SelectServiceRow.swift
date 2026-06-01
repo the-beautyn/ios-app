@@ -13,6 +13,7 @@ import SwiftUI
 struct SelectServiceRow: View {
 
     let service: ServiceModel
+    var isLoading: Bool = false
     var onToggle: () -> Void
 
     // Figma uses 12pt for the card padding, content spacing and price/duration
@@ -85,11 +86,17 @@ struct SelectServiceRow: View {
             ZStack {
                 Text(Localization.addButton)
                     .font(.App.subheadline)
-                    .opacity(service.isAdded ? 0 : 1)
+                    .opacity(service.isAdded || isLoading ? 0 : 1)
 
                 Image(systemName: "checkmark")
                     .font(.system(size: 15, weight: .semibold))
-                    .opacity(service.isAdded ? 1 : 0)
+                    .opacity(service.isAdded && !isLoading ? 1 : 0)
+
+                if isLoading {
+                    ProgressView()
+                        .controlSize(.small)
+                        .tint(service.isAdded ? Color.App.white : Color.App.brown2)
+                }
             }
             .foregroundStyle(service.isAdded ? Color.App.white : Color.App.brown2)
             .padding(.horizontal, CGFloat.Spacing.sm + CGFloat.Spacing.xs)   // px-12
@@ -104,7 +111,9 @@ struct SelectServiceRow: View {
             )
         }
         .buttonStyle(.plain)
+        .disabled(isLoading)
         .animation(.easeInOut(duration: 0.2), value: service.isAdded)
+        .animation(.easeInOut(duration: 0.2), value: isLoading)
     }
 }
 

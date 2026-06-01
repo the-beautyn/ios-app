@@ -6,6 +6,7 @@ protocol SalonBookingFactory: ResolverInjector {
     var salonRepository: any SalonRepository { get }
     var getSalonByIdUseCase: any GetSalonByIdUseCase { get }
     var getSalonShareUseCase: any GetSalonShareUseCase { get }
+    var getAltegioAvailableServicesUseCase: any GetAltegioAvailableServicesUseCase { get }
     var controllerFactory: any SalonBookingControllerFactory { get }
 }
 
@@ -15,6 +16,9 @@ extension SalonBookingFactory {
     var salonRepository: any SalonRepository { resolver.require((any SalonRepository).self) }
     var getSalonByIdUseCase: any GetSalonByIdUseCase { resolver.require((any GetSalonByIdUseCase).self) }
     var getSalonShareUseCase: any GetSalonShareUseCase { resolver.require((any GetSalonShareUseCase).self) }
+    var getAltegioAvailableServicesUseCase: any GetAltegioAvailableServicesUseCase {
+        resolver.require((any GetAltegioAvailableServicesUseCase).self)
+    }
     var controllerFactory: any SalonBookingControllerFactory { resolver.require((any SalonBookingControllerFactory).self) }
 }
 

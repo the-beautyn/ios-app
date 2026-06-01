@@ -12,7 +12,7 @@ final class SalonProfileViewModel: BaseViewModel {
     struct Transition {
         let didTapBack: () -> Void
         let didRequireAuth: () -> Void
-        let didRequestBooking: (_ salon: Salon, _ entry: SalonBookingEntry) -> Void
+        let didRequestBooking: (_ salon: Salon, _ entry: SalonBookingEntry, _ availableServiceIds: Set<String>) -> Void
     }
 
     // MARK: - Share sheet presentation model
@@ -32,12 +32,19 @@ final class SalonProfileViewModel: BaseViewModel {
     @Published private(set) var isFavorited: Bool = false
     @Published var shareSheet: ShareSheetPresentation?
 
+    /// Ids of services the salon can actually book (Altegio only). `nil` until
+    /// loaded; drives filtering of the Services tab and is handed to the booking
+    /// flow. Non-Altegio salons leave this `nil` (no availability concept).
+    @Published private(set) var availableServiceIds: Set<String>?
+    @Published private(set) var isLoadingAvailability: Bool = false
+
     // MARK: - Dependencies
 
     private let salonId: String
     private let transition: Transition
     private let getSalonByIdUseCase: any GetSalonByIdUseCase
     private let getSalonShareUseCase: any GetSalonShareUseCase
+    private let getAltegioAvailableServicesUseCase: any GetAltegioAvailableServicesUseCase
     private let saveSalonUseCase: any SaveSalonUseCase
     private let unsaveSalonUseCase: any UnsaveSalonUseCase
     private let savedSalonsEventBus: any SavedSalonsEventBus
@@ -51,6 +58,7 @@ final class SalonProfileViewModel: BaseViewModel {
         transition: Transition,
         getSalonByIdUseCase: any GetSalonByIdUseCase,
         getSalonShareUseCase: any GetSalonShareUseCase,
+        getAltegioAvailableServicesUseCase: any GetAltegioAvailableServicesUseCase,
         saveSalonUseCase: any SaveSalonUseCase,
         unsaveSalonUseCase: any UnsaveSalonUseCase,
         savedSalonsEventBus: any SavedSalonsEventBus,
@@ -60,6 +68,7 @@ final class SalonProfileViewModel: BaseViewModel {
         self.transition = transition
         self.getSalonByIdUseCase = getSalonByIdUseCase
         self.getSalonShareUseCase = getSalonShareUseCase
+        self.getAltegioAvailableServicesUseCase = getAltegioAvailableServicesUseCase
         self.saveSalonUseCase = saveSalonUseCase
         self.unsaveSalonUseCase = unsaveSalonUseCase
         self.savedSalonsEventBus = savedSalonsEventBus
@@ -71,19 +80,33 @@ final class SalonProfileViewModel: BaseViewModel {
     // MARK: - Lifecycle
 
     override func onViewTask() async {
+        // `.task` re-runs every time the screen reappears (e.g. popping back from
+        // SelectService). Load only once — keep the salon + availability we
+        // already fetched instead of re-hitting the API (incl. the slow CRM call).
+        guard salon == nil else { return }
         await loadSalon()
     }
 
     // MARK: - Computed
 
     var filteredServices: [SalonService] {
-        guard let services = salon?.services else { return [] }
+        guard let salon else { return [] }
+        var services = salon.services
+        // Altegio salons only surface services the salon can actually book.
+        if salon.provider == .altegio, let availableServiceIds {
+            services = services.filter { availableServiceIds.contains($0.id) }
+        }
         let q = servicesSearchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !q.isEmpty else { return services }
         return services.filter { service in
             service.name.localizedCaseInsensitiveContains(q)
                 || (service.description?.localizedCaseInsensitiveContains(q) ?? false)
         }
+    }
+
+    // Suppresses the "nothing found" message while availability is still loading.
+    var servicesTabIsEmpty: Bool {
+        isLoadingAvailability ? false : filteredServices.isEmpty
     }
 
     var filteredWorkers: [SalonWorker] {
@@ -155,7 +178,7 @@ final class SalonProfileViewModel: BaseViewModel {
             }
         case .altegio:
             // In-app booking — start service selection with nothing preselected.
-            if let salon { transition.didRequestBooking(salon, .book) }
+            if let salon { transition.didRequestBooking(salon, .book, availableServiceIds ?? []) }
         default:
             // Unknown / nil providers.
             showComingSoon()
@@ -171,7 +194,7 @@ final class SalonProfileViewModel: BaseViewModel {
             return
         }
         // Open service selection with this service preselected + its category active.
-        transition.didRequestBooking(salon, .service(id: service.id))
+        transition.didRequestBooking(salon, .service(id: service.id), availableServiceIds ?? [])
     }
 
     func didTapSelectSpecialist(_ worker: SalonWorker) {
@@ -181,7 +204,7 @@ final class SalonProfileViewModel: BaseViewModel {
             return
         }
         // Open service selection, remembering the chosen specialist for later steps.
-        transition.didRequestBooking(salon, .worker(id: worker.id))
+        transition.didRequestBooking(salon, .worker(id: worker.id), availableServiceIds ?? [])
     }
 
     private func showComingSoon() {
@@ -237,11 +260,32 @@ final class SalonProfileViewModel: BaseViewModel {
 
     private func loadSalon() async {
         showLoader()
-        defer { hideLoader() }
         do {
             let result = try await getSalonByIdUseCase.execute(id: salonId)
             salon = result
             isFavorited = result.isSaved
+            hideLoader()
+            // Altegio salons additionally resolve which services are bookable.
+            // Loaded after the profile is shown (the CRM call can be slow), with
+            // the Services tab showing its own loader meanwhile.
+            if result.provider == .altegio {
+                await loadAvailability()
+            }
+        } catch {
+            hideLoader()
+            showError(error)
+        }
+    }
+
+    private func loadAvailability() async {
+        isLoadingAvailability = true
+        defer { isLoadingAvailability = false }
+        do {
+            availableServiceIds = try await getAltegioAvailableServicesUseCase.execute(
+                salonId: salonId,
+                selectedServiceIds: [],
+                workerId: nil
+            )
         } catch {
             showError(error)
         }

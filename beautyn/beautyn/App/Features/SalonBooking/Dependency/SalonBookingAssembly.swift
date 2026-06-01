@@ -10,9 +10,21 @@ final class SalonBookingAssembly: Assembly {
             )
         }
 
+        container.register((any AltegioBookingRepository).self) { resolver in
+            AltegioBookingRepositoryImpl(
+                networkService: resolver.require((any NetworkService).self)
+            )
+        }
+
         container.register((any GetSalonByIdUseCase).self) { resolver in
             GetSalonByIdUseCaseImpl(
                 repository: resolver.require((any SalonRepository).self)
+            )
+        }
+
+        container.register((any GetAltegioAvailableServicesUseCase).self) { resolver in
+            GetAltegioAvailableServicesUseCaseImpl(
+                repository: resolver.require((any AltegioBookingRepository).self)
             )
         }
 
