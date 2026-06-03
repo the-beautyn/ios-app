@@ -12,6 +12,9 @@ struct EditServicesSheet: View {
     let totalDurationText: String    // e.g. "90 хв."
     let totalPriceText: String       // e.g. "1550 грн"
     let services: [SelectServiceViewModel.AddedServiceModel]
+    /// When false, rows hide their remove (×) button — used to block removing
+    /// the last service when the flow requires at least one.
+    var canRemove: Bool = true
     let onRemove: (String) -> Void
     let onClose: () -> Void
 
@@ -103,15 +106,17 @@ struct EditServicesSheet: View {
                 .font(.App.footnote)
                 .foregroundStyle(Color.App.black)
 
-            Button {
-                onRemove(service.id)
-            } label: {
-                Image(systemName: "xmark")
-                    .font(.system(size: 18, weight: .regular))
-                    .foregroundStyle(Color.App.gray2)
-                    .frame(width: 24, height: 24)
+            if canRemove {
+                Button {
+                    onRemove(service.id)
+                } label: {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 18, weight: .regular))
+                        .foregroundStyle(Color.App.gray2)
+                        .frame(width: 24, height: 24)
+                }
+                .buttonStyle(.plain)
             }
-            .buttonStyle(.plain)
         }
         .padding(.vertical, CGFloat.Spacing.sm)
         .padding(.horizontal, CGFloat.Spacing.md)

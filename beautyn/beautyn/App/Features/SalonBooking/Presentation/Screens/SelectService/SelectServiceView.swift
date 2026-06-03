@@ -169,6 +169,7 @@ private func makePreviewVM(entry: SalonBookingEntry) -> SelectServiceViewModel {
         salon: .previewAltegio(services: services, categories: Salon.previewCategories),
         entry: entry,
         initialAvailableServiceIds: ids,
+        transition: .init(didContinue: { _, _, _, _ in }),
         getAltegioAvailableServicesUseCase: PreviewGetAltegioAvailableServicesUseCase(ids: ids)
     )
 }

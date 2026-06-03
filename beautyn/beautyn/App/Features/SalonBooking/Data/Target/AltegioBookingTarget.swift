@@ -16,6 +16,12 @@ enum AltegioBookingTarget {
     /// Workers the salon can book. `serviceIds` and `datetime` narrow
     /// availability; `includeSlots` adds each worker's next available slots.
     case getBookableWorkers(salonId: String, serviceIds: [String], datetime: String?, includeSlots: Bool)
+    /// Bookable calendar days for the `[dateFrom, dateTo]` range (both
+    /// `yyyy-MM-dd`). `serviceIds` and `workerId` narrow availability.
+    case getBookableDates(salonId: String, serviceIds: [String], workerId: String?, dateFrom: String, dateTo: String)
+    /// Available time slots for a single `date` (`yyyy-MM-dd`). `serviceIds` and
+    /// `workerId` narrow availability.
+    case getTimeSlots(salonId: String, date: String, workerId: String?, serviceIds: [String])
 }
 
 // MARK: - TargetType
@@ -32,12 +38,16 @@ extension AltegioBookingTarget: TargetType {
             return "/booking/altegio/\(salonId)/services"
         case .getBookableWorkers(let salonId, _, _, _):
             return "/booking/altegio/\(salonId)/workers"
+        case .getBookableDates(let salonId, _, _, _, _):
+            return "/booking/altegio/\(salonId)/dates"
+        case .getTimeSlots(let salonId, _, _, _):
+            return "/booking/altegio/\(salonId)/timeslots"
         }
     }
 
     var method: Moya.Method {
         switch self {
-        case .getBookableServices, .getBookableWorkers:
+        case .getBookableServices, .getBookableWorkers, .getBookableDates, .getTimeSlots:
             return .get
         }
     }
@@ -75,6 +85,31 @@ extension AltegioBookingTarget: TargetType {
                 parameters["includeSlots"] = true
             }
             guard !parameters.isEmpty else { return .requestPlain }
+            return .requestParameters(parameters: parameters, encoding: URLEncoding.default)
+
+        case .getBookableDates(_, let serviceIds, let workerId, let dateFrom, let dateTo):
+            // The date range is always sent; `serviceIds` / `workerId` narrow it.
+            var parameters: [String: Any] = [
+                "dateFrom": dateFrom,
+                "dateTo": dateTo
+            ]
+            if !serviceIds.isEmpty {
+                parameters["serviceIds"] = serviceIds
+            }
+            if let workerId, !workerId.isEmpty {
+                parameters["workerId"] = workerId
+            }
+            return .requestParameters(parameters: parameters, encoding: URLEncoding.default)
+
+        case .getTimeSlots(_, let date, let workerId, let serviceIds):
+            // `date` is required by the backend; the rest narrow availability.
+            var parameters: [String: Any] = ["date": date]
+            if let workerId, !workerId.isEmpty {
+                parameters["workerId"] = workerId
+            }
+            if !serviceIds.isEmpty {
+                parameters["serviceIds"] = serviceIds
+            }
             return .requestParameters(parameters: parameters, encoding: URLEncoding.default)
         }
     }

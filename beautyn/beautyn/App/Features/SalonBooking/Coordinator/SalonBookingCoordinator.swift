@@ -48,8 +48,33 @@ final class SalonBookingCoordinator: BaseCoordinator {
 
     private func showSelectService(salon: Salon, entry: SalonBookingEntry, availableServiceIds: Set<String>) {
         // Back navigation is handled by the system back button on the pushed
-        // controller, so no transition is needed yet.
-        let vc = factory.makeSelectService(salon: salon, entry: entry, availableServiceIds: availableServiceIds)
+        // controller; the transition only forwards to the date/time step.
+        let transition = SelectServiceViewModel.Transition(
+            didContinue: { [weak self] salon, serviceIds, workerId, datetime in
+                self?.showSelectDateTime(
+                    salon: salon,
+                    selectedServiceIds: serviceIds,
+                    workerId: workerId,
+                    datetime: datetime
+                )
+            }
+        )
+        let vc = factory.makeSelectService(
+            salon: salon,
+            entry: entry,
+            availableServiceIds: availableServiceIds,
+            transition: transition
+        )
+        router.push(vc, animated: true)
+    }
+
+    private func showSelectDateTime(salon: Salon, selectedServiceIds: Set<String>, workerId: String?, datetime: String?) {
+        let vc = factory.makeSelectDateTime(
+            salon: salon,
+            selectedServiceIds: selectedServiceIds,
+            workerId: workerId,
+            datetime: datetime
+        )
         router.push(vc, animated: true)
     }
 }

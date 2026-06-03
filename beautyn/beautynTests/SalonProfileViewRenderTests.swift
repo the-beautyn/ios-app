@@ -51,10 +51,12 @@ final class SalonProfileViewRenderTests: XCTestCase {
             transition: .init(
                 didTapBack: {},
                 didRequireAuth: {},
-                didRequestBooking: { _, _ in }
+                didRequestBooking: { _, _, _ in }
             ),
             getSalonByIdUseCase: MockGetSalonByIdUseCase(salon: salon),
             getSalonShareUseCase: MockGetSalonShareUseCase(),
+            getAltegioAvailableServicesUseCase: MockSalonProfileServicesUseCase(),
+            getAltegioAvailableWorkersUseCase: MockSalonProfileWorkersUseCase(),
             saveSalonUseCase: MockSalonProfileSaveSalonUseCase(),
             unsaveSalonUseCase: MockSalonProfileUnsaveSalonUseCase(),
             savedSalonsEventBus: MockSalonProfileSavedSalonsEventBus(),
@@ -72,6 +74,14 @@ private final class MockGetSalonByIdUseCase: GetSalonByIdUseCase {
     let salon: Salon
     init(salon: Salon) { self.salon = salon }
     func execute(id: String) async throws -> Salon { salon }
+}
+
+private final class MockSalonProfileServicesUseCase: GetAltegioAvailableServicesUseCase {
+    func execute(salonId: String, selectedServiceIds: [String], workerId: String?, datetime: String?) async throws -> Set<String> { [] }
+}
+
+private final class MockSalonProfileWorkersUseCase: GetAltegioAvailableWorkersUseCase {
+    func execute(salonId: String, serviceIds: [String], datetime: String?, includeSlots: Bool) async throws -> [AltegioBookableWorker] { [] }
 }
 
 private final class MockGetSalonShareUseCase: GetSalonShareUseCase {

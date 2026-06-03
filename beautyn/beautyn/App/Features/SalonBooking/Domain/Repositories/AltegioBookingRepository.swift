@@ -21,4 +21,23 @@ protocol AltegioBookingRepository {
         datetime: String?,
         includeSlots: Bool
     ) async throws -> [AltegioBookableWorker]
+
+    /// Bookable calendar days in `[dateFrom, dateTo]` (both `yyyy-MM-dd`), each
+    /// the start of a day. `serviceIds` / `workerId` narrow availability.
+    func availableDates(
+        salonId: String,
+        serviceIds: [String],
+        workerId: String?,
+        dateFrom: String,
+        dateTo: String
+    ) async throws -> [Date]
+
+    /// Available time slots for `date` (`yyyy-MM-dd`). `serviceIds` / `workerId`
+    /// narrow availability.
+    func timeSlots(
+        salonId: String,
+        date: String,
+        workerId: String?,
+        serviceIds: [String]
+    ) async throws -> [AltegioBookingSlot]
 }

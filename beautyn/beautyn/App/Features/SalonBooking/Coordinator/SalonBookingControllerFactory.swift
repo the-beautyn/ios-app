@@ -12,7 +12,15 @@ protocol SalonBookingControllerFactory {
     func makeSelectService(
         salon: Salon,
         entry: SalonBookingEntry,
-        availableServiceIds: Set<String>
+        availableServiceIds: Set<String>,
+        transition: SelectServiceViewModel.Transition
+    ) -> UIViewController
+
+    func makeSelectDateTime(
+        salon: Salon,
+        selectedServiceIds: Set<String>,
+        workerId: String?,
+        datetime: String?
     ) -> UIViewController
 }
 
@@ -49,14 +57,34 @@ final class SalonBookingControllerFactoryImpl: SalonBookingControllerFactory {
     func makeSelectService(
         salon: Salon,
         entry: SalonBookingEntry,
-        availableServiceIds: Set<String>
+        availableServiceIds: Set<String>,
+        transition: SelectServiceViewModel.Transition
     ) -> UIViewController {
         let viewModel = SelectServiceViewModel(
             salon: salon,
             entry: entry,
             initialAvailableServiceIds: availableServiceIds,
+            transition: transition,
             getAltegioAvailableServicesUseCase: assembler.salonBooking.getAltegioAvailableServicesUseCase
         )
         return SelectServiceController(viewModel: viewModel)
+    }
+
+    func makeSelectDateTime(
+        salon: Salon,
+        selectedServiceIds: Set<String>,
+        workerId: String?,
+        datetime: String?
+    ) -> UIViewController {
+        let viewModel = SelectDateTimeViewModel(
+            salon: salon,
+            selectedServiceIds: selectedServiceIds,
+            workerId: workerId,
+            datetime: datetime,
+            getAltegioAvailableWorkersUseCase: assembler.salonBooking.getAltegioAvailableWorkersUseCase,
+            getAltegioBookingDatesUseCase: assembler.salonBooking.getAltegioBookingDatesUseCase,
+            getAltegioTimeSlotsUseCase: assembler.salonBooking.getAltegioTimeSlotsUseCase
+        )
+        return SelectDateTimeController(viewModel: viewModel)
     }
 }

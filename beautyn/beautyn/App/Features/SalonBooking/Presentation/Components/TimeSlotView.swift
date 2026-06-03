@@ -3,8 +3,8 @@ import SwiftUI
 // MARK: - TimeSlotView
 //
 // Matches Figma time slot pill chips in the booking date picker and specialist tab.
-// Selected: brown fill (#5A483A), white text.
-// Unselected: white fill, brown text, brown border.
+// Selected: clay-rose fill (#907064), white text.
+// Unselected: white fill, black text, faint hairline border.
 
 struct TimeSlotView: View {
 
@@ -16,16 +16,16 @@ struct TimeSlotView: View {
         Button(action: onTap) {
             Text(time)
                 .font(.App.subheadline)
-                .foregroundStyle(isSelected ? Color.App.white : Color.App.brown1)
+                .foregroundStyle(isSelected ? Color.App.white : Color.App.black)
                 .padding(.horizontal, CGFloat.Spacing.md)
                 .padding(.vertical, CGFloat.Spacing.sm)
                 .background(
                     RoundedRectangle(cornerRadius: 100, style: .continuous)
-                        .fill(isSelected ? Color.App.brown1 : Color.App.backgroundLight)
+                        .fill(isSelected ? Color.App.brown2 : Color.App.backgroundLight)
                 )
                 .overlay(
                     RoundedRectangle(cornerRadius: 100, style: .continuous)
-                        .stroke(isSelected ? Color.clear : Color.App.brown1, lineWidth: 1)
+                        .stroke(isSelected ? Color.clear : Color.App.blueTransparency, lineWidth: 1)
                 )
         }
         .buttonStyle(.plain)

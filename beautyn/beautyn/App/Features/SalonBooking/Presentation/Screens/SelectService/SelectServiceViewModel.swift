@@ -7,6 +7,17 @@ import SwiftUI
 @MainActor
 final class SelectServiceViewModel: BaseViewModel {
 
+    // MARK: - Transition
+
+    struct Transition {
+        /// Move to the date / time / specialist step with the chosen services and
+        /// the carried-forward worker / slot filter.
+        let didContinue: (_ salon: Salon,
+                          _ serviceIds: Set<String>,
+                          _ workerId: String?,
+                          _ datetime: String?) -> Void
+    }
+
     // MARK: - Category tab
 
     struct CategoryTab: Identifiable {
@@ -48,6 +59,7 @@ final class SelectServiceViewModel: BaseViewModel {
 
     private let salon: Salon
     private let entry: SalonBookingEntry
+    private let transition: Transition
     private let getAltegioAvailableServicesUseCase: any GetAltegioAvailableServicesUseCase
 
     /// Specialist chosen on the salon profile (entry case 3). Not shown on this
@@ -71,11 +83,13 @@ final class SelectServiceViewModel: BaseViewModel {
         salon: Salon,
         entry: SalonBookingEntry,
         initialAvailableServiceIds: Set<String>,
+        transition: Transition,
         getAltegioAvailableServicesUseCase: any GetAltegioAvailableServicesUseCase
     ) {
         self.salon = salon
         self.entry = entry
         self.availableServiceIds = initialAvailableServiceIds
+        self.transition = transition
         self.getAltegioAvailableServicesUseCase = getAltegioAvailableServicesUseCase
         super.init()
         applyEntry(entry)
@@ -319,19 +333,12 @@ final class SelectServiceViewModel: BaseViewModel {
     }
 
     func didTapContinue() {
-        // Mocked until the date/time step exists.
-        showComingSoon()
+        guard hasSelection else { return }
+        // Carry the basket + chosen specialist / slot into the date/time step.
+        transition.didContinue(salon, selectedServiceIds, selectedWorkerId, selectedDatetime)
     }
 
     // MARK: - Private
-
-    private func showComingSoon() {
-        showSuccess(
-            title: Localization.salonProfileComingSoonTitle,
-            message: Localization.salonProfileComingSoonMessage,
-            scope: .current
-        )
-    }
 
     private func formattedPrice(_ price: Double) -> String {
         price.truncatingRemainder(dividingBy: 1) == 0

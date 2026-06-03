@@ -22,20 +22,32 @@ struct MasterPickerView: View {
     private let avatarSize: CGFloat = 52
 
     var body: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: CGFloat.Spacing.md) {
-                masterItem(
-                    id: nil,
-                    name: Localization.bookingAnyMaster,
-                    imageURL: nil
-                )
+        // "Будь-який" + the hairline stay pinned at the leading edge; only the
+        // specialist avatars to the right of the divider scroll horizontally.
+        HStack(spacing: CGFloat.Spacing.md) {
+            masterItem(
+                id: nil,
+                name: Localization.bookingAnyMaster,
+                imageURL: nil
+            )
 
-                ForEach(masters) { master in
-                    masterItem(id: master.id, name: master.name, imageURL: master.imageURL)
+            if !masters.isEmpty {
+                Rectangle()
+                    .fill(Color.App.blueTransparency)
+                    .frame(width: 1, height: 40)
+
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: CGFloat.Spacing.md) {
+                        ForEach(masters) { master in
+                            masterItem(id: master.id, name: master.name, imageURL: master.imageURL)
+                        }
+                    }
+                    .padding(.trailing, CGFloat.Spacing.md)
                 }
             }
-            .padding(.horizontal, CGFloat.Spacing.md)
         }
+        .padding(.leading, CGFloat.Spacing.md)
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     @ViewBuilder
@@ -53,22 +65,38 @@ struct MasterPickerView: View {
                     )
 
                     if isSelected {
+                        // strokeBorder (not stroke) keeps the ring inside its frame,
+                        // otherwise the outer half overflows the bounds and the enclosing
+                        // ScrollView clips it (~1px) at the top edge.
                         Circle()
-                            .stroke(Color.App.brown1, lineWidth: 2)
-                            .frame(width: avatarSize + 4, height: avatarSize + 4)
+                            .strokeBorder(Color.App.sage, lineWidth: 3)
+                            .frame(width: avatarSize + 6, height: avatarSize + 6)
                     }
+                }
+                .overlay(alignment: .bottomTrailing) {
+                    if isSelected { selectedBadge }
                 }
 
                 Text(name)
                     .font(.App.caption2)
                     .tracking(CGFloat.Tracking.caption2)
-                    .foregroundStyle(Color.App.text)
+                    .foregroundStyle(Color.App.gray)
                     .lineLimit(1)
                     .frame(width: avatarSize + 8)
             }
         }
         .buttonStyle(.plain)
         .animation(.easeInOut(duration: 0.15), value: isSelected)
+    }
+
+    // Sage checkmark badge on the selected avatar's lower-trailing edge. The
+    // white circle behind shows through the symbol's cut-out check and gives a
+    // thin halo so it reads on any photo.
+    private var selectedBadge: some View {
+        Image(systemName: "checkmark.circle.fill")
+            .font(.system(size: 18, weight: .bold))
+            .foregroundStyle(Color.App.sage)
+            .background(Circle().fill(Color.App.white))
     }
 }
 

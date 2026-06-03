@@ -2,26 +2,76 @@ import SwiftUI
 
 // MARK: - CalendarView
 //
-// Matches Figma booking date picker and Search filter calendar.
-// Displays a month grid with prev/next navigation.
-// Supports single-date selection; today is outlined if not selected.
+// Matches Figma booking date picker (node 143:3026).
+// Displays a single month grid with prev/next navigation; weeks start on Monday.
+// - Past dates (before `minSelectableDate`) are grayed out and non-selectable.
+// - Today is outlined (sandstone border) when not selected.
+// - The selected date is filled (clay-rose).
+// - Prev/next-month days are not shown.
+// - Month arrows gray out when the adjacent month is blocked.
+// Emits `onMonthChanged` / `onDateSelected` so a host screen can load slots.
 
 struct CalendarView: View {
 
     @Binding var selectedDate: Date?
-    var availableDates: Set<Date>? = nil   // nil = all dates available
 
-    @State private var displayedMonth: Date = Calendar.current.startOfMonth(for: Date())
+    /// Optional per-day availability filter. `nil` = no filtering (all future days selectable).
+    var availableDates: Set<Date>? = nil
+    /// Dates before this day are grayed out and cannot be selected. Defaults to today.
+    var minSelectableDate: Date = Date()
+    /// Last navigable month. `nil` = unbounded forward navigation.
+    var maxMonth: Date? = nil
+    /// Fires with the new displayed month after the user taps a navigation arrow.
+    var onMonthChanged: ((Date) -> Void)? = nil
+    /// Fires with the tapped selectable date.
+    var onDateSelected: ((Date) -> Void)? = nil
 
-    private let calendar = Calendar.current
-    private let columns = Array(repeating: GridItem(.flexible(), spacing: 0), count: 7)
-    private var weekdays: [String] { Calendar.current.shortWeekdaySymbols }
+    @State private var displayedMonth: Date
+
+    /// - Parameter initialMonth: month the grid opens on. `nil` = current month.
+    init(
+        selectedDate: Binding<Date?>,
+        availableDates: Set<Date>? = nil,
+        minSelectableDate: Date = Date(),
+        maxMonth: Date? = nil,
+        initialMonth: Date? = nil,
+        onMonthChanged: ((Date) -> Void)? = nil,
+        onDateSelected: ((Date) -> Void)? = nil
+    ) {
+        self._selectedDate = selectedDate
+        self.availableDates = availableDates
+        self.minSelectableDate = minSelectableDate
+        self.maxMonth = maxMonth
+        self.onMonthChanged = onMonthChanged
+        self.onDateSelected = onDateSelected
+        self._displayedMonth = State(initialValue: Self.calendar.startOfMonth(for: initialMonth ?? Date()))
+    }
+
+    /// Monday-first Ukrainian calendar — fixed so layout is deterministic regardless of device locale.
+    private static let calendar: Calendar = {
+        var c = Calendar(identifier: .gregorian)
+        c.firstWeekday = 2                       // Monday
+        c.locale = Locale(identifier: "uk_UA")
+        return c
+    }()
+
+    private var calendar: Calendar { Self.calendar }
+    private let columns = Array(repeating: GridItem(.flexible(), spacing: CGFloat.Spacing.xs), count: 7)
+
+    /// Short weekday symbols rotated to start at `firstWeekday` (→ пн вт ср чт пт сб нд).
+    private var weekdays: [String] {
+        let symbols = calendar.shortWeekdaySymbols       // base order is Sunday-first
+        let offset = calendar.firstWeekday - 1
+        return Array(symbols[offset...] + symbols[..<offset])
+    }
 
     var body: some View {
         VStack(spacing: CGFloat.Spacing.md) {
             monthHeader
-            weekdayHeader
-            daysGrid
+            VStack(spacing: CGFloat.Spacing.xs) {
+                weekdayHeader
+                daysGrid
+            }
         }
     }
 
@@ -29,34 +79,33 @@ struct CalendarView: View {
 
     private var monthHeader: some View {
         HStack {
-            Button {
-                displayedMonth = calendar.date(byAdding: .month, value: -1, to: displayedMonth) ?? displayedMonth
-            } label: {
-                Image(systemName: "chevron.left")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(Color.App.text)
-                    .frame(width: 32, height: 32)
+            navButton(systemName: "arrow.left", enabled: canGoToPreviousMonth) {
+                changeMonth(by: -1)
             }
-            .buttonStyle(.plain)
 
             Spacer()
 
             Text(monthYearString)
-                .font(.App.headline)
+                .font(.App.subheadline)
                 .foregroundStyle(Color.App.text)
 
             Spacer()
 
-            Button {
-                displayedMonth = calendar.date(byAdding: .month, value: 1, to: displayedMonth) ?? displayedMonth
-            } label: {
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(Color.App.text)
-                    .frame(width: 32, height: 32)
+            navButton(systemName: "arrow.right", enabled: canGoToNextMonth) {
+                changeMonth(by: 1)
             }
-            .buttonStyle(.plain)
         }
+    }
+
+    private func navButton(systemName: String, enabled: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: systemName)
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(enabled ? Color.App.text : Color.App.gray2)
+                .frame(width: 32, height: 32)
+        }
+        .buttonStyle(.plain)
+        .disabled(!enabled)
     }
 
     // MARK: - Weekday header
@@ -65,11 +114,9 @@ struct CalendarView: View {
         LazyVGrid(columns: columns, spacing: 0) {
             ForEach(weekdays, id: \.self) { day in
                 Text(day)
-                    .font(.App.caption2)
-                    .tracking(CGFloat.Tracking.caption2)
+                    .font(.App.footnote)
                     .foregroundStyle(Color.App.gray2)
                     .frame(maxWidth: .infinity)
-                    .padding(.bottom, CGFloat.Spacing.xs)
             }
         }
     }
@@ -82,7 +129,7 @@ struct CalendarView: View {
                 if let date {
                     dayCell(date)
                 } else {
-                    Color.clear.frame(height: 36)
+                    Color.clear.frame(height: 44)
                 }
             }
         }
@@ -92,42 +139,70 @@ struct CalendarView: View {
     private func dayCell(_ date: Date) -> some View {
         let isSelected = selectedDate.map { calendar.isDate($0, inSameDayAs: date) } ?? false
         let isToday = calendar.isDateInToday(date)
-        let isAvailable = availableDates == nil || availableDates!.contains { calendar.isDate($0, inSameDayAs: date) }
+        let isPast = date < calendar.startOfDay(for: minSelectableDate)
+        let isUnavailable: Bool = {
+            guard let availableDates else { return false }
+            return !availableDates.contains { calendar.isDate($0, inSameDayAs: date) }
+        }()
+        let isSelectable = !isPast && !isUnavailable
         let dayNumber = calendar.component(.day, from: date)
 
         Button {
-            guard isAvailable else { return }
-            selectedDate = isSelected ? nil : date
+            guard isSelectable else { return }
+            selectedDate = date
+            onDateSelected?(date)
         } label: {
             Text("\(dayNumber)")
                 .font(.App.subheadline)
-                .foregroundStyle(foregroundColor(isSelected: isSelected, isToday: isToday, isAvailable: isAvailable))
-                .frame(width: 36, height: 36)
-                .background(background(isSelected: isSelected, isToday: isToday))
-                .clipShape(Circle())
+                .foregroundStyle(dayForeground(isSelected: isSelected, isSelectable: isSelectable))
+                .frame(maxWidth: .infinity, minHeight: 44)
+                .background(dayBackground(isSelected: isSelected, isToday: isToday))
         }
         .buttonStyle(.plain)
-        .disabled(!isAvailable)
-        .opacity(isAvailable ? 1 : 0.3)
+        .disabled(!isSelectable)
     }
 
-    // MARK: - Helpers
+    // MARK: - Day styling
 
-    private func foregroundColor(isSelected: Bool, isToday: Bool, isAvailable: Bool) -> Color {
+    private func dayForeground(isSelected: Bool, isSelectable: Bool) -> Color {
         if isSelected { return Color.App.white }
-        return Color.App.text
+        // Available (bookable) days are black; past / unavailable days are grayed out.
+        return isSelectable ? Color.App.black : Color.App.gray2
     }
 
     @ViewBuilder
-    private func background(isSelected: Bool, isToday: Bool) -> some View {
+    private func dayBackground(isSelected: Bool, isToday: Bool) -> some View {
         if isSelected {
-            Circle().fill(Color.App.brown1)
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .fill(Color.App.brown2)
         } else if isToday {
-            Circle().stroke(Color.App.brown1, lineWidth: 1)
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .stroke(Color.App.beige1, lineWidth: 1)
         } else {
             Color.clear
         }
     }
+
+    // MARK: - Navigation
+
+    private var minMonth: Date { calendar.startOfMonth(for: minSelectableDate) }
+
+    private var canGoToPreviousMonth: Bool {
+        calendar.startOfMonth(for: displayedMonth) > minMonth
+    }
+
+    private var canGoToNextMonth: Bool {
+        guard let maxMonth else { return true }
+        return calendar.startOfMonth(for: displayedMonth) < calendar.startOfMonth(for: maxMonth)
+    }
+
+    private func changeMonth(by value: Int) {
+        guard let next = calendar.date(byAdding: .month, value: value, to: displayedMonth) else { return }
+        displayedMonth = next
+        onMonthChanged?(next)
+    }
+
+    // MARK: - Date math
 
     private var monthYearString: String {
         let formatter = DateFormatter()
@@ -138,16 +213,17 @@ struct CalendarView: View {
 
     private var daysInGrid: [Date?] {
         guard let monthInterval = calendar.dateInterval(of: .month, for: displayedMonth) else { return [] }
-        let firstWeekday = calendar.component(.weekday, from: monthInterval.start) - 1
+        let weekday = calendar.component(.weekday, from: monthInterval.start)
+        let leading = (weekday - calendar.firstWeekday + 7) % 7
         let daysInMonth = calendar.range(of: .day, in: .month, for: displayedMonth)?.count ?? 30
 
-        var days: [Date?] = Array(repeating: nil, count: firstWeekday)
+        var days: [Date?] = Array(repeating: nil, count: leading)
         for day in 1...daysInMonth {
             if let date = calendar.date(byAdding: .day, value: day - 1, to: monthInterval.start) {
                 days.append(date)
             }
         }
-        // Pad to complete last row
+        // Pad to complete the last row.
         while days.count % 7 != 0 { days.append(nil) }
         return days
     }
@@ -166,8 +242,12 @@ private extension Calendar {
 
 #if DEBUG
 #Preview {
-    @Previewable @State var selected: Date? = Date()
-    CalendarView(selectedDate: $selected)
-        .padding(CGFloat.Spacing.md)
+    @Previewable @State var selected: Date? = Calendar.current.date(byAdding: .day, value: 1, to: Date())
+    CalendarView(
+        selectedDate: $selected,
+        onMonthChanged: { print("month →", $0) },
+        onDateSelected: { print("date →", $0) }
+    )
+    .padding(CGFloat.Spacing.md)
 }
 #endif

@@ -64,6 +64,7 @@ final class SelectServiceViewRenderTests: XCTestCase {
             salon: .selectServicePreview,
             entry: entry,
             initialAvailableServiceIds: ids,
+            transition: .init(didContinue: { _, _, _, _ in }),
             getAltegioAvailableServicesUseCase: StubGetAltegioAvailableServicesUseCase(ids: ids)
         )
     }

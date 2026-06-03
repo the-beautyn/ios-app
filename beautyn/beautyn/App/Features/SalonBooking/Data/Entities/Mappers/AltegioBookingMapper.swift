@@ -19,20 +19,52 @@ enum AltegioBookingMapper {
             AltegioBookableWorker(
                 id: worker.id,
                 isBookable: worker.bookable,
-                slots: (worker.slots ?? []).map { slot in
-                    AltegioBookingSlot(
-                        time: slot.time,
-                        datetime: slot.datetime,
-                        date: parseSlotDate(slot.datetime),
-                        seanceLengthSec: slot.seanceLengthSec,
-                        sumLengthSec: slot.sumLengthSec
-                    )
-                }
+                slots: mapSlots(worker.slots ?? [])
+            )
+        }
+    }
+
+    /// Time slots for a single day (`/timeslots`). Same per-slot shape as the
+    /// slots embedded in the workers response, so the mapping is shared.
+    static func timeSlots(_ dto: AltegioTimeSlotsResponseDTO) -> [AltegioBookingSlot] {
+        mapSlots(dto.slots)
+    }
+
+    /// Bookable calendar days (`/dates`), parsed from `yyyy-MM-dd` strings.
+    /// Unparseable entries are dropped.
+    static func bookingDates(_ dto: AltegioBookableDatesResponseDTO) -> [Date] {
+        dto.bookingDates.compactMap(dayFormatter.date(from:))
+    }
+
+    // MARK: - Slot mapping
+
+    private static func mapSlots(_ slots: [AltegioBookingSlotDTO]) -> [AltegioBookingSlot] {
+        slots.map { slot in
+            AltegioBookingSlot(
+                time: slot.time,
+                datetime: slot.datetime,
+                date: parseSlotDate(slot.datetime),
+                seanceLengthSec: slot.seanceLengthSec,
+                sumLengthSec: slot.sumLengthSec
             )
         }
     }
 
     // MARK: - Date parsing
+
+    // `yyyy-MM-dd` calendar days. Uses the same gregorian / uk_UA calendar as
+    // `CalendarView` so parsed days compare equal to the grid's days.
+    private static let dayFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.calendar = {
+            var c = Calendar(identifier: .gregorian)
+            c.locale = Locale(identifier: "uk_UA")
+            return c
+        }()
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter
+    }()
 
     // Altegio slot datetimes come ISO 8601 with an offset (e.g.
     // "2025-01-01T10:00:00+03:00"). Parse defensively across the common shapes
