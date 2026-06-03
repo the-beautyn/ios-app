@@ -12,6 +12,8 @@ enum SalonBookingEntry {
     case book
     /// Tapped a service row — preselect that service and open its category tab.
     case service(id: String)
-    /// Tapped a specialist — no service preselected, but remember the worker.
-    case worker(id: String)
+    /// Tapped a specialist — no service preselected, but remember the worker and
+    /// the chosen slot's `datetime` (when one was selected) so service
+    /// availability can be filtered by that datetime too.
+    case worker(id: String, datetime: String?)
 }

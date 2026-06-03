@@ -28,6 +28,12 @@ final class SalonBookingAssembly: Assembly {
             )
         }
 
+        container.register((any GetAltegioAvailableWorkersUseCase).self) { resolver in
+            GetAltegioAvailableWorkersUseCaseImpl(
+                repository: resolver.require((any AltegioBookingRepository).self)
+            )
+        }
+
         container.register((any GetSalonShareUseCase).self) { resolver in
             GetSalonShareUseCaseImpl(
                 repository: resolver.require((any SalonRepository).self)

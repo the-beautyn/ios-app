@@ -37,6 +37,7 @@ final class SalonBookingControllerFactoryImpl: SalonBookingControllerFactory {
             getSalonByIdUseCase: assembler.salonBooking.getSalonByIdUseCase,
             getSalonShareUseCase: assembler.salonBooking.getSalonShareUseCase,
             getAltegioAvailableServicesUseCase: assembler.salonBooking.getAltegioAvailableServicesUseCase,
+            getAltegioAvailableWorkersUseCase: assembler.salonBooking.getAltegioAvailableWorkersUseCase,
             saveSalonUseCase: assembler.require((any SaveSalonUseCase).self),
             unsaveSalonUseCase: assembler.require((any UnsaveSalonUseCase).self),
             savedSalonsEventBus: assembler.require((any SavedSalonsEventBus).self),

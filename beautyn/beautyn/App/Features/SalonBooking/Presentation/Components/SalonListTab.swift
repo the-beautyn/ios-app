@@ -36,11 +36,12 @@ struct SalonListTab<Rows: View>: View {
                 emptyLabel
             } else {
                 ScrollView(showsIndicators: false) {
-                    LazyVStack(spacing: 0) {
+                    // Cards carry their own border; 12pt gaps separate them.
+                    LazyVStack(spacing: CGFloat.Spacing.sm + CGFloat.Spacing.xs) {
                         rows()
                     }
                     .padding(.horizontal, CGFloat.Spacing.md)
-                    .padding(.bottom, CGFloat.Spacing.md)
+                    .padding(.vertical, CGFloat.Spacing.md)
                 }
             }
         }

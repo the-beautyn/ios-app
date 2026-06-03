@@ -68,10 +68,15 @@ struct ServiceRowView: View {
                 }
             }
         }
-        .padding(.vertical, CGFloat.Spacing.sm)
-        .overlay(alignment: .bottom) {
-            Divider()
-        }
+        .padding(CGFloat.Spacing.sm + CGFloat.Spacing.xs)   // 12
+        .background(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(Color.App.white)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .strokeBorder(Color.App.blueTransparency, lineWidth: 1)
+        )
     }
 }
 
@@ -88,7 +93,7 @@ private let previewService = ServiceModel(
 )
 
 #Preview {
-    VStack(spacing: 0) {
+    VStack(spacing: CGFloat.Spacing.sm + CGFloat.Spacing.xs) {
         ServiceRowView(service: previewService, onAdd: {})
         ServiceRowView(service: ServiceModel(id: "2", name: "French Manicure", description: "Класичний французький манікюр.", photoURLs: [], price: "від 900 грн", duration: "120 хв.", isAdded: true), onAdd: {})
     }

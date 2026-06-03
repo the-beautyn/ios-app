@@ -55,6 +55,10 @@ final class SelectServiceViewModel: BaseViewModel {
     /// filter availability here.
     private(set) var selectedWorkerId: String?
 
+    /// Slot datetime chosen alongside the specialist (ISO 8601). Filters service
+    /// availability by that datetime and is carried into later steps.
+    private(set) var selectedDatetime: String?
+
     /// In-flight availability refresh; cancelled when a newer one starts.
     private var availabilityTask: Task<Void, Never>?
 
@@ -103,8 +107,9 @@ final class SelectServiceViewModel: BaseViewModel {
             }) {
                 selectedCategoryIndex = index
             }
-        case .worker(let id):
+        case .worker(let id, let datetime):
             selectedWorkerId = id
+            selectedDatetime = datetime
         }
     }
 
@@ -280,7 +285,8 @@ final class SelectServiceViewModel: BaseViewModel {
             let ids = try await getAltegioAvailableServicesUseCase.execute(
                 salonId: salon.id,
                 selectedServiceIds: Array(selectedServiceIds),
-                workerId: selectedWorkerId
+                workerId: selectedWorkerId,
+                datetime: selectedDatetime
             )
             try Task.checkCancellation()
             // Keep selected services visible even if the CRM omits them. Animate

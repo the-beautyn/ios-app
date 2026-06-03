@@ -155,17 +155,26 @@ struct SalonProfileView: BaseViewProtocol {
             SalonListTab(
                 placeholder: Localization.salonProfileSearchPlaceholder,
                 searchText: $viewModel.specialistsSearchQuery,
-                isEmpty: viewModel.filteredWorkers.isEmpty,
+                isEmpty: viewModel.specialistsTabIsEmpty,
                 emptyMessage: Localization.salonProfileNothingFound,
                 onFocusChange: { isSearching = $0 }
             ) {
-                ForEach(viewModel.filteredWorkers) { worker in
-                    SpecialistRowView(
-                        specialist: viewModel.specialistRowModel(for: worker),
-                        selectedTimeSlot: .constant(nil),
-                        showsActionButton: viewModel.showsRowActions,
-                        onSelect: { viewModel.didTapSelectSpecialist(worker) }
-                    )
+                if viewModel.isLoadingWorkers {
+                    ProgressView()
+                        .frame(maxWidth: .infinity)
+                        .padding(.top, CGFloat.Spacing.lg)
+                } else {
+                    if viewModel.showsAnySpecialistOption {
+                        AnySpecialistRowView(onSelect: { viewModel.didTapSelectAnySpecialist() })
+                    }
+                    ForEach(viewModel.filteredWorkers) { worker in
+                        SpecialistRowView(
+                            specialist: viewModel.specialistRowModel(for: worker),
+                            selectedTimeSlot: viewModel.selectedSlotBinding(for: worker.id),
+                            showsActionButton: viewModel.showsRowActions,
+                            onSelect: { viewModel.didTapSelectSpecialist(worker) }
+                        )
+                    }
                 }
             }
             .tag(1)
@@ -208,7 +217,11 @@ private final class PreviewGetSalonShareUseCase: GetSalonShareUseCase {
 }
 
 private final class PreviewGetAltegioAvailableServicesUseCase: GetAltegioAvailableServicesUseCase {
-    func execute(salonId: String, selectedServiceIds: [String], workerId: String?) async throws -> Set<String> { [] }
+    func execute(salonId: String, selectedServiceIds: [String], workerId: String?, datetime: String?) async throws -> Set<String> { [] }
+}
+
+private final class PreviewGetAltegioAvailableWorkersUseCase: GetAltegioAvailableWorkersUseCase {
+    func execute(salonId: String, serviceIds: [String], datetime: String?, includeSlots: Bool) async throws -> [AltegioBookableWorker] { [] }
 }
 
 private final class PreviewSaveSalonUseCase: SaveSalonUseCase {
@@ -315,6 +328,7 @@ private func makePreviewViewModel(salon: Salon) -> SalonProfileViewModel {
         getSalonByIdUseCase: PreviewGetSalonByIdUseCase(salon: salon),
         getSalonShareUseCase: PreviewGetSalonShareUseCase(),
         getAltegioAvailableServicesUseCase: PreviewGetAltegioAvailableServicesUseCase(),
+        getAltegioAvailableWorkersUseCase: PreviewGetAltegioAvailableWorkersUseCase(),
         saveSalonUseCase: PreviewSaveSalonUseCase(),
         unsaveSalonUseCase: PreviewUnsaveSalonUseCase(),
         savedSalonsEventBus: PreviewSavedSalonsEventBus(),

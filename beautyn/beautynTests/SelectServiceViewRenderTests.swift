@@ -59,11 +59,22 @@ final class SelectServiceViewRenderTests: XCTestCase {
     // MARK: - Helpers
 
     private func makeViewModel(entry: SalonBookingEntry) -> SelectServiceViewModel {
-        SelectServiceViewModel(
+        let ids = Set(Salon.selectServicePreview.services.map { $0.id })
+        return SelectServiceViewModel(
             salon: .selectServicePreview,
-            entry: entry
+            entry: entry,
+            initialAvailableServiceIds: ids,
+            getAltegioAvailableServicesUseCase: StubGetAltegioAvailableServicesUseCase(ids: ids)
         )
     }
+}
+
+// MARK: - Stub
+
+private final class StubGetAltegioAvailableServicesUseCase: GetAltegioAvailableServicesUseCase {
+    let ids: Set<String>
+    init(ids: Set<String>) { self.ids = ids }
+    func execute(salonId: String, selectedServiceIds: [String], workerId: String?, datetime: String?) async throws -> Set<String> { ids }
 }
 
 // MARK: - Preview Data

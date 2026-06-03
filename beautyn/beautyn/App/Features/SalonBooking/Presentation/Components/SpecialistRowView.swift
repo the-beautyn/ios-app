@@ -25,6 +25,9 @@ struct SpecialistRowView: View {
     var onSelect: () -> Void
 
     private let avatarSize: CGFloat = 40
+    // Figma card padding (12) — also used to inset the slots scroll content so
+    // it lines up with the rest of the card at rest while scrolling edge-to-edge.
+    private let cardPadding: CGFloat = CGFloat.Spacing.sm + CGFloat.Spacing.xs
 
     var body: some View {
         VStack(alignment: .leading, spacing: CGFloat.Spacing.sm) {
@@ -70,11 +73,68 @@ struct SpecialistRowView: View {
                             )
                         }
                     }
+                    // The pills' 1pt stroke sits on the scroll content's edge, so
+                    // the horizontal ScrollView would shave it top/bottom. A
+                    // little vertical room inside the content keeps it intact.
+                    .padding(.vertical, 2)
+                    // Inset the content so pills line up with the card at rest…
+                    .padding(.horizontal, cardPadding)
                 }
+                // …while the scroll view itself spans the full card width, so
+                // pills scroll edge-to-edge instead of stopping at the padding.
+                .padding(.horizontal, -cardPadding)
             }
         }
-        .padding(.vertical, CGFloat.Spacing.sm)
-        .overlay(alignment: .bottom) { Divider() }
+        .padding(cardPadding)
+        .background(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(Color.App.white)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .strokeBorder(Color.App.blueTransparency, lineWidth: 1)
+        )
+    }
+}
+
+// MARK: - AnySpecialistRowView
+//
+// "Будь-який" / "Any" specialist card on the Salon Profile "Спеціалісти" tab
+// (Figma 143:3609). Ivory placeholder avatar + label + "Обрати" — selecting it
+// starts booking without a specific specialist. No slots.
+
+struct AnySpecialistRowView: View {
+
+    var onSelect: () -> Void
+
+    private let avatarSize: CGFloat = 40
+
+    var body: some View {
+        HStack(spacing: CGFloat.Spacing.sm) {
+            ZStack {
+                Circle().fill(Color.App.beige2)
+                Image(systemName: "person.fill")
+                    .font(.system(size: 18))
+                    .foregroundStyle(Color.App.brown2)
+            }
+            .frame(width: avatarSize, height: avatarSize)
+
+            Text(Localization.bookingAnyMaster)
+                .font(.App.subheadline)
+                .foregroundStyle(Color.App.text)
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+            AppButton.secondaryOutlined(title: Localization.selectButton, size: .small, action: onSelect)
+        }
+        .padding(CGFloat.Spacing.sm + CGFloat.Spacing.xs)   // 12
+        .background(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(Color.App.white)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .strokeBorder(Color.App.blueTransparency, lineWidth: 1)
+        )
     }
 }
 

@@ -158,7 +158,7 @@ private extension Salon {
 private final class PreviewGetAltegioAvailableServicesUseCase: GetAltegioAvailableServicesUseCase {
     let ids: Set<String>
     init(ids: Set<String>) { self.ids = ids }
-    func execute(salonId: String, selectedServiceIds: [String], workerId: String?) async throws -> Set<String> { ids }
+    func execute(salonId: String, selectedServiceIds: [String], workerId: String?, datetime: String?) async throws -> Set<String> { ids }
 }
 
 @MainActor

@@ -38,6 +38,21 @@ final class SalonProfileViewModel: BaseViewModel {
     @Published private(set) var availableServiceIds: Set<String>?
     @Published private(set) var isLoadingAvailability: Bool = false
 
+    /// Ids of workers the salon can actually book (Altegio only). `nil` until
+    /// loaded; drives filtering of the Specialists tab. Non-Altegio salons leave
+    /// this `nil` (no availability concept → show every worker).
+    @Published private(set) var availableWorkerIds: Set<String>?
+    @Published private(set) var isLoadingWorkers: Bool = false
+
+    /// Currently-highlighted slot time per worker id (defaults to the nearest).
+    /// Bound by each specialist row; the chosen slot's datetime is carried into
+    /// the booking flow.
+    @Published var selectedSlotByWorker: [String: String] = [:]
+
+    /// Next available slots per worker id (Altegio, when loaded). Backs the slot
+    /// pills + nearest-date label and resolves the datetime carried forward.
+    private var workerSlots: [String: [AltegioBookingSlot]] = [:]
+
     // MARK: - Dependencies
 
     private let salonId: String
@@ -45,6 +60,7 @@ final class SalonProfileViewModel: BaseViewModel {
     private let getSalonByIdUseCase: any GetSalonByIdUseCase
     private let getSalonShareUseCase: any GetSalonShareUseCase
     private let getAltegioAvailableServicesUseCase: any GetAltegioAvailableServicesUseCase
+    private let getAltegioAvailableWorkersUseCase: any GetAltegioAvailableWorkersUseCase
     private let saveSalonUseCase: any SaveSalonUseCase
     private let unsaveSalonUseCase: any UnsaveSalonUseCase
     private let savedSalonsEventBus: any SavedSalonsEventBus
@@ -59,6 +75,7 @@ final class SalonProfileViewModel: BaseViewModel {
         getSalonByIdUseCase: any GetSalonByIdUseCase,
         getSalonShareUseCase: any GetSalonShareUseCase,
         getAltegioAvailableServicesUseCase: any GetAltegioAvailableServicesUseCase,
+        getAltegioAvailableWorkersUseCase: any GetAltegioAvailableWorkersUseCase,
         saveSalonUseCase: any SaveSalonUseCase,
         unsaveSalonUseCase: any UnsaveSalonUseCase,
         savedSalonsEventBus: any SavedSalonsEventBus,
@@ -69,6 +86,7 @@ final class SalonProfileViewModel: BaseViewModel {
         self.getSalonByIdUseCase = getSalonByIdUseCase
         self.getSalonShareUseCase = getSalonShareUseCase
         self.getAltegioAvailableServicesUseCase = getAltegioAvailableServicesUseCase
+        self.getAltegioAvailableWorkersUseCase = getAltegioAvailableWorkersUseCase
         self.saveSalonUseCase = saveSalonUseCase
         self.unsaveSalonUseCase = unsaveSalonUseCase
         self.savedSalonsEventBus = savedSalonsEventBus
@@ -110,7 +128,12 @@ final class SalonProfileViewModel: BaseViewModel {
     }
 
     var filteredWorkers: [SalonWorker] {
-        guard let workers = salon?.workers else { return [] }
+        guard let salon else { return [] }
+        var workers = salon.workers
+        // Altegio salons only surface workers the salon can actually book.
+        if salon.provider == .altegio, let availableWorkerIds {
+            workers = workers.filter { availableWorkerIds.contains($0.id) }
+        }
         let q = specialistsSearchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !q.isEmpty else { return workers }
         return workers.filter { worker in
@@ -118,6 +141,20 @@ final class SalonProfileViewModel: BaseViewModel {
             return fullName.localizedCaseInsensitiveContains(q)
                 || (worker.position?.localizedCaseInsensitiveContains(q) ?? false)
         }
+    }
+
+    // Suppresses the "nothing found" message while availability is still loading
+    // or when only the "any specialist" option would show.
+    var specialistsTabIsEmpty: Bool {
+        if isLoadingWorkers { return false }
+        return filteredWorkers.isEmpty && !showsAnySpecialistOption
+    }
+
+    // The "Будь-який" (any specialist) option leads the Specialists list for the
+    // in-app (Altegio) flow. Hidden while searching by name.
+    var showsAnySpecialistOption: Bool {
+        salon?.provider == .altegio
+            && specialistsSearchQuery.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
     // EasyWeek salons are browse-only in-app (booking happens in the web widget),
@@ -149,13 +186,23 @@ final class SalonProfileViewModel: BaseViewModel {
     }
 
     func specialistRowModel(for worker: SalonWorker) -> SpecialistModel {
-        SpecialistModel(
+        let slots = workerSlots[worker.id] ?? []
+        return SpecialistModel(
             id: worker.id,
             name: "\(worker.firstName) \(worker.lastName)".trimmingCharacters(in: .whitespaces),
             specialty: worker.position ?? "",
             imageURL: worker.photoUrl.flatMap(URL.init(string:)),
-            availableTimeSlots: [],
-            nearestDate: nil
+            availableTimeSlots: slots.map(\.time),
+            nearestDate: nearestDateLabel(for: slots)
+        )
+    }
+
+    // A fresh binding per render into the per-worker selection dictionary, so the
+    // tapped slot pill highlights and its datetime can be carried forward.
+    func selectedSlotBinding(for workerId: String) -> Binding<String?> {
+        Binding(
+            get: { self.selectedSlotByWorker[workerId] },
+            set: { self.selectedSlotByWorker[workerId] = $0 }
         )
     }
 
@@ -203,8 +250,20 @@ final class SalonProfileViewModel: BaseViewModel {
             showComingSoon()
             return
         }
-        // Open service selection, remembering the chosen specialist for later steps.
-        transition.didRequestBooking(salon, .worker(id: worker.id), availableServiceIds ?? [])
+        // Open service selection, remembering the chosen specialist and slot
+        // datetime so the next step can filter services by that datetime too.
+        let datetime = selectedSlotDatetime(for: worker.id)
+        transition.didRequestBooking(salon, .worker(id: worker.id, datetime: datetime), availableServiceIds ?? [])
+    }
+
+    // "Будь-який" — book without choosing a specialist (no worker/datetime filter).
+    func didTapSelectAnySpecialist() {
+        guard requireAuth() else { return }
+        guard let salon, salon.provider == .altegio else {
+            showComingSoon()
+            return
+        }
+        transition.didRequestBooking(salon, .book, availableServiceIds ?? [])
     }
 
     private func showComingSoon() {
@@ -265,11 +324,12 @@ final class SalonProfileViewModel: BaseViewModel {
             salon = result
             isFavorited = result.isSaved
             hideLoader()
-            // Altegio salons additionally resolve which services are bookable.
-            // Loaded after the profile is shown (the CRM call can be slow), with
-            // the Services tab showing its own loader meanwhile.
+            // Altegio salons additionally resolve which services and workers are
+            // bookable. Loaded after the profile is shown (the CRM calls can be
+            // slow), with each tab showing its own loader meanwhile.
             if result.provider == .altegio {
                 await loadAvailability()
+                await loadWorkers()
             }
         } catch {
             hideLoader()
@@ -290,6 +350,59 @@ final class SalonProfileViewModel: BaseViewModel {
             showError(error)
         }
     }
+
+    // Resolves bookable workers + their next slots. No filters here — the user
+    // hasn't picked services/time yet on the profile; `includeSlots` powers the
+    // nearest-date label and slot pills.
+    private func loadWorkers() async {
+        isLoadingWorkers = true
+        defer { isLoadingWorkers = false }
+        do {
+            let workers = try await getAltegioAvailableWorkersUseCase.execute(
+                salonId: salonId,
+                serviceIds: [],
+                datetime: nil,
+                includeSlots: true
+            )
+            availableWorkerIds = Set(workers.filter { $0.isBookable }.map { $0.id })
+            var slotsById: [String: [AltegioBookingSlot]] = [:]
+            var defaultSelection: [String: String] = [:]
+            for worker in workers where worker.isBookable {
+                slotsById[worker.id] = worker.slots
+                // Pre-select the nearest slot, matching the Figma highlight.
+                if let nearest = worker.slots.first {
+                    defaultSelection[worker.id] = nearest.time
+                }
+            }
+            workerSlots = slotsById
+            selectedSlotByWorker = defaultSelection
+        } catch {
+            showError(error)
+        }
+    }
+
+    // Datetime of the worker's currently-selected slot (the nearest by default),
+    // carried into the booking flow. `nil` when the worker has no slots.
+    private func selectedSlotDatetime(for workerId: String) -> String? {
+        let slots = workerSlots[workerId] ?? []
+        if let time = selectedSlotByWorker[workerId],
+           let slot = slots.first(where: { $0.time == time }) {
+            return slot.datetime
+        }
+        return slots.first?.datetime
+    }
+
+    private func nearestDateLabel(for slots: [AltegioBookingSlot]) -> String? {
+        guard let date = slots.first?.date else { return nil }
+        return Localization.salonSpecialistNearestDate(Self.nearestDateFormatter.string(from: date))
+    }
+
+    private static let nearestDateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "uk_UA")
+        formatter.dateFormat = "dd.MM"
+        return formatter
+    }()
 
     private func observeSavedSalonsBus() {
         savedSalonsEventBus.changes
