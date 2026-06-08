@@ -10,6 +10,7 @@ protocol SalonBookingFactory: ResolverInjector {
     var getAltegioAvailableWorkersUseCase: any GetAltegioAvailableWorkersUseCase { get }
     var getAltegioBookingDatesUseCase: any GetAltegioBookingDatesUseCase { get }
     var getAltegioTimeSlotsUseCase: any GetAltegioTimeSlotsUseCase { get }
+    var createAltegioBookingUseCase: any CreateAltegioBookingUseCase { get }
     var controllerFactory: any SalonBookingControllerFactory { get }
 }
 
@@ -30,6 +31,9 @@ extension SalonBookingFactory {
     }
     var getAltegioTimeSlotsUseCase: any GetAltegioTimeSlotsUseCase {
         resolver.require((any GetAltegioTimeSlotsUseCase).self)
+    }
+    var createAltegioBookingUseCase: any CreateAltegioBookingUseCase {
+        resolver.require((any CreateAltegioBookingUseCase).self)
     }
     var controllerFactory: any SalonBookingControllerFactory { resolver.require((any SalonBookingControllerFactory).self) }
 }

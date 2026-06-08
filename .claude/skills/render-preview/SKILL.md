@@ -91,64 +91,37 @@ Use the Read tool to view each PNG:
 
 These are full-resolution renders at 2x scale. The view height auto-expands to show all content (no vertical clipping). Images from the network appear as beige placeholders.
 
-## Step 3: Compare against Figma (if available)
+## Step 3: Verify the render
 
-Fetch the Figma design screenshot:
-```
-mcp__figma__get_screenshot(fileKey: "jhPfJ6hh8NTS6zc1R1A5kE", nodeId: "...")
-```
+Reading the PNG is necessary but not sufficient — the whole point of rendering is to catch where the implementation drifts from the design. There are two distinct passes, and they don't substitute for each other: a render-specific pass that only this pipeline can do, and the full design comparison.
 
-Compare the render against the Figma screenshot. Also fetch the design context via `get_design_context` to get exact values for spacing, colors, and typography — don't rely only on visual comparison.
+### 3a. Render-specific sanity checks (do these first)
 
-### Checklist — go through EVERY item
+These matter because the PNG came out of a test harness, not the live app. `audit-ui` looks at a static image and has no way to know any of this — so catching it here is on you:
 
-**Spacing & Padding:**
-- Horizontal padding on section headers — do they match Figma's left/right insets?
-- Horizontal padding on scrollable rows — do cards/items start at the correct inset from the screen edge?
-- Vertical spacing between sections — compare gap sizes
-- Internal padding within cards, badges, chips — check all four sides
-- Padding inside the header area (top, bottom, between elements)
+- **Clipping / cut-off artifacts.** The renderer auto-expands *height* to fit content, so nothing clips vertically — but horizontal overflow and stroke/shadow clipping still happen. The classic case: a `Circle().stroke(…)` whose line is centered on the frame edge, so its outer half spills outside the laid-out bounds and an enclosing `ScrollView` shaves it (often ~1px on one edge). Scan every border, ring, rounded corner, and row edge for shaved pixels.
+- **Placeholder rendering is expected.** Network images render as beige (`Color.App.beige2`) placeholders — that's the harness, not a bug. Don't "fix" it, and don't audit dynamic image *content*; judge only the frame + clip shape.
+- **Did the data actually load?** The harness waits ~0.5s for async work. If the screen still shows a loading spinner, an empty state, or stub values, the mock isn't wired right — fix the test/mock, not the view.
+- **Auto-height means there's no fold.** The render shows the full intrinsic height with no scrolling, so content that sits below the fold in-app is fully visible here. Judge sticky headers, `.safeAreaInset` bars, and bottom CTAs with that in mind — their position in the PNG isn't where they pin on a real screen.
+- **Everything is 2× scale.** Pixel measurements in the PNG are double the point values. Halve them before comparing to Figma's pt units.
 
-**Alignment:**
-- Are all items in a horizontal row aligned to the same baseline/top? (e.g., category chips with different label lengths should align at the top, not center-vertically)
-- Are section headers left-aligned consistently?
-- Are card elements (badges, buttons, text) positioned correctly relative to the card?
+### 3b. Full design comparison → hand off to `audit-ui`
 
-**Shadows & Effects:**
-- Does the design have shadows? If yes, where exactly — top, bottom, all sides?
-- Is the shadow direction correct? (e.g., bottom-only vs all-around)
-- Do child elements incorrectly inherit shadows from their parent? (e.g., images inside a shadowed container should NOT have their own shadow unless Figma shows one)
-- Check blur, opacity, and gradients
+For the actual design-fidelity pass — structure, position/sizing, spacing, typography, colors, images, icons, components, effects, states, localization, touch targets, responsiveness, chrome — **invoke the `audit-ui` skill**, giving it the rendered PNG path (from Step 2) and the Figma node.
 
-**Typography:**
-- Font size, weight, line height — compare against Figma's text styles
-- Letter spacing / tracking
-- Text color — exact hex match
+`audit-ui` is the single source of truth for comparison depth: it walks 15 categories (A–O), reads exact values from `get_design_context`, maps every Figma value to a `Font.App.*` / `Color.App.*` / `CGFloat.Spacing.*` token, applies severity thresholds, and returns a triaged report (Critical / Minor / Nits / Looks correct / Open questions). Deliberately **don't** keep a parallel checklist here — a second copy would only drift from `audit-ui` and rot. Improve the comparison depth by improving `audit-ui`.
 
-**Colors & Backgrounds:**
-- Background colors of sections, cards, badges, chips
-- Border/stroke colors if any
-- Opacity values
-
-**Components & Content:**
-- Are all sections from Figma present in the render?
-- Correct order of sections?
-- Are badges, icons, overlays present where Figma shows them?
-
-**Shape & Clipping:**
-- Corner radius on cards, images, badges, chips
-- Are images clipped to their container shape?
-- Circle vs rounded-rect — match Figma exactly
+If there's **no Figma reference** to compare against, there's nothing to hand off — just confirm via 3a that the render is structurally sane and report what you see.
 
 ## Step 4: Fix and re-render
 
-If you spot discrepancies:
+When 3a finds a render artifact or `audit-ui` surfaces a discrepancy:
 1. Fix the SwiftUI code
 2. Re-run the render test (Step 1)
 3. Re-read the PNG (Step 2)
-4. Repeat until it matches the design
+4. Re-verify (Step 3) — re-run the audit on the new PNG so findings reflect the current render
 
-This is the edit → render → verify loop. Keep iterating until satisfied.
+This is the edit → render → verify loop. Keep iterating until the render is clean and the audit comes back with nothing actionable.
 
 ## Adding render tests for a new screen
 

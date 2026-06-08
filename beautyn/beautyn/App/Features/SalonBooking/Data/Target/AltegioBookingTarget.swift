@@ -22,6 +22,9 @@ enum AltegioBookingTarget {
     /// Available time slots for a single `date` (`yyyy-MM-dd`). `serviceIds` and
     /// `workerId` narrow availability.
     case getTimeSlots(salonId: String, date: String, workerId: String?, serviceIds: [String])
+    /// Create the booking record. `workerId` nil = "any team member" (backend
+    /// books with Altegio `staff_id: 0`). `comment` is optional.
+    case createRecord(salonId: String, workerId: String?, serviceIds: [String], datetime: String, comment: String?)
 }
 
 // MARK: - TargetType
@@ -42,6 +45,8 @@ extension AltegioBookingTarget: TargetType {
             return "/booking/altegio/\(salonId)/dates"
         case .getTimeSlots(let salonId, _, _, _):
             return "/booking/altegio/\(salonId)/timeslots"
+        case .createRecord(let salonId, _, _, _, _):
+            return "/booking/altegio/\(salonId)/records"
         }
     }
 
@@ -49,6 +54,8 @@ extension AltegioBookingTarget: TargetType {
         switch self {
         case .getBookableServices, .getBookableWorkers, .getBookableDates, .getTimeSlots:
             return .get
+        case .createRecord:
+            return .post
         }
     }
 
@@ -111,6 +118,21 @@ extension AltegioBookingTarget: TargetType {
                 parameters["serviceIds"] = serviceIds
             }
             return .requestParameters(parameters: parameters, encoding: URLEncoding.default)
+
+        case .createRecord(_, let workerId, let serviceIds, let datetime, let comment):
+            // JSON body. `serviceIds` + `datetime` are always sent; `workerId` is
+            // omitted for "any team member"; `comment` is omitted when blank.
+            var parameters: [String: Any] = [
+                "serviceIds": serviceIds,
+                "datetime": datetime
+            ]
+            if let workerId, !workerId.isEmpty {
+                parameters["workerId"] = workerId
+            }
+            if let comment, !comment.isEmpty {
+                parameters["comment"] = comment
+            }
+            return .requestParameters(parameters: parameters, encoding: JSONEncoding.default)
         }
     }
 

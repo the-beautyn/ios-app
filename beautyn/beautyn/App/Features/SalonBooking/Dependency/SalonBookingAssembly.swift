@@ -46,6 +46,12 @@ final class SalonBookingAssembly: Assembly {
             )
         }
 
+        container.register((any CreateAltegioBookingUseCase).self) { resolver in
+            CreateAltegioBookingUseCaseImpl(
+                repository: resolver.require((any AltegioBookingRepository).self)
+            )
+        }
+
         container.register((any GetSalonShareUseCase).self) { resolver in
             GetSalonShareUseCaseImpl(
                 repository: resolver.require((any SalonRepository).self)

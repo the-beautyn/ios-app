@@ -75,4 +75,22 @@ final class AltegioBookingRepositoryImpl: AltegioBookingRepository {
         let response: AltegioTimeSlotsResponseDTO = try await networkService.request(target)
         return AltegioBookingMapper.timeSlots(response)
     }
+
+    func createBooking(
+        salonId: String,
+        workerId: String?,
+        serviceIds: [String],
+        datetime: String,
+        comment: String?
+    ) async throws -> CreatedBooking {
+        let target = Target(type: AltegioBookingTarget.createRecord(
+            salonId: salonId,
+            workerId: workerId,
+            serviceIds: serviceIds,
+            datetime: datetime,
+            comment: comment
+        ))
+        let response: AltegioCreateRecordResponseDTO = try await networkService.request(target)
+        return AltegioBookingMapper.createdBooking(response)
+    }
 }

@@ -185,6 +185,17 @@ public enum Localization {
     return Localization.tr("Localizable", "booking_total_price", String(describing: p1), fallback: "Всього: %@ грн")
   }
 
+  // MARK: - Confirm Booking
+  public static let confirmBookingTitle = Localization.tr("Localizable", "confirm_booking_title", fallback: "Підтвердження запису")
+  public static let confirmBookingPaymentOnSite = Localization.tr("Localizable", "confirm_booking_payment_on_site", fallback: "Оплата на місці")
+  public static let confirmBookingYourData = Localization.tr("Localizable", "confirm_booking_your_data", fallback: "Ваші дані")
+  public static let confirmBookingDiscountTitle = Localization.tr("Localizable", "confirm_booking_discount_title", fallback: "Код знижки")
+  public static let confirmBookingDiscountPlaceholder = Localization.tr("Localizable", "confirm_booking_discount_placeholder", fallback: "Введить код")
+  public static let confirmBookingCommentTitle = Localization.tr("Localizable", "confirm_booking_comment_title", fallback: "Коментар")
+  public static let confirmBookingCommentPlaceholder = Localization.tr("Localizable", "confirm_booking_comment_placeholder", fallback: "Залиште додаткові коментарі для майстра або салону")
+  public static let confirmBookingConfirmButton = Localization.tr("Localizable", "confirm_booking_confirm_button", fallback: "Підтвердити")
+  public static let confirmBookingSuccess = Localization.tr("Localizable", "confirm_booking_success", fallback: "Бронювання створено")
+
   // MARK: - My Bookings
   public static let bookingsTabCancelled = Localization.tr("Localizable", "bookings_tab_cancelled", fallback: "Скасовані")
   public static let bookingsTabPast = Localization.tr("Localizable", "bookings_tab_past", fallback: "Попередні")

@@ -69,11 +69,40 @@ final class SalonBookingCoordinator: BaseCoordinator {
     }
 
     private func showSelectDateTime(salon: Salon, selectedServiceIds: Set<String>, workerId: String?, datetime: String?) {
+        let transition = SelectDateTimeViewModel.Transition(
+            didContinue: { [weak self] salon, serviceIds, workerId, datetime in
+                self?.showConfirmBooking(
+                    salon: salon,
+                    selectedServiceIds: serviceIds,
+                    workerId: workerId,
+                    datetime: datetime
+                )
+            }
+        )
         let vc = factory.makeSelectDateTime(
             salon: salon,
             selectedServiceIds: selectedServiceIds,
             workerId: workerId,
-            datetime: datetime
+            datetime: datetime,
+            transition: transition
+        )
+        router.push(vc, animated: true)
+    }
+
+    private func showConfirmBooking(salon: Salon, selectedServiceIds: Set<String>, workerId: String?, datetime: String) {
+        let transition = ConfirmBookingViewModel.Transition(
+            didFinishBooking: { [weak self] _ in
+                // Booking done — return to the salon profile. The success toast was
+                // enqueued globally by the view model and shows there on appear.
+                self?.router.popTo(SalonProfileController.self, animated: true)
+            }
+        )
+        let vc = factory.makeConfirmBooking(
+            salon: salon,
+            selectedServiceIds: selectedServiceIds,
+            workerId: workerId,
+            datetime: datetime,
+            transition: transition
         )
         router.push(vc, animated: true)
     }

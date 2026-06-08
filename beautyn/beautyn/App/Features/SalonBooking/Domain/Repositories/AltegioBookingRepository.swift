@@ -40,4 +40,13 @@ protocol AltegioBookingRepository {
         workerId: String?,
         serviceIds: [String]
     ) async throws -> [AltegioBookingSlot]
+
+    /// Create the booking record. `workerId` nil = "any team member".
+    func createBooking(
+        salonId: String,
+        workerId: String?,
+        serviceIds: [String],
+        datetime: String,
+        comment: String?
+    ) async throws -> CreatedBooking
 }

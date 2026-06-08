@@ -139,6 +139,17 @@
 "booking_clear_button" = "Почистити";
 "booking_apply_button" = "Застосувати";
 
+// MARK: - Confirm Booking
+"confirm_booking_title" = "Підтвердження запису";
+"confirm_booking_payment_on_site" = "Оплата на місці";
+"confirm_booking_your_data" = "Ваші дані";
+"confirm_booking_discount_title" = "Код знижки";
+"confirm_booking_discount_placeholder" = "Введить код";
+"confirm_booking_comment_title" = "Коментар";
+"confirm_booking_comment_placeholder" = "Залиште додаткові коментарі для майстра або салону";
+"confirm_booking_confirm_button" = "Підтвердити";
+"confirm_booking_success" = "Бронювання створено";
+
 // MARK: - My Bookings
 "bookings_title" = "Мої бронювання";
 "bookings_tab_upcoming" = "Наступні";

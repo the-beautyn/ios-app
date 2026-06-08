@@ -139,6 +139,17 @@
 "booking_clear_button" = "Clear";
 "booking_apply_button" = "Apply";
 
+// MARK: - Confirm Booking
+"confirm_booking_title" = "Booking confirmation";
+"confirm_booking_payment_on_site" = "Payment on site";
+"confirm_booking_your_data" = "Your details";
+"confirm_booking_discount_title" = "Discount code";
+"confirm_booking_discount_placeholder" = "Enter code";
+"confirm_booking_comment_title" = "Comment";
+"confirm_booking_comment_placeholder" = "Leave additional comments for the master or salon";
+"confirm_booking_confirm_button" = "Confirm";
+"confirm_booking_success" = "Booking created";
+
 // MARK: - My Bookings
 "bookings_title" = "My bookings";
 "bookings_tab_upcoming" = "Upcoming";

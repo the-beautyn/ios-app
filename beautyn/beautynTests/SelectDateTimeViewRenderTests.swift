@@ -55,6 +55,7 @@ final class SelectDateTimeViewRenderTests: XCTestCase {
             selectedServiceIds: ["srv1", "srv2"],
             workerId: workerId,
             datetime: datetime,
+            transition: .init(didContinue: { _, _, _, _ in }),
             getAltegioAvailableWorkersUseCase: StubWorkersUseCase(),
             getAltegioBookingDatesUseCase: StubDatesUseCase(),
             getAltegioTimeSlotsUseCase: StubTimeSlotsUseCase()

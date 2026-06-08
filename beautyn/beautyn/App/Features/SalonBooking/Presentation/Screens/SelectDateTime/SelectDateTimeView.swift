@@ -158,6 +158,7 @@ private func makePreviewVM() -> SelectDateTimeViewModel {
         selectedServiceIds: ["srv1", "srv2"],
         workerId: nil,
         datetime: nil,
+        transition: .init(didContinue: { _, _, _, _ in }),
         getAltegioAvailableWorkersUseCase: PreviewWorkersUseCase(),
         getAltegioBookingDatesUseCase: PreviewDatesUseCase(),
         getAltegioTimeSlotsUseCase: PreviewTimeSlotsUseCase()

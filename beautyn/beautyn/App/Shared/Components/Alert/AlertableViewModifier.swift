@@ -15,6 +15,7 @@ struct AlertableViewModifier: ViewModifier {
                 .animation(.spring(response: 0.45, dampingFraction: 0.8))
                 .closeOnTap(true)
                 .closeOnTapOutside(false)
+                .allowTapThroughBG(true)
                 .dragToDismiss(true)
                 .autohideIn(3.5)
                 .dismissCallback { _ in alert = nil }

@@ -7,6 +7,17 @@ import SwiftUI
 @MainActor
 final class SelectDateTimeViewModel: BaseViewModel {
 
+    // MARK: - Transition
+
+    struct Transition {
+        /// Move to the confirmation step with the chosen services, specialist and
+        /// the picked slot's datetime (ISO 8601).
+        let didContinue: (_ salon: Salon,
+                          _ serviceIds: Set<String>,
+                          _ workerId: String?,
+                          _ datetime: String) -> Void
+    }
+
     // MARK: - Published State
 
     /// Bookable masters for the selected services, leading with "Будь-який"
@@ -34,6 +45,7 @@ final class SelectDateTimeViewModel: BaseViewModel {
 
     private let salon: Salon
     @Published private(set) var selectedServiceIds: Set<String>
+    private let transition: Transition
     private let getAltegioAvailableWorkersUseCase: any GetAltegioAvailableWorkersUseCase
     private let getAltegioBookingDatesUseCase: any GetAltegioBookingDatesUseCase
     private let getAltegioTimeSlotsUseCase: any GetAltegioTimeSlotsUseCase
@@ -57,12 +69,14 @@ final class SelectDateTimeViewModel: BaseViewModel {
         selectedServiceIds: Set<String>,
         workerId: String?,
         datetime: String?,
+        transition: Transition,
         getAltegioAvailableWorkersUseCase: any GetAltegioAvailableWorkersUseCase,
         getAltegioBookingDatesUseCase: any GetAltegioBookingDatesUseCase,
         getAltegioTimeSlotsUseCase: any GetAltegioTimeSlotsUseCase
     ) {
         self.salon = salon
         self.selectedServiceIds = selectedServiceIds
+        self.transition = transition
         self.preselectedWorkerId = workerId
         self.preselectedDatetime = datetime
         self.selectedMasterId = workerId
@@ -252,14 +266,8 @@ final class SelectDateTimeViewModel: BaseViewModel {
     }
 
     func didTapContinue() {
-        guard canContinue else { return }
-        // The confirmation / payment step isn't built yet — placeholder for now,
-        // matching how the rest of the flow stubs unbuilt destinations.
-        showSuccess(
-            title: Localization.salonProfileComingSoonTitle,
-            message: Localization.salonProfileComingSoonMessage,
-            scope: .current
-        )
+        guard canContinue, let datetime = selectedSlotDatetime else { return }
+        transition.didContinue(salon, selectedServiceIds, selectedMasterId, datetime)
     }
 
     // MARK: - Bottom bar / edit sheet

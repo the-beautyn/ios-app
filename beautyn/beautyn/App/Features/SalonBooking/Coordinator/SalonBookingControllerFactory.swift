@@ -20,7 +20,16 @@ protocol SalonBookingControllerFactory {
         salon: Salon,
         selectedServiceIds: Set<String>,
         workerId: String?,
-        datetime: String?
+        datetime: String?,
+        transition: SelectDateTimeViewModel.Transition
+    ) -> UIViewController
+
+    func makeConfirmBooking(
+        salon: Salon,
+        selectedServiceIds: Set<String>,
+        workerId: String?,
+        datetime: String,
+        transition: ConfirmBookingViewModel.Transition
     ) -> UIViewController
 }
 
@@ -74,17 +83,38 @@ final class SalonBookingControllerFactoryImpl: SalonBookingControllerFactory {
         salon: Salon,
         selectedServiceIds: Set<String>,
         workerId: String?,
-        datetime: String?
+        datetime: String?,
+        transition: SelectDateTimeViewModel.Transition
     ) -> UIViewController {
         let viewModel = SelectDateTimeViewModel(
             salon: salon,
             selectedServiceIds: selectedServiceIds,
             workerId: workerId,
             datetime: datetime,
+            transition: transition,
             getAltegioAvailableWorkersUseCase: assembler.salonBooking.getAltegioAvailableWorkersUseCase,
             getAltegioBookingDatesUseCase: assembler.salonBooking.getAltegioBookingDatesUseCase,
             getAltegioTimeSlotsUseCase: assembler.salonBooking.getAltegioTimeSlotsUseCase
         )
         return SelectDateTimeController(viewModel: viewModel)
+    }
+
+    func makeConfirmBooking(
+        salon: Salon,
+        selectedServiceIds: Set<String>,
+        workerId: String?,
+        datetime: String,
+        transition: ConfirmBookingViewModel.Transition
+    ) -> UIViewController {
+        let viewModel = ConfirmBookingViewModel(
+            salon: salon,
+            selectedServiceIds: selectedServiceIds,
+            workerId: workerId,
+            datetime: datetime,
+            transition: transition,
+            createBookingUseCase: assembler.salonBooking.createAltegioBookingUseCase,
+            getCurrentUserUseCase: assembler.app.getCurrentUserUseCase
+        )
+        return ConfirmBookingController(viewModel: viewModel)
     }
 }

@@ -292,7 +292,7 @@ final class HomeViewModel: BaseViewModel {
 
     private func mapBookingToAppointment(_ booking: NextBooking) -> AppointmentCardModel {
         let dateFormatter = DateFormatter()
-        dateFormatter.locale = Locale(identifier: "uk_UA")
+        dateFormatter.locale = .appDisplay
         dateFormatter.dateFormat = "EEEE, d MMM, yyyy"
         let dateString = dateFormatter.string(from: booking.datetime).capitalized
 

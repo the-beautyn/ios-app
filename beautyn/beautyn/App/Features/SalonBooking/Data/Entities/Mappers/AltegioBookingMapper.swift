@@ -36,6 +36,16 @@ enum AltegioBookingMapper {
         dto.bookingDates.compactMap(dayFormatter.date(from:))
     }
 
+    /// Created booking record (`POST /records`).
+    static func createdBooking(_ dto: AltegioCreateRecordResponseDTO) -> CreatedBooking {
+        CreatedBooking(
+            bookingId: dto.bookingId,
+            crmRecordId: dto.crmRecordId,
+            shortLink: dto.shortLink,
+            status: dto.status
+        )
+    }
+
     // MARK: - Slot mapping
 
     private static func mapSlots(_ slots: [AltegioBookingSlotDTO]) -> [AltegioBookingSlot] {
