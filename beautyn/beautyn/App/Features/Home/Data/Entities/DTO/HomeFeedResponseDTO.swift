@@ -50,10 +50,12 @@ struct HomeFeedNextBookingDTO: Decodable {
     let salonName: String
     let salonCoverImageUrl: String?
     let salonAddressLine: String?
+    let salonTimezone: String?
     let datetime: String
     let endDatetime: String?
     let totalPriceCents: Int?
     let durationMinutes: Int?
+    let serviceNames: [String]?
 
     enum CodingKeys: String, CodingKey {
         case bookingId = "booking_id"
@@ -61,10 +63,12 @@ struct HomeFeedNextBookingDTO: Decodable {
         case salonName = "salon_name"
         case salonCoverImageUrl = "salon_cover_image_url"
         case salonAddressLine = "salon_address_line"
+        case salonTimezone = "salon_timezone"
         case datetime
         case endDatetime = "end_datetime"
         case totalPriceCents = "total_price_cents"
         case durationMinutes = "duration_minutes"
+        case serviceNames = "service_names"
     }
 }
 

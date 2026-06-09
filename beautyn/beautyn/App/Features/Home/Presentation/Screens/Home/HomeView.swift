@@ -66,6 +66,11 @@ struct HomeView: BaseViewProtocol {
     // MARK: - Scrollable Content
 
     private var scrollableContent: some View {
+        // GeometryReader + minHeight makes the content fill at least the viewport
+        // so the scroll view always has a pull region — pull-to-refresh then works
+        // even when the feed is empty. minHeight (not a fixed height) still lets a
+        // tall feed grow and scroll normally.
+        GeometryReader { proxy in
         ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: CGFloat.Spacing.lg + 4) {
 
@@ -75,7 +80,7 @@ struct HomeView: BaseViewProtocol {
                         SectionHeaderView(title: Localization.homeSectionNextAppointment)
                         AppointmentCardView(
                             appointment: appointment,
-                            onDetailsTap: viewModel.didTapAppointmentDetails
+                            onFooterTap: viewModel.didTapAppointmentDetails
                         )
                     }
                     .padding(.horizontal, CGFloat.Spacing.md)
@@ -91,6 +96,9 @@ struct HomeView: BaseViewProtocol {
                         .padding(.horizontal, CGFloat.Spacing.md)
                         savedSalonsRow
                     }
+                    // Fades the whole section when the first salon is saved / the
+                    // last is removed, instead of popping the layout.
+                    .transition(.opacity)
                 }
 
                 // Dynamic Sections
@@ -107,9 +115,14 @@ struct HomeView: BaseViewProtocol {
             }
             .padding(.top, CGFloat.Spacing.lg)
             .padding(.bottom, CGFloat.Spacing.xxxl)
+            .frame(maxWidth: .infinity, minHeight: proxy.size.height, alignment: .topLeading)
         }
         .refreshable {
             await viewModel.refresh()
+        }
+        // With the content filling the viewport, force the bounce so the pull
+        // gesture is available even when the feed is empty / exactly fits.
+        .scrollBounceBehavior(.always)
         }
     }
 
@@ -122,6 +135,9 @@ struct HomeView: BaseViewProtocol {
                     SavedSalonItemView(salon: salon) {
                         viewModel.didTapSavedSalon(salon)
                     }
+                    // Items scale/fade in/out while the rest of the row slides
+                    // to make room (driven by the view model's withAnimation).
+                    .transition(.scale.combined(with: .opacity))
                 }
             }
             .padding(.horizontal, CGFloat.Spacing.md)
@@ -169,6 +185,7 @@ struct HomeView: BaseViewProtocol {
             saveSalonUseCase: PreviewSaveSalonUseCase(),
             unsaveSalonUseCase: PreviewUnsaveSalonUseCase(),
             savedSalonsEventBus: PreviewSavedSalonsEventBus(),
+            bookingEventBus: BookingEventBusImpl(),
             sessionManager: SessionManager(keychainService: KeychainServiceImpl(), defaultsService: DefaultsStorageService()),
             getCurrentUserUseCase: PreviewGetCurrentUserUseCase()
         )

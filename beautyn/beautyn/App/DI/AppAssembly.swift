@@ -168,6 +168,13 @@ final class AppAssembly: Assembly {
             unsaveSalonUseCase
         }
 
+        // MARK: - Bookings (shared — Home + MyBookings refresh when a booking is created)
+
+        let bookingEventBus: any BookingEventBus = BookingEventBusImpl()
+        container.register((any BookingEventBus).self) { _ in
+            bookingEventBus
+        }
+
         // MARK: - OAuth services
 
         container.register((any AppleSignInService).self) { _ in

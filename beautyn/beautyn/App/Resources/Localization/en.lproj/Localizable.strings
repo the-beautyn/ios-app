@@ -12,6 +12,9 @@
 "input_phone_placeholder" = "phone number";
 "common_cancel" = "Cancel";
 "common_done" = "Done";
+"common_today" = "Today";
+"common_tomorrow" = "Tomorrow";
+"common_yesterday" = "Yesterday";
 
 // MARK: - Errors
 "error_invalid_response" = "Invalid server response.";
@@ -149,6 +152,7 @@
 "confirm_booking_comment_placeholder" = "Leave additional comments for the master or salon";
 "confirm_booking_confirm_button" = "Confirm";
 "confirm_booking_success" = "Booking created";
+"booking_success_title" = "You're successfully booked";
 
 // MARK: - My Bookings
 "bookings_title" = "My bookings";
@@ -156,6 +160,17 @@
 "bookings_tab_past" = "Past";
 "bookings_tab_cancelled" = "Cancelled";
 "bookings_upcoming_section_title" = "Upcoming appointments";
+"bookings_past_section_title" = "Past appointments";
+"bookings_cancelled_section_title" = "Cancelled appointments";
+"bookings_book_button" = "Book";
+"bookings_empty_upcoming" = "You have no upcoming appointments";
+"bookings_empty_past" = "You have no past appointments";
+"bookings_empty_cancelled" = "You have no cancelled appointments";
+"booking_details_title" = "Booking details";
+"booking_details_coming_soon" = "Booking details will be available soon.";
+"maps_chooser_title" = "Open in";
+"maps_apple_maps" = "Apple Maps";
+"maps_google_maps" = "Google Maps";
 
 // MARK: - My Profile
 "profile_title" = "Profile";

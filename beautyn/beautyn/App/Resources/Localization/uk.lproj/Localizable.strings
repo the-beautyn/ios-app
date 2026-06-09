@@ -12,6 +12,9 @@
 "input_phone_placeholder" = "номер телефону";
 "common_cancel" = "Скасувати";
 "common_done" = "Готово";
+"common_today" = "Сьогодні";
+"common_tomorrow" = "Завтра";
+"common_yesterday" = "Вчора";
 
 // MARK: - Errors
 "error_invalid_response" = "Невірна відповідь сервера.";
@@ -149,6 +152,7 @@
 "confirm_booking_comment_placeholder" = "Залиште додаткові коментарі для майстра або салону";
 "confirm_booking_confirm_button" = "Підтвердити";
 "confirm_booking_success" = "Бронювання створено";
+"booking_success_title" = "Вас успішно записано";
 
 // MARK: - My Bookings
 "bookings_title" = "Мої бронювання";
@@ -156,6 +160,17 @@
 "bookings_tab_past" = "Попередні";
 "bookings_tab_cancelled" = "Скасовані";
 "bookings_upcoming_section_title" = "Наступні записи";
+"bookings_past_section_title" = "Попередні записи";
+"bookings_cancelled_section_title" = "Скасовані записи";
+"bookings_book_button" = "Забронювати";
+"bookings_empty_upcoming" = "У вас немає наступних записів";
+"bookings_empty_past" = "У вас немає попередніх записів";
+"bookings_empty_cancelled" = "У вас немає скасованих записів";
+"booking_details_title" = "Деталі бронювання";
+"booking_details_coming_soon" = "Деталі бронювання будуть доступні незабаром.";
+"maps_chooser_title" = "Відкрити в";
+"maps_apple_maps" = "Apple Maps";
+"maps_google_maps" = "Google Maps";
 
 // MARK: - My Profile
 "profile_title" = "Профайл";

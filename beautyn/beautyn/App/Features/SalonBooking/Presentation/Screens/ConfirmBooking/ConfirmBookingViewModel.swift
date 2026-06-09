@@ -164,9 +164,8 @@ final class ConfirmBookingViewModel: BaseViewModel {
                 datetime: datetime,
                 comment: trimmedComment.isEmpty ? nil : trimmedComment
             )
-            // `.global` so the toast survives the pop and shows on the screen we
-            // land on (the coordinator pops the booking stack).
-            showSuccess(Localization.confirmBookingSuccess, scope: .global)
+            // Hand off to the coordinator, which shows the success splash
+            // (Figma 143:3199) before returning to the salon profile.
             transition.didFinishBooking(result)
         } catch {
             // Surfaces backend 400s (e.g. missing name/phone) via NetworkError.

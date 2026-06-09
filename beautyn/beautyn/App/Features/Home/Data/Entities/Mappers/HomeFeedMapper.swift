@@ -61,7 +61,9 @@ enum HomeFeedMapper {
             datetime: parseDate(dto.datetime),
             endDatetime: dto.endDatetime.map { parseDate($0) },
             totalPriceCents: dto.totalPriceCents,
-            durationMinutes: dto.durationMinutes
+            durationMinutes: dto.durationMinutes,
+            serviceNames: dto.serviceNames ?? [],
+            timezone: dto.salonTimezone.flatMap(TimeZone.init(identifier:))
         )
     }
 

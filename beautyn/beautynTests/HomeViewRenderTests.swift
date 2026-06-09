@@ -53,6 +53,7 @@ final class HomeViewRenderTests: XCTestCase {
             saveSalonUseCase: MockSaveSalonUseCase(),
             unsaveSalonUseCase: MockUnsaveSalonUseCase(),
             savedSalonsEventBus: MockSavedSalonsEventBus(),
+            bookingEventBus: MockBookingEventBus(),
             sessionManager: SessionManager(keychainService: KeychainServiceImpl(), defaultsService: DefaultsStorageService()),
             getCurrentUserUseCase: MockGetCurrentUserUseCase()
         )
@@ -78,6 +79,11 @@ private final class MockUnsaveSalonUseCase: UnsaveSalonUseCase {
 private final class MockSavedSalonsEventBus: SavedSalonsEventBus {
     var changes: AnyPublisher<SavedSalonChange, Never> { Empty().eraseToAnyPublisher() }
     func notify(_ change: SavedSalonChange) {}
+}
+
+private final class MockBookingEventBus: BookingEventBus {
+    var bookingCreated: AnyPublisher<BookingCreatedEvent, Never> { Empty().eraseToAnyPublisher() }
+    func notifyBookingCreated(_ event: BookingCreatedEvent) {}
 }
 
 // MARK: - MockHomeFeedUseCase
@@ -125,7 +131,9 @@ extension HomeFeed {
             datetime: Date().addingTimeInterval(86400),
             endDatetime: Date().addingTimeInterval(86400 + 7200),
             totalPriceCents: 70000,
-            durationMinutes: 90
+            durationMinutes: 90,
+            serviceNames: ["Манікюр", "Покриття гель-лаком"],
+            timezone: TimeZone(identifier: "Europe/Kyiv")
         ),
         savedSalons: [
             SavedSalon(id: "ss1", salonId: "s1", salonName: "Nail bar: Glossy Room", coverImageUrl: nil, addressLine: nil, city: nil, ratingAvg: 4.5, ratingCount: 120, savedAt: Date()),

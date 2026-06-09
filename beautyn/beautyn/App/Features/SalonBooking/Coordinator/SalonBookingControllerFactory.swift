@@ -31,6 +31,10 @@ protocol SalonBookingControllerFactory {
         datetime: String,
         transition: ConfirmBookingViewModel.Transition
     ) -> UIViewController
+
+    func makeBookingSuccess(
+        transition: BookingSuccessViewModel.Transition
+    ) -> UIViewController
 }
 
 // MARK: - SalonBookingControllerFactoryImpl
@@ -116,5 +120,12 @@ final class SalonBookingControllerFactoryImpl: SalonBookingControllerFactory {
             getCurrentUserUseCase: assembler.app.getCurrentUserUseCase
         )
         return ConfirmBookingController(viewModel: viewModel)
+    }
+
+    func makeBookingSuccess(
+        transition: BookingSuccessViewModel.Transition
+    ) -> UIViewController {
+        let viewModel = BookingSuccessViewModel(transition: transition)
+        return BookingSuccessController(viewModel: viewModel)
     }
 }

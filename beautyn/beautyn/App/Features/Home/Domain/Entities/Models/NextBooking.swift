@@ -12,4 +12,8 @@ struct NextBooking {
     let endDatetime: Date?
     let totalPriceCents: Int?
     let durationMinutes: Int?
+    let serviceNames: [String]
+    /// Salon's IANA timezone for rendering the appointment in salon-local time.
+    /// `nil` falls back to the device timezone.
+    let timezone: TimeZone?
 }

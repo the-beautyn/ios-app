@@ -43,6 +43,7 @@ final class HomeViewModel: BaseViewModel {
     private let saveSalonUseCase: any SaveSalonUseCase
     private let unsaveSalonUseCase: any UnsaveSalonUseCase
     private let savedSalonsEventBus: any SavedSalonsEventBus
+    private let bookingEventBus: any BookingEventBus
     private let sessionManager: SessionManager
     private let getCurrentUserUseCase: any GetCurrentUserUseCase
     private var cancellables = Set<AnyCancellable>()
@@ -55,6 +56,7 @@ final class HomeViewModel: BaseViewModel {
         saveSalonUseCase: any SaveSalonUseCase,
         unsaveSalonUseCase: any UnsaveSalonUseCase,
         savedSalonsEventBus: any SavedSalonsEventBus,
+        bookingEventBus: any BookingEventBus,
         sessionManager: SessionManager,
         getCurrentUserUseCase: any GetCurrentUserUseCase
     ) {
@@ -63,11 +65,13 @@ final class HomeViewModel: BaseViewModel {
         self.saveSalonUseCase = saveSalonUseCase
         self.unsaveSalonUseCase = unsaveSalonUseCase
         self.savedSalonsEventBus = savedSalonsEventBus
+        self.bookingEventBus = bookingEventBus
         self.sessionManager = sessionManager
         self.getCurrentUserUseCase = getCurrentUserUseCase
         super.init()
         observeAuthState()
         observeSavedSalonsBus()
+        observeBookingCreated()
         Task { [weak self] in
             await self?.loadHomeFeed()
         }
@@ -96,6 +100,19 @@ final class HomeViewModel: BaseViewModel {
             .store(in: &cancellables)
     }
 
+    private func observeBookingCreated() {
+        bookingEventBus.bookingCreated
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                // Silent reload (no full-screen loader) so the next-appointment
+                // card is already fresh when the user returns to Home.
+                Task { [weak self] in
+                    await self?.fetchFeed()
+                }
+            }
+            .store(in: &cancellables)
+    }
+
     private func applySavedChange(_ change: SavedSalonChange) {
         sections = sections.map { section in
             SectionUI(
@@ -110,16 +127,22 @@ final class HomeViewModel: BaseViewModel {
             )
         }
 
+        // Animate just the saved-list mutation so the row (and the feed below it)
+        // slides instead of jumping. The section heart toggle above stays instant.
         if change.isSaved {
             if !savedSalons.contains(where: { $0.id == change.salonId }),
                let card = sections.lazy.flatMap(\.items).first(where: { $0.id == change.salonId }) {
-                savedSalons.insert(
-                    SavedSalonUI(id: card.id, salonName: card.name, imageURL: card.imageURL),
-                    at: 0
-                )
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    savedSalons.insert(
+                        SavedSalonUI(id: card.id, salonName: card.name, imageURL: card.imageURL),
+                        at: 0
+                    )
+                }
             }
         } else {
-            savedSalons.removeAll { $0.id == change.salonId }
+            withAnimation(.easeInOut(duration: 0.3)) {
+                savedSalons.removeAll { $0.id == change.salonId }
+            }
         }
     }
 
@@ -291,18 +314,6 @@ final class HomeViewModel: BaseViewModel {
     }
 
     private func mapBookingToAppointment(_ booking: NextBooking) -> AppointmentCardModel {
-        let dateFormatter = DateFormatter()
-        dateFormatter.locale = .appDisplay
-        dateFormatter.dateFormat = "EEEE, d MMM, yyyy"
-        let dateString = dateFormatter.string(from: booking.datetime).capitalized
-
-        let timeFormatter = DateFormatter()
-        timeFormatter.dateFormat = "H:mm"
-        var timeString = timeFormatter.string(from: booking.datetime)
-        if let end = booking.endDatetime {
-            timeString += " - " + timeFormatter.string(from: end)
-        }
-
         let price: String
         if let cents = booking.totalPriceCents {
             price = Localization.homeAppointmentPrice("\(cents / 100)")
@@ -322,10 +333,14 @@ final class HomeViewModel: BaseViewModel {
             salonName: booking.salonName,
             address: booking.salonAddressLine ?? "",
             salonImageURL: booking.salonCoverImageUrl.flatMap(URL.init(string:)),
-            date: dateString,
-            time: timeString,
+            // Same presentation as the My Bookings upcoming card — relative
+            // "Сьогодні" / "Завтра" day and shared time format — only the map is
+            // omitted (no coordinate), per design.
+            date: AppointmentDateFormatter.dateString(booking.datetime, relativeDay: true, timeZone: booking.timezone),
+            time: AppointmentDateFormatter.timeString(start: booking.datetime, end: booking.endDatetime, timeZone: booking.timezone),
             price: price,
-            duration: duration
+            duration: duration,
+            serviceName: booking.serviceNames.isEmpty ? nil : booking.serviceNames.joined(separator: ", ")
         )
     }
 }

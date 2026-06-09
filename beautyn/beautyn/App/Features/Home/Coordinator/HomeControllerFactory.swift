@@ -25,6 +25,7 @@ final class HomeControllerFactoryImpl: HomeControllerFactory {
             saveSalonUseCase: assembler.require((any SaveSalonUseCase).self),
             unsaveSalonUseCase: assembler.require((any UnsaveSalonUseCase).self),
             savedSalonsEventBus: assembler.require((any SavedSalonsEventBus).self),
+            bookingEventBus: assembler.require((any BookingEventBus).self),
             sessionManager: assembler.app.sessionManager,
             getCurrentUserUseCase: assembler.app.getCurrentUserUseCase
         )

@@ -92,9 +92,9 @@ final class SalonBookingCoordinator: BaseCoordinator {
     private func showConfirmBooking(salon: Salon, selectedServiceIds: Set<String>, workerId: String?, datetime: String) {
         let transition = ConfirmBookingViewModel.Transition(
             didFinishBooking: { [weak self] _ in
-                // Booking done — return to the salon profile. The success toast was
-                // enqueued globally by the view model and shows there on appear.
-                self?.router.popTo(SalonProfileController.self, animated: true)
+                // Booking done — show the success splash, which auto-returns to the
+                // salon profile after a couple of seconds.
+                self?.showBookingSuccess()
             }
         )
         let vc = factory.makeConfirmBooking(
@@ -104,6 +104,18 @@ final class SalonBookingCoordinator: BaseCoordinator {
             datetime: datetime,
             transition: transition
         )
+        router.push(vc, animated: true)
+    }
+
+    private func showBookingSuccess() {
+        let transition = BookingSuccessViewModel.Transition(
+            didFinish: { [weak self] in
+                // Splash finished — collapse the booking stack back to the salon
+                // profile (removes both the confirm and success screens).
+                self?.router.popTo(SalonProfileController.self, animated: true)
+            }
+        )
+        let vc = factory.makeBookingSuccess(transition: transition)
         router.push(vc, animated: true)
     }
 }

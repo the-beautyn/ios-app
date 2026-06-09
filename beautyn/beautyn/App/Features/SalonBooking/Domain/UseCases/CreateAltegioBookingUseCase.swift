@@ -18,9 +18,11 @@ protocol CreateAltegioBookingUseCase {
 final class CreateAltegioBookingUseCaseImpl: CreateAltegioBookingUseCase {
 
     private let repository: AltegioBookingRepository
+    private let bookingEventBus: any BookingEventBus
 
-    init(repository: AltegioBookingRepository) {
+    init(repository: AltegioBookingRepository, bookingEventBus: any BookingEventBus) {
         self.repository = repository
+        self.bookingEventBus = bookingEventBus
     }
 
     func execute(
@@ -30,12 +32,17 @@ final class CreateAltegioBookingUseCaseImpl: CreateAltegioBookingUseCase {
         datetime: String,
         comment: String?
     ) async throws -> CreatedBooking {
-        try await repository.createBooking(
+        let booking = try await repository.createBooking(
             salonId: salonId,
             workerId: workerId,
             serviceIds: serviceIds,
             datetime: datetime,
             comment: comment
         )
+        // Let the Home and MyBookings screens refresh themselves.
+        bookingEventBus.notifyBookingCreated(
+            BookingCreatedEvent(bookingId: booking.bookingId, salonId: salonId)
+        )
+        return booking
     }
 }
