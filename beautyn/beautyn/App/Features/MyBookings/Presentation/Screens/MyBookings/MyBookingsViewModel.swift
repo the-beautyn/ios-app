@@ -7,8 +7,8 @@ import Combine
 final class MyBookingsViewModel: BaseViewModel {
 
     struct Transition {
-        let didTapBookingDetails: (String) -> Void   // bookingId
-        let didTapBook: (String) -> Void             // salonId
+        let didTapBookingDetails: (Booking) -> Void   // the tapped booking
+        let didTapBook: (String) -> Void              // salonId
     }
 
     enum TabState {
@@ -43,13 +43,13 @@ final class MyBookingsViewModel: BaseViewModel {
     }
 
     override func onViewTask() async {
-        await loadIfNeeded(selectedTab)
+        await openTab(selectedTab)
     }
 
     func selectTab(_ tab: BookingTab) {
         guard tab != selectedTab else { return }
         selectedTab = tab
-        Task { await loadIfNeeded(tab) }
+        Task { await openTab(tab) }
     }
 
     func refresh() async {
@@ -61,7 +61,7 @@ final class MyBookingsViewModel: BaseViewModel {
     // MARK: - Card actions
 
     func didTapDetails(_ booking: Booking) {
-        transition.didTapBookingDetails(booking.id)
+        transition.didTapBookingDetails(booking)
     }
 
     func didTapBook(_ booking: Booking) {
@@ -90,16 +90,22 @@ final class MyBookingsViewModel: BaseViewModel {
 
     // MARK: - Loading
 
-    private func loadIfNeeded(_ tab: BookingTab) async {
+    // Opening a tab (screen appears or tab switched): show any cached rows
+    // immediately and silently refresh them in the background; the first load of
+    // a tab shows the loading state. A failed silent refresh keeps the stale rows
+    // and stays quiet (no error toast).
+    private func openTab(_ tab: BookingTab) async {
         switch states[tab] {
-        case .loaded, .loading:
+        case .loading:
             return
+        case .loaded:
+            await load(tab, keepCurrent: true, surfaceError: false)
         default:
             await load(tab)
         }
     }
 
-    private func load(_ tab: BookingTab, keepCurrent: Bool = false) async {
+    private func load(_ tab: BookingTab, keepCurrent: Bool = false, surfaceError: Bool = true) async {
         if !keepCurrent {
             states[tab] = .loading
         }
@@ -110,7 +116,9 @@ final class MyBookingsViewModel: BaseViewModel {
             if !keepCurrent {
                 states[tab] = .failed
             }
-            showError(error, scope: .current)
+            if surfaceError {
+                showError(error, scope: .current)
+            }
         }
     }
 }

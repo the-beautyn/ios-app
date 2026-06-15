@@ -168,6 +168,17 @@
 "bookings_empty_cancelled" = "You have no cancelled appointments";
 "booking_details_title" = "Booking details";
 "booking_details_coming_soon" = "Booking details will be available soon.";
+"booking_details_status_confirmed" = "Confirmed";
+"booking_details_status_cancelled" = "Cancelled";
+"booking_details_status_completed" = "Completed";
+"booking_details_add_to_calendar" = "Add to calendar";
+"booking_details_calendar_access_denied" = "Allow calendar access in Settings.";
+"booking_details_route" = "Get directions";
+"booking_details_make_changes" = "Make changes";
+"booking_details_make_changes_subtitle" = "Reschedule, edit, cancel.";
+"booking_details_book_again" = "Book again";
+"booking_details_services_section" = "Appointment details";
+"booking_details_total" = "Total";
 "maps_chooser_title" = "Open in";
 "maps_apple_maps" = "Apple Maps";
 "maps_google_maps" = "Google Maps";

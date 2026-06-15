@@ -5,6 +5,10 @@ import UIKit
 @MainActor
 protocol HomeControllerFactory {
     func makeHome(transition: HomeViewModel.Transition) -> UIViewController
+    func makeBookingDetails(
+        booking: Booking,
+        transition: BookingDetailsViewModel.Transition
+    ) -> UIViewController
 }
 
 // MARK: - HomeControllerFactoryImpl
@@ -30,5 +34,22 @@ final class HomeControllerFactoryImpl: HomeControllerFactory {
             getCurrentUserUseCase: assembler.app.getCurrentUserUseCase
         )
         return HomeController(viewModel: viewModel)
+    }
+
+    func makeBookingDetails(
+        booking: Booking,
+        transition: BookingDetailsViewModel.Transition
+    ) -> UIViewController {
+        let viewModel = BookingDetailsViewModel(
+            booking: booking,
+            transition: transition,
+            getSalonByIdUseCase: assembler.salonBooking.getSalonByIdUseCase,
+            getSalonShareUseCase: assembler.salonBooking.getSalonShareUseCase,
+            saveSalonUseCase: assembler.require((any SaveSalonUseCase).self),
+            unsaveSalonUseCase: assembler.require((any UnsaveSalonUseCase).self),
+            savedSalonsEventBus: assembler.require((any SavedSalonsEventBus).self),
+            sessionManager: assembler.app.sessionManager
+        )
+        return BookingDetailsController(viewModel: viewModel)
     }
 }

@@ -95,6 +95,8 @@ These are full-resolution renders at 2x scale. The view height auto-expands to s
 
 Reading the PNG is necessary but not sufficient — the whole point of rendering is to catch where the implementation drifts from the design. There are two distinct passes, and they don't substitute for each other: a render-specific pass that only this pipeline can do, and the full design comparison.
 
+**Mandatory gate — a render is not "done" until both passes run.** Every render of a screen that has a Figma source MUST end with an `audit-ui` pass (3b). Your own eyeballing of the PNG is *not* a substitute and does not satisfy this step. Do **not** tell the user — or write in any summary — that a render "matches Figma", "looks right", or "is 1:1" until `audit-ui` has run on that exact PNG and you've acted on its findings. This holds even when you produced the PNG by calling `xcodebuild` directly instead of through this skill: the moment a screen PNG exists and a Figma node exists, the audit is owed.
+
 ### 3a. Render-specific sanity checks (do these first)
 
 These matter because the PNG came out of a test harness, not the live app. `audit-ui` looks at a static image and has no way to know any of this — so catching it here is on you:
@@ -111,7 +113,9 @@ For the actual design-fidelity pass — structure, position/sizing, spacing, typ
 
 `audit-ui` is the single source of truth for comparison depth: it walks 15 categories (A–O), reads exact values from `get_design_context`, maps every Figma value to a `Font.App.*` / `Color.App.*` / `CGFloat.Spacing.*` token, applies severity thresholds, and returns a triaged report (Critical / Minor / Nits / Looks correct / Open questions). Deliberately **don't** keep a parallel checklist here — a second copy would only drift from `audit-ui` and rot. Improve the comparison depth by improving `audit-ui`.
 
-If there's **no Figma reference** to compare against, there's nothing to hand off — just confirm via 3a that the render is structurally sane and report what you see.
+The handoff is not optional. After Step 2 produces each PNG, immediately invoke `audit-ui` for it (one invocation per rendered screen) — don't defer it to "later" or fold it into a prose summary. If you rendered several screens, audit each one.
+
+If there's genuinely **no Figma reference** for the screen, say so explicitly in your report — "audit-ui skipped: no Figma source for this screen" — rather than silently moving on, and confirm via 3a that the render is structurally sane. If the screen *does* have a Figma node but you simply don't have the URL/nodeId, ask the user for it instead of skipping the audit.
 
 ## Step 4: Fix and re-render
 

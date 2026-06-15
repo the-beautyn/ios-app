@@ -12,7 +12,10 @@ final class HomeCoordinator: BaseCoordinator {
     var onRequireAuth: (() -> Void)?
 
     init(router: Router, parentAssembler: Assembler) {
-        let assembler = Assembler([HomeAssembly()], parent: parentAssembler)
+        // SalonBookingAssembly is included so the booking-details screen can reach
+        // the salon-by-id / salon-share use cases (for the favorite + share
+        // controls); "book again" still spins up its own child coordinator.
+        let assembler = Assembler([HomeAssembly(), SalonBookingAssembly()], parent: parentAssembler)
         self.factory = assembler.home.controllerFactory
         self.router = router
         self.parentAssembler = parentAssembler
@@ -41,8 +44,8 @@ final class HomeCoordinator: BaseCoordinator {
             didTapSeeAllSection: { [weak self] sectionId in
                 self?.navigateToSectionAll(sectionId: sectionId)
             },
-            didTapAppointmentDetails: { [weak self] bookingId in
-                self?.navigateToBookingDetails(bookingId: bookingId)
+            didTapAppointmentDetails: { [weak self] booking in
+                self?.navigateToBookingDetails(booking: booking)
             },
             didTapCategory: { [weak self] categoryId in
                 self?.navigateToCategory(categoryId: categoryId)
@@ -85,8 +88,17 @@ final class HomeCoordinator: BaseCoordinator {
         // TODO: Push section detail / search with filter
     }
 
-    private func navigateToBookingDetails(bookingId: String) {
-        // TODO: Push BookingDetails screen
+    private func navigateToBookingDetails(booking: Booking) {
+        let transition = BookingDetailsViewModel.Transition(
+            didTapBookAgain: { [weak self] salonId in
+                self?.navigateToSalonBooking(salonId: salonId)
+            },
+            didRequireAuth: { [weak self] in
+                self?.onRequireAuth?()
+            }
+        )
+        let vc = factory.makeBookingDetails(booking: booking, transition: transition)
+        router.push(vc, animated: true)
     }
 
     private func navigateToCategory(categoryId: String) {

@@ -16,7 +16,10 @@ final class MyBookingsCoordinator: BaseCoordinator {
     var onRequireAuth: (() -> Void)?
 
     init(router: Router, parentAssembler: Assembler) {
-        let assembler = Assembler([MyBookingsAssembly()], parent: parentAssembler)
+        // SalonBookingAssembly is included so the booking-details screen can reach
+        // the salon-by-id / salon-share use cases (for the favorite + share
+        // controls); "book again" still spins up its own child coordinator.
+        let assembler = Assembler([MyBookingsAssembly(), SalonBookingAssembly()], parent: parentAssembler)
         self.router = router
         self.factory = assembler.myBookings.controllerFactory
         self.parentAssembler = parentAssembler
@@ -30,8 +33,8 @@ final class MyBookingsCoordinator: BaseCoordinator {
 
     private func showMyBookings() {
         let transition = MyBookingsViewModel.Transition(
-            didTapBookingDetails: { [weak self] bookingId in
-                self?.showBookingDetails(bookingId: bookingId)
+            didTapBookingDetails: { [weak self] booking in
+                self?.showBookingDetails(booking: booking)
             },
             didTapBook: { [weak self] salonId in
                 self?.showSalonProfile(salonId: salonId)
@@ -41,8 +44,16 @@ final class MyBookingsCoordinator: BaseCoordinator {
         router.setRoot(vc, animated: false)
     }
 
-    private func showBookingDetails(bookingId: String) {
-        let vc = factory.makeBookingDetails(bookingId: bookingId)
+    private func showBookingDetails(booking: Booking) {
+        let transition = BookingDetailsViewModel.Transition(
+            didTapBookAgain: { [weak self] salonId in
+                self?.showSalonProfile(salonId: salonId)
+            },
+            didRequireAuth: { [weak self] in
+                self?.onRequireAuth?()
+            }
+        )
+        let vc = factory.makeBookingDetails(booking: booking, transition: transition)
         router.push(vc, animated: true)
     }
 

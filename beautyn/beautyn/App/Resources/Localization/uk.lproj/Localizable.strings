@@ -168,6 +168,17 @@
 "bookings_empty_cancelled" = "У вас немає скасованих записів";
 "booking_details_title" = "Деталі бронювання";
 "booking_details_coming_soon" = "Деталі бронювання будуть доступні незабаром.";
+"booking_details_status_confirmed" = "Підтверджено";
+"booking_details_status_cancelled" = "Скасовано";
+"booking_details_status_completed" = "Завершено";
+"booking_details_add_to_calendar" = "Додати в календар";
+"booking_details_calendar_access_denied" = "Дозвольте доступ до календаря в Налаштуваннях.";
+"booking_details_route" = "Прокласти маршрут";
+"booking_details_make_changes" = "Внести зміни";
+"booking_details_make_changes_subtitle" = "Перенести, відредагувати, відмінити.";
+"booking_details_book_again" = "Забронювати знову";
+"booking_details_services_section" = "Деталі запису";
+"booking_details_total" = "Всього";
 "maps_chooser_title" = "Відкрити в";
 "maps_apple_maps" = "Apple Maps";
 "maps_google_maps" = "Google Maps";

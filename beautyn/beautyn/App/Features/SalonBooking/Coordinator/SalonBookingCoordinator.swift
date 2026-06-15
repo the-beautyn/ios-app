@@ -91,10 +91,15 @@ final class SalonBookingCoordinator: BaseCoordinator {
 
     private func showConfirmBooking(salon: Salon, selectedServiceIds: Set<String>, workerId: String?, datetime: String) {
         let transition = ConfirmBookingViewModel.Transition(
-            didFinishBooking: { [weak self] _ in
-                // Booking done — show the success splash, which auto-returns to the
-                // salon profile after a couple of seconds.
-                self?.showBookingSuccess()
+            didFinishBooking: { [weak self] created in
+                // Booking done — show the success splash, which then hands off to
+                // the booking details screen.
+                self?.showBookingSuccess(
+                    salon: salon,
+                    selectedServiceIds: selectedServiceIds,
+                    datetime: datetime,
+                    created: created
+                )
             }
         )
         let vc = factory.makeConfirmBooking(
@@ -107,15 +112,44 @@ final class SalonBookingCoordinator: BaseCoordinator {
         router.push(vc, animated: true)
     }
 
-    private func showBookingSuccess() {
+    private func showBookingSuccess(
+        salon: Salon,
+        selectedServiceIds: Set<String>,
+        datetime: String,
+        created: CreatedBooking
+    ) {
         let transition = BookingSuccessViewModel.Transition(
             didFinish: { [weak self] in
-                // Splash finished — collapse the booking stack back to the salon
-                // profile (removes both the confirm and success screens).
-                self?.router.popTo(SalonProfileController.self, animated: true)
+                guard let self else { return }
+                let booking = CreatedBookingMapper.make(
+                    salon: salon,
+                    selectedServiceIds: selectedServiceIds,
+                    datetime: datetime,
+                    created: created
+                )
+                // Collapse the booking stack back to the salon profile (removes the
+                // confirm + success + selection steps), then push the details
+                // screen — so back from details returns to the salon profile.
+                self.router.popTo(SalonProfileController.self, animated: false)
+                self.showBookingDetails(booking: booking)
             }
         )
         let vc = factory.makeBookingSuccess(transition: transition)
+        router.push(vc, animated: true)
+    }
+
+    private func showBookingDetails(booking: Booking) {
+        let transition = BookingDetailsViewModel.Transition(
+            didTapBookAgain: { [weak self] _ in
+                // Future bookings don't surface "book again"; if ever reached,
+                // return to the salon profile already in the stack.
+                self?.router.popTo(SalonProfileController.self, animated: true)
+            },
+            didRequireAuth: { [weak self] in
+                self?.onRequireAuth?()
+            }
+        )
+        let vc = factory.makeBookingDetails(booking: booking, transition: transition)
         router.push(vc, animated: true)
     }
 }

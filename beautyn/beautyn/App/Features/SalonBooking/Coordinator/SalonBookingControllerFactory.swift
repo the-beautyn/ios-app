@@ -35,6 +35,11 @@ protocol SalonBookingControllerFactory {
     func makeBookingSuccess(
         transition: BookingSuccessViewModel.Transition
     ) -> UIViewController
+
+    func makeBookingDetails(
+        booking: Booking,
+        transition: BookingDetailsViewModel.Transition
+    ) -> UIViewController
 }
 
 // MARK: - SalonBookingControllerFactoryImpl
@@ -127,5 +132,22 @@ final class SalonBookingControllerFactoryImpl: SalonBookingControllerFactory {
     ) -> UIViewController {
         let viewModel = BookingSuccessViewModel(transition: transition)
         return BookingSuccessController(viewModel: viewModel)
+    }
+
+    func makeBookingDetails(
+        booking: Booking,
+        transition: BookingDetailsViewModel.Transition
+    ) -> UIViewController {
+        let viewModel = BookingDetailsViewModel(
+            booking: booking,
+            transition: transition,
+            getSalonByIdUseCase: assembler.salonBooking.getSalonByIdUseCase,
+            getSalonShareUseCase: assembler.salonBooking.getSalonShareUseCase,
+            saveSalonUseCase: assembler.require((any SaveSalonUseCase).self),
+            unsaveSalonUseCase: assembler.require((any UnsaveSalonUseCase).self),
+            savedSalonsEventBus: assembler.require((any SavedSalonsEventBus).self),
+            sessionManager: assembler.app.sessionManager
+        )
+        return BookingDetailsController(viewModel: viewModel)
     }
 }

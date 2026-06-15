@@ -5,7 +5,10 @@ import UIKit
 @MainActor
 protocol MyBookingsControllerFactory {
     func makeMyBookings(transition: MyBookingsViewModel.Transition) -> UIViewController
-    func makeBookingDetails(bookingId: String) -> UIViewController
+    func makeBookingDetails(
+        booking: Booking,
+        transition: BookingDetailsViewModel.Transition
+    ) -> UIViewController
 }
 
 // MARK: - MyBookingsControllerFactoryImpl
@@ -28,7 +31,20 @@ final class MyBookingsControllerFactoryImpl: MyBookingsControllerFactory {
         return MyBookingsController(viewModel: viewModel)
     }
 
-    func makeBookingDetails(bookingId: String) -> UIViewController {
-        BookingDetailsController(viewModel: BookingDetailsViewModel(bookingId: bookingId))
+    func makeBookingDetails(
+        booking: Booking,
+        transition: BookingDetailsViewModel.Transition
+    ) -> UIViewController {
+        let viewModel = BookingDetailsViewModel(
+            booking: booking,
+            transition: transition,
+            getSalonByIdUseCase: assembler.salonBooking.getSalonByIdUseCase,
+            getSalonShareUseCase: assembler.salonBooking.getSalonShareUseCase,
+            saveSalonUseCase: assembler.require((any SaveSalonUseCase).self),
+            unsaveSalonUseCase: assembler.require((any UnsaveSalonUseCase).self),
+            savedSalonsEventBus: assembler.require((any SavedSalonsEventBus).self),
+            sessionManager: assembler.app.sessionManager
+        )
+        return BookingDetailsController(viewModel: viewModel)
     }
 }

@@ -15,7 +15,7 @@ final class HomeViewModel: BaseViewModel {
         let didTapSavedSalon: (_ salonId: String) -> Void
         let didTapSeeAllSaved: () -> Void
         let didTapSeeAllSection: (_ sectionId: String) -> Void
-        let didTapAppointmentDetails: (_ bookingId: String) -> Void
+        let didTapAppointmentDetails: (_ booking: Booking) -> Void
         let didTapCategory: (_ categoryId: String) -> Void
         let didRequireAuth: () -> Void
     }
@@ -33,6 +33,9 @@ final class HomeViewModel: BaseViewModel {
     @Published private(set) var greeting: String = Localization.homeGreetingUnauthorized
     @Published private(set) var categories: [CategoryChipModel] = []
     @Published private(set) var nextAppointment: AppointmentCardModel?
+    /// Raw next booking, retained so the details screen can be opened with the
+    /// full model (the card only carries the formatted presentation values).
+    private var nextBooking: NextBooking?
     @Published private(set) var savedSalons: [SavedSalonUI] = []
     @Published private(set) var sections: [SectionUI] = []
 
@@ -173,8 +176,8 @@ final class HomeViewModel: BaseViewModel {
     }
 
     func didTapAppointmentDetails() {
-        guard let booking = nextAppointment else { return }
-        transition.didTapAppointmentDetails(booking.id)
+        guard let nextBooking else { return }
+        transition.didTapAppointmentDetails(NextBookingMapper.makeBooking(nextBooking))
     }
 
     func didTapFavorite(salonId: String) {
@@ -278,8 +281,10 @@ final class HomeViewModel: BaseViewModel {
 
         // Next appointment (auth only)
         if let booking = feed.nextBooking {
+            nextBooking = booking
             nextAppointment = mapBookingToAppointment(booking)
         } else {
+            nextBooking = nil
             nextAppointment = nil
         }
 
