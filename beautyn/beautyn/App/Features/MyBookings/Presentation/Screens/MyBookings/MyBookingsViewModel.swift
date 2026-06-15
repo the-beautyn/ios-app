@@ -39,7 +39,11 @@ final class MyBookingsViewModel: BaseViewModel {
     }
 
     var currentState: TabState {
-        states[selectedTab] ?? .idle
+        state(for: selectedTab)
+    }
+
+    func state(for tab: BookingTab) -> TabState {
+        states[tab] ?? .idle
     }
 
     override func onViewTask() async {
