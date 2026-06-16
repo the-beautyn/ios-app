@@ -56,6 +56,8 @@ struct HomeFeedNextBookingDTO: Decodable {
     let totalPriceCents: Int?
     let durationMinutes: Int?
     let serviceNames: [String]?
+    let services: [HomeFeedNextBookingServiceDTO]?
+    let shortLink: String?
 
     enum CodingKeys: String, CodingKey {
         case bookingId = "booking_id"
@@ -69,6 +71,24 @@ struct HomeFeedNextBookingDTO: Decodable {
         case totalPriceCents = "total_price_cents"
         case durationMinutes = "duration_minutes"
         case serviceNames = "service_names"
+        case services
+        case shortLink = "short_link"
+    }
+}
+
+// MARK: - HomeFeedNextBookingServiceDTO
+
+struct HomeFeedNextBookingServiceDTO: Decodable {
+    let id: String
+    let name: String
+    let description: String?
+    let priceCents: Int?
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case name
+        case description
+        case priceCents = "price_cents"
     }
 }
 

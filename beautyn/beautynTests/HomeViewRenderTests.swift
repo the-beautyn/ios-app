@@ -133,6 +133,8 @@ extension HomeFeed {
             totalPriceCents: 70000,
             durationMinutes: 90,
             serviceNames: ["Манікюр", "Покриття гель-лаком"],
+            services: [],
+            bookingUrl: nil,
             timezone: TimeZone(identifier: "Europe/Kyiv")
         ),
         savedSalons: [
