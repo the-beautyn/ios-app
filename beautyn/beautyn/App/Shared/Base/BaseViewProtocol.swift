@@ -25,6 +25,13 @@ extension BaseViewProtocol {
                 ),
                 content: WebPageView.init
             )
+            .sheet(
+                item: Binding<WebBookingPresentation?>(
+                    get: { viewModel.webBookingPresentation },
+                    set: { viewModel.webBookingPresentation = $0 }
+                ),
+                content: WebBookingView.init
+            )
             .onAppear {
                 if let pending = AlertRelay.shared.consume() {
                     viewModel.alert = pending

@@ -51,7 +51,8 @@ final class SalonProfileViewRenderTests: XCTestCase {
             transition: .init(
                 didTapBack: {},
                 didRequireAuth: {},
-                didRequestBooking: { _, _, _ in }
+                didRequestBooking: { _, _, _ in },
+                didCompleteEasyweekBooking: { _ in }
             ),
             getSalonByIdUseCase: MockGetSalonByIdUseCase(salon: salon),
             getSalonShareUseCase: MockGetSalonShareUseCase(),
@@ -63,7 +64,9 @@ final class SalonProfileViewRenderTests: XCTestCase {
             sessionManager: SessionManager(
                 keychainService: KeychainServiceImpl(),
                 defaultsService: DefaultsStorageService()
-            )
+            ),
+            getCurrentUserUseCase: MockSalonProfileGetCurrentUserUseCase(),
+            confirmEasyweekBookingUseCase: MockConfirmEasyweekBookingUseCase()
         )
     }
 }
@@ -105,6 +108,24 @@ private final class MockSalonProfileUnsaveSalonUseCase: UnsaveSalonUseCase {
 private final class MockSalonProfileSavedSalonsEventBus: SavedSalonsEventBus {
     var changes: AnyPublisher<SavedSalonChange, Never> { Empty().eraseToAnyPublisher() }
     func notify(_ change: SavedSalonChange) {}
+}
+
+private final class MockSalonProfileGetCurrentUserUseCase: GetCurrentUserUseCase {
+    func execute() async throws -> UserProfile {
+        UserProfile(
+            id: "u1", email: "dima@example.com", role: "client",
+            name: "Dmytro", secondName: "Pohrebniak", phone: "+380950021938",
+            avatarUrl: nil, birthDate: nil, city: nil, sex: nil,
+            authProvider: "password", isPhoneVerified: true,
+            isProfileCreated: true, isOnboardingCompleted: true
+        )
+    }
+}
+
+private final class MockConfirmEasyweekBookingUseCase: ConfirmEasyweekBookingUseCase {
+    func execute(salonId: String, bookingUuid: String) async throws -> Booking {
+        throw CancellationError()
+    }
 }
 
 // MARK: - Preview Data

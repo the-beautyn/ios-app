@@ -64,10 +64,12 @@ final class SalonBookingControllerFactoryImpl: SalonBookingControllerFactory {
             getSalonShareUseCase: assembler.salonBooking.getSalonShareUseCase,
             getAltegioAvailableServicesUseCase: assembler.salonBooking.getAltegioAvailableServicesUseCase,
             getAltegioAvailableWorkersUseCase: assembler.salonBooking.getAltegioAvailableWorkersUseCase,
-            saveSalonUseCase: assembler.require((any SaveSalonUseCase).self),
-            unsaveSalonUseCase: assembler.require((any UnsaveSalonUseCase).self),
-            savedSalonsEventBus: assembler.require((any SavedSalonsEventBus).self),
-            sessionManager: assembler.app.sessionManager
+            saveSalonUseCase: assembler.app.saveSalonUseCase,
+            unsaveSalonUseCase: assembler.app.unsaveSalonUseCase,
+            savedSalonsEventBus: assembler.app.savedSalonsEventBus,
+            sessionManager: assembler.app.sessionManager,
+            getCurrentUserUseCase: assembler.app.getCurrentUserUseCase,
+            confirmEasyweekBookingUseCase: assembler.salonBooking.confirmEasyweekBookingUseCase
         )
         return SalonProfileController(viewModel: viewModel)
     }
@@ -143,9 +145,9 @@ final class SalonBookingControllerFactoryImpl: SalonBookingControllerFactory {
             transition: transition,
             getSalonByIdUseCase: assembler.salonBooking.getSalonByIdUseCase,
             getSalonShareUseCase: assembler.salonBooking.getSalonShareUseCase,
-            saveSalonUseCase: assembler.require((any SaveSalonUseCase).self),
-            unsaveSalonUseCase: assembler.require((any UnsaveSalonUseCase).self),
-            savedSalonsEventBus: assembler.require((any SavedSalonsEventBus).self),
+            saveSalonUseCase: assembler.app.saveSalonUseCase,
+            unsaveSalonUseCase: assembler.app.unsaveSalonUseCase,
+            savedSalonsEventBus: assembler.app.savedSalonsEventBus,
             sessionManager: assembler.app.sessionManager
         )
         return BookingDetailsController(viewModel: viewModel)

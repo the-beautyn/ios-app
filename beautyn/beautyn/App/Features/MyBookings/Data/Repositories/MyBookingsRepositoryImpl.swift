@@ -23,6 +23,15 @@ final class MyBookingsRepositoryImpl: MyBookingsRepository {
         return BookingMapper.map(response.items)
     }
 
+    func getBooking(id: String) async throws -> Booking {
+        let target = Target(type: BookingsTarget.getBookingById(id: id))
+        let dto: BookingItemDTO = try await networkService.request(target)
+        guard let booking = BookingMapper.map(dto) else {
+            throw MyBookingsError.bookingNotFound
+        }
+        return booking
+    }
+
     // MARK: - Private
 
     private static let isoFormatter: ISO8601DateFormatter = {

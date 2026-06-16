@@ -26,10 +26,10 @@ final class HomeControllerFactoryImpl: HomeControllerFactory {
         let viewModel = HomeViewModel(
             transition: transition,
             getHomeFeedUseCase: assembler.home.getHomeFeedUseCase,
-            saveSalonUseCase: assembler.require((any SaveSalonUseCase).self),
-            unsaveSalonUseCase: assembler.require((any UnsaveSalonUseCase).self),
-            savedSalonsEventBus: assembler.require((any SavedSalonsEventBus).self),
-            bookingEventBus: assembler.require((any BookingEventBus).self),
+            saveSalonUseCase: assembler.app.saveSalonUseCase,
+            unsaveSalonUseCase: assembler.app.unsaveSalonUseCase,
+            savedSalonsEventBus: assembler.app.savedSalonsEventBus,
+            bookingEventBus: assembler.app.bookingEventBus,
             sessionManager: assembler.app.sessionManager,
             getCurrentUserUseCase: assembler.app.getCurrentUserUseCase
         )
@@ -45,9 +45,9 @@ final class HomeControllerFactoryImpl: HomeControllerFactory {
             transition: transition,
             getSalonByIdUseCase: assembler.salonBooking.getSalonByIdUseCase,
             getSalonShareUseCase: assembler.salonBooking.getSalonShareUseCase,
-            saveSalonUseCase: assembler.require((any SaveSalonUseCase).self),
-            unsaveSalonUseCase: assembler.require((any UnsaveSalonUseCase).self),
-            savedSalonsEventBus: assembler.require((any SavedSalonsEventBus).self),
+            saveSalonUseCase: assembler.app.saveSalonUseCase,
+            unsaveSalonUseCase: assembler.app.unsaveSalonUseCase,
+            savedSalonsEventBus: assembler.app.savedSalonsEventBus,
             sessionManager: assembler.app.sessionManager
         )
         return BookingDetailsController(viewModel: viewModel)

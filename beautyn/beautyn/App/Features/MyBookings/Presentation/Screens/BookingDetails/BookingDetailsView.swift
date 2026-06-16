@@ -27,7 +27,11 @@ struct BookingDetailsView: BaseViewProtocol {
             scrollableSheet
                 .padding(.top, Self.sheetTop)
         }
-        .ignoresSafeArea(edges: .top)
+        // Ignore the top safe area (cover bleeds under the status bar) and the
+        // bottom (the sheet's scroll content fills to the screen edge, matching
+        // the white background — see `scrollableSheet`; the content's 48pt bottom
+        // padding keeps the last row clear of the home indicator).
+        .ignoresSafeArea(edges: [.top, .bottom])
         .background(Color.App.beige2.ignoresSafeArea())
         .sheet(item: $viewModel.shareSheet) { presentation in
             ShareSheetRepresentable(items: [presentation.url, presentation.title])

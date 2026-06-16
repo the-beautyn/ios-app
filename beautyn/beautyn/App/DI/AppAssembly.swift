@@ -168,11 +168,27 @@ final class AppAssembly: Assembly {
             unsaveSalonUseCase
         }
 
+        let getSavedSalonsUseCase: GetSavedSalonsUseCase = GetSavedSalonsUseCaseImpl(
+            repository: savedSalonsRepository
+        )
+        container.register((any GetSavedSalonsUseCase).self) { _ in
+            getSavedSalonsUseCase
+        }
+
         // MARK: - Bookings (shared — Home + MyBookings refresh when a booking is created)
 
         let bookingEventBus: any BookingEventBus = BookingEventBusImpl()
         container.register((any BookingEventBus).self) { _ in
             bookingEventBus
+        }
+
+        // Single-booking fetch, shared by MyBookings and the EasyWeek booking flow
+        // (which fetches the full booking after confirming the widget booking).
+        let getBookingByIdUseCase: any GetBookingByIdUseCase = GetBookingByIdUseCaseImpl(
+            repository: MyBookingsRepositoryImpl(networkService: networkService)
+        )
+        container.register((any GetBookingByIdUseCase).self) { _ in
+            getBookingByIdUseCase
         }
 
         // MARK: - OAuth services

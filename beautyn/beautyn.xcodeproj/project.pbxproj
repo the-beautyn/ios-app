@@ -25,6 +25,7 @@
 		F1A0B0012FA0000100000644 /* ConfirmBookingViewRenderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A0B0012FA0000100000624 /* ConfirmBookingViewRenderTests.swift */; };
 		F1A0B0012FA0000100000645 /* BookingSuccessViewRenderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A0B0012FA0000100000625 /* BookingSuccessViewRenderTests.swift */; };
 		F1A0B0012FA0000100000722 /* AppointmentDateFormatterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A0B0012FA0000100000702 /* AppointmentDateFormatterTests.swift */; };
+		F1A0B0012FA0000100000922 /* WebBookingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A0B0012FA0000100000902 /* WebBookingTests.swift */; };
 		F1B000002FA0000100000003 /* Moya in Frameworks */ = {isa = PBXBuildFile; productRef = F1B000002FA0000100000002 /* Moya */; };
 		F1E920C12FAB18A40068085B /* PopupView in Frameworks */ = {isa = PBXBuildFile; productRef = F1E920C02FAB18A40068085B /* PopupView */; };
 		F1F78C9F2F87B60900B3E6F1 /* NukeUI in Frameworks */ = {isa = PBXBuildFile; productRef = A1B2C3D4E5F6A7B8C9D0E1F2 /* NukeUI */; };
@@ -59,6 +60,7 @@
 		F1A0B0012FA0000100000624 /* ConfirmBookingViewRenderTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConfirmBookingViewRenderTests.swift; sourceTree = "<group>"; };
 		F1A0B0012FA0000100000625 /* BookingSuccessViewRenderTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BookingSuccessViewRenderTests.swift; sourceTree = "<group>"; };
 		F1A0B0012FA0000100000702 /* AppointmentDateFormatterTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppointmentDateFormatterTests.swift; sourceTree = "<group>"; };
+		F1A0B0012FA0000100000902 /* WebBookingTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebBookingTests.swift; sourceTree = "<group>"; };
 		F1C0F10000000000000000C1 /* local.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = local.xcconfig; sourceTree = "<group>"; };
 		F1C0F10000000000000000C2 /* dev.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = dev.xcconfig; sourceTree = "<group>"; };
 		F1C0F10000000000000000C3 /* stage.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = stage.xcconfig; sourceTree = "<group>"; };
@@ -135,6 +137,7 @@
 				F1A0B0012FA0000100000501 /* ViewRenderer.swift */,
 				F1A0B0012FA0000100000502 /* HomeViewRenderTests.swift */,
 				F1A0B0012FA0000100000702 /* AppointmentDateFormatterTests.swift */,
+				F1A0B0012FA0000100000902 /* WebBookingTests.swift */,
 				F1A0B0012FA0000100000602 /* SalonProfileViewRenderTests.swift */,
 				F1A0B0012FA0000100000612 /* SelectServiceViewRenderTests.swift */,
 				F1A0B0012FA0000100000613 /* SelectDateTimeViewRenderTests.swift */,
@@ -297,6 +300,7 @@
 				F1A0B0012FA0000100000521 /* ViewRenderer.swift in Sources */,
 				F1A0B0012FA0000100000522 /* HomeViewRenderTests.swift in Sources */,
 				F1A0B0012FA0000100000722 /* AppointmentDateFormatterTests.swift in Sources */,
+				F1A0B0012FA0000100000922 /* WebBookingTests.swift in Sources */,
 				F1A0B0012FA0000100000622 /* SalonProfileViewRenderTests.swift in Sources */,
 				F1A0B0012FA0000100000632 /* SelectServiceViewRenderTests.swift in Sources */,
 				F1A0B0012FA0000100000633 /* SelectDateTimeViewRenderTests.swift in Sources */,
