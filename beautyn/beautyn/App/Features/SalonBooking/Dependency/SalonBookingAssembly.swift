@@ -59,6 +59,20 @@ final class SalonBookingAssembly: Assembly {
             )
         }
 
+        container.register((any EasyweekBookingRepository).self) { resolver in
+            EasyweekBookingRepositoryImpl(
+                networkService: resolver.require((any NetworkService).self)
+            )
+        }
+
+        container.register((any ConfirmEasyweekBookingUseCase).self) { resolver in
+            ConfirmEasyweekBookingUseCaseImpl(
+                repository: resolver.require((any EasyweekBookingRepository).self),
+                getBookingByIdUseCase: resolver.require((any GetBookingByIdUseCase).self),
+                bookingEventBus: resolver.require((any BookingEventBus).self)
+            )
+        }
+
         container.register((any SalonBookingControllerFactory).self) { resolver in
             SalonBookingControllerFactoryImpl(assembler: resolver)
         }

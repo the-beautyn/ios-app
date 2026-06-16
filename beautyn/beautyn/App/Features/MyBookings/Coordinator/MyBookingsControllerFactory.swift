@@ -26,7 +26,7 @@ final class MyBookingsControllerFactoryImpl: MyBookingsControllerFactory {
         let viewModel = MyBookingsViewModel(
             transition: transition,
             getMyBookingsUseCase: assembler.myBookings.getMyBookingsUseCase,
-            bookingEventBus: assembler.require((any BookingEventBus).self)
+            bookingEventBus: assembler.app.bookingEventBus
         )
         return MyBookingsController(viewModel: viewModel)
     }
@@ -40,9 +40,9 @@ final class MyBookingsControllerFactoryImpl: MyBookingsControllerFactory {
             transition: transition,
             getSalonByIdUseCase: assembler.salonBooking.getSalonByIdUseCase,
             getSalonShareUseCase: assembler.salonBooking.getSalonShareUseCase,
-            saveSalonUseCase: assembler.require((any SaveSalonUseCase).self),
-            unsaveSalonUseCase: assembler.require((any UnsaveSalonUseCase).self),
-            savedSalonsEventBus: assembler.require((any SavedSalonsEventBus).self),
+            saveSalonUseCase: assembler.app.saveSalonUseCase,
+            unsaveSalonUseCase: assembler.app.unsaveSalonUseCase,
+            savedSalonsEventBus: assembler.app.savedSalonsEventBus,
             sessionManager: assembler.app.sessionManager
         )
         return BookingDetailsController(viewModel: viewModel)

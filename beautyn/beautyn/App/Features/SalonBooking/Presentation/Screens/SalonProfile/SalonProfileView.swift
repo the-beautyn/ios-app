@@ -225,6 +225,24 @@ private final class PreviewSavedSalonsEventBus: SavedSalonsEventBus {
     func notify(_ change: SavedSalonChange) {}
 }
 
+private final class PreviewGetCurrentUserUseCase: GetCurrentUserUseCase {
+    func execute() async throws -> UserProfile {
+        UserProfile(
+            id: "u1", email: "dima@example.com", role: "client",
+            name: "Dmytro", secondName: "Pohrebniak", phone: "+380950021938",
+            avatarUrl: nil, birthDate: nil, city: nil, sex: nil,
+            authProvider: "password", isPhoneVerified: true,
+            isProfileCreated: true, isOnboardingCompleted: true
+        )
+    }
+}
+
+private final class PreviewConfirmEasyweekBookingUseCase: ConfirmEasyweekBookingUseCase {
+    func execute(salonId: String, bookingUuid: String) async throws -> Booking {
+        throw CancellationError()
+    }
+}
+
 private extension Salon {
 
     static let previewWithTag = Salon(
@@ -311,7 +329,8 @@ private func makePreviewViewModel(salon: Salon) -> SalonProfileViewModel {
         transition: .init(
             didTapBack: {},
             didRequireAuth: {},
-            didRequestBooking: { _, _, _ in }
+            didRequestBooking: { _, _, _ in },
+            didCompleteEasyweekBooking: { _ in }
         ),
         getSalonByIdUseCase: PreviewGetSalonByIdUseCase(salon: salon),
         getSalonShareUseCase: PreviewGetSalonShareUseCase(),
@@ -323,7 +342,9 @@ private func makePreviewViewModel(salon: Salon) -> SalonProfileViewModel {
         sessionManager: SessionManager(
             keychainService: KeychainServiceImpl(),
             defaultsService: DefaultsStorageService()
-        )
+        ),
+        getCurrentUserUseCase: PreviewGetCurrentUserUseCase(),
+        confirmEasyweekBookingUseCase: PreviewConfirmEasyweekBookingUseCase()
     )
 }
 

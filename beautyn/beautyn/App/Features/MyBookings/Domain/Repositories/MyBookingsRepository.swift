@@ -4,6 +4,14 @@ import Foundation
 
 protocol MyBookingsRepository {
     func getBookings(_ request: BookingsRequest) async throws -> [Booking]
+    /// Fetch a single booking by its local id (`GET /bookings/{id}`).
+    func getBooking(id: String) async throws -> Booking
+}
+
+// MARK: - MyBookingsError
+
+enum MyBookingsError: Error {
+    case bookingNotFound
 }
 
 // MARK: - BookingsRequest

@@ -13,6 +13,7 @@ enum BookingsTarget {
         cursor: String?,
         sort: String?
     )
+    case getBookingById(id: String)
 }
 
 // MARK: - TargetType
@@ -27,12 +28,14 @@ extension BookingsTarget: TargetType {
         switch self {
         case .getBookings:
             return "/bookings"
+        case let .getBookingById(id):
+            return "/bookings/\(id)"
         }
     }
 
     var method: Moya.Method {
         switch self {
-        case .getBookings:
+        case .getBookings, .getBookingById:
             return .get
         }
     }
@@ -51,6 +54,9 @@ extension BookingsTarget: TargetType {
                 return .requestPlain
             }
             return .requestParameters(parameters: params, encoding: URLEncoding.default)
+
+        case .getBookingById:
+            return .requestPlain
         }
     }
 

@@ -13,6 +13,9 @@ final class SalonProfileViewModel: BaseViewModel {
         let didTapBack: () -> Void
         let didRequireAuth: () -> Void
         let didRequestBooking: (_ salon: Salon, _ entry: SalonBookingEntry, _ availableServiceIds: Set<String>) -> Void
+        /// EasyWeek booking completed in the web widget and confirmed on the
+        /// backend; hand off to the success / details screens.
+        let didCompleteEasyweekBooking: (_ booking: Booking) -> Void
     }
 
     // MARK: - Share sheet presentation model
@@ -65,6 +68,8 @@ final class SalonProfileViewModel: BaseViewModel {
     private let unsaveSalonUseCase: any UnsaveSalonUseCase
     private let savedSalonsEventBus: any SavedSalonsEventBus
     private let sessionManager: SessionManager
+    private let getCurrentUserUseCase: any GetCurrentUserUseCase
+    private let confirmEasyweekBookingUseCase: any ConfirmEasyweekBookingUseCase
     private var cancellables = Set<AnyCancellable>()
 
     // MARK: - Init
@@ -79,7 +84,9 @@ final class SalonProfileViewModel: BaseViewModel {
         saveSalonUseCase: any SaveSalonUseCase,
         unsaveSalonUseCase: any UnsaveSalonUseCase,
         savedSalonsEventBus: any SavedSalonsEventBus,
-        sessionManager: SessionManager
+        sessionManager: SessionManager,
+        getCurrentUserUseCase: any GetCurrentUserUseCase,
+        confirmEasyweekBookingUseCase: any ConfirmEasyweekBookingUseCase
     ) {
         self.salonId = salonId
         self.transition = transition
@@ -91,6 +98,8 @@ final class SalonProfileViewModel: BaseViewModel {
         self.unsaveSalonUseCase = unsaveSalonUseCase
         self.savedSalonsEventBus = savedSalonsEventBus
         self.sessionManager = sessionManager
+        self.getCurrentUserUseCase = getCurrentUserUseCase
+        self.confirmEasyweekBookingUseCase = confirmEasyweekBookingUseCase
         super.init()
         observeSavedSalonsBus()
     }
@@ -217,18 +226,69 @@ final class SalonProfileViewModel: BaseViewModel {
         guard requireAuth() else { return }
         switch salon?.provider {
         case .easyweek:
-            // Booking itself happens in the EasyWeek web widget.
-            if let url = salon?.bookingUrl {
-                openWebView(url: url, title: salon?.name)
-            } else {
+            // Booking happens in the EasyWeek web widget: autofill the form with
+            // the user's details, then confirm the detected booking on completion.
+            guard
+                let salon,
+                let url = salon.bookingUrl,
+                let configuration = salon.provider.webBookingConfiguration
+            else {
                 showComingSoon()
+                return
             }
+            startWebBooking(salon: salon, url: url, configuration: configuration)
         case .altegio:
             // In-app booking — start service selection with nothing preselected.
             if let salon { transition.didRequestBooking(salon, .book, availableServiceIds ?? []) }
         default:
             // Unknown / nil providers.
             showComingSoon()
+        }
+    }
+
+    // MARK: - Web booking (EasyWeek)
+
+    private func startWebBooking(salon: Salon, url: URL, configuration: WebBookingConfiguration) {
+        Task { [weak self] in
+            guard let self else { return }
+            let autofill = await self.makeAutofill()
+            self.openWebBooking(
+                url: url,
+                title: salon.name,
+                configuration: configuration,
+                autofill: autofill
+            ) { [weak self] result in
+                self?.handleWebBookingCompleted(result)
+            }
+        }
+    }
+
+    private func makeAutofill() async -> WebBookingAutofill {
+        let profile = try? await getCurrentUserUseCase.execute()
+        return WebBookingAutofill(
+            firstName: profile?.name ?? "",
+            lastName: profile?.secondName ?? "",
+            email: profile?.email ?? "",
+            phone: profile?.phone ?? ""
+        )
+    }
+
+    private func handleWebBookingCompleted(_ result: WebBookingResult) {
+        // Dismiss the widget sheet, then confirm + fetch the full booking.
+        webBookingPresentation = nil
+        Task { [weak self] in
+            guard let self else { return }
+            self.showLoader()
+            defer { self.hideLoader() }
+            do {
+                let booking = try await self.confirmEasyweekBookingUseCase.execute(
+                    salonId: self.salonId,
+                    bookingUuid: result.bookingId
+                )
+                self.transition.didCompleteEasyweekBooking(booking)
+            } catch {
+                self.showError(error)
+            }
         }
     }
 

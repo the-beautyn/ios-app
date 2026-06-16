@@ -53,10 +53,10 @@ final class ProfileControllerFactoryImpl: ProfileControllerFactory {
     func makeSavedSalons(transition: SavedSalonsViewModel.Transition) -> UIViewController {
         let viewModel = SavedSalonsViewModel(
             transition: transition,
-            getSavedSalonsUseCase: assembler.require((any GetSavedSalonsUseCase).self),
-            saveSalonUseCase: assembler.require((any SaveSalonUseCase).self),
-            unsaveSalonUseCase: assembler.require((any UnsaveSalonUseCase).self),
-            savedSalonsEventBus: assembler.require((any SavedSalonsEventBus).self)
+            getSavedSalonsUseCase: assembler.app.getSavedSalonsUseCase,
+            saveSalonUseCase: assembler.app.saveSalonUseCase,
+            unsaveSalonUseCase: assembler.app.unsaveSalonUseCase,
+            savedSalonsEventBus: assembler.app.savedSalonsEventBus
         )
         return SavedSalonsController(viewModel: viewModel)
     }
