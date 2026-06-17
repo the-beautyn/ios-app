@@ -2,6 +2,13 @@ import Foundation
 import Combine
 
 // MARK: - MyBookingsViewModel
+//
+// Reads from the shared bookings source of truth (via `ObserveBookingsUseCase`)
+// and splits the cached array into the three tabs locally using `BookingCategory`
+// — the same bucketing the backend filters on, so a booking can't land in two
+// tabs or none. Selecting a tab / pulling to refresh triggers a category fetch
+// (`RefreshBookingsUseCase`) which merges into the cache; the observer then
+// re-emits and the tabs re-derive. The VM never touches the repository directly.
 
 @MainActor
 final class MyBookingsViewModel: BaseViewModel {
@@ -18,24 +25,34 @@ final class MyBookingsViewModel: BaseViewModel {
         case failed
     }
 
+    // The network fetch status per tab (separate from the cached data, which
+    // arrives via the observer).
+    private enum FetchPhase {
+        case idle
+        case loading
+        case loaded
+        case failed
+    }
+
     @Published private(set) var selectedTab: BookingTab = .upcoming
-    @Published private(set) var states: [BookingTab: TabState] = [:]
+    @Published private var allBookings: [Booking] = []
+    @Published private var fetchPhase: [BookingTab: FetchPhase] = [:]
 
     private let transition: Transition
-    private let getMyBookingsUseCase: any GetMyBookingsUseCase
-    private let bookingEventBus: any BookingEventBus
+    private let observeBookingsUseCase: any ObserveBookingsUseCase
+    private let refreshBookingsUseCase: any RefreshBookingsUseCase
     private var cancellables = Set<AnyCancellable>()
 
     init(
         transition: Transition,
-        getMyBookingsUseCase: any GetMyBookingsUseCase,
-        bookingEventBus: any BookingEventBus
+        observeBookingsUseCase: any ObserveBookingsUseCase,
+        refreshBookingsUseCase: any RefreshBookingsUseCase
     ) {
         self.transition = transition
-        self.getMyBookingsUseCase = getMyBookingsUseCase
-        self.bookingEventBus = bookingEventBus
+        self.observeBookingsUseCase = observeBookingsUseCase
+        self.refreshBookingsUseCase = refreshBookingsUseCase
         super.init()
-        observeBookingCreated()
+        observeBookings()
     }
 
     var currentState: TabState {
@@ -43,7 +60,17 @@ final class MyBookingsViewModel: BaseViewModel {
     }
 
     func state(for tab: BookingTab) -> TabState {
-        states[tab] ?? .idle
+        let bookings = self.bookings(for: tab)
+        switch fetchPhase[tab] ?? .idle {
+        case .idle:
+            return bookings.isEmpty ? .idle : .loaded(bookings)
+        case .loading:
+            return bookings.isEmpty ? .loading : .loaded(bookings)
+        case .loaded:
+            return .loaded(bookings)
+        case .failed:
+            return bookings.isEmpty ? .failed : .loaded(bookings)
+        }
     }
 
     override func onViewTask() async {
@@ -57,9 +84,9 @@ final class MyBookingsViewModel: BaseViewModel {
     }
 
     func refresh() async {
-        // Pull-to-refresh: keep the current rows on screen (the system spinner
-        // already signals progress) so the list doesn't blank out and flash.
-        await load(selectedTab, keepCurrent: true)
+        // Pull-to-refresh: keep the rows on screen (cache already feeds them) and
+        // rely on the system spinner instead of the loading state.
+        await load(selectedTab)
     }
 
     // MARK: - Card actions
@@ -72,55 +99,49 @@ final class MyBookingsViewModel: BaseViewModel {
         transition.didTapBook(booking.salonId)
     }
 
-    // MARK: - Booking events
+    // MARK: - Cache
 
-    private func observeBookingCreated() {
-        bookingEventBus.bookingCreated
+    private func observeBookings() {
+        observeBookingsUseCase.execute()
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
-                self?.handleBookingCreated()
+            .sink { [weak self] bookings in
+                self?.allBookings = bookings
             }
             .store(in: &cancellables)
     }
 
-    private func handleBookingCreated() {
-        // A new booking is always "upcoming". Drop the other tabs' caches so they
-        // refetch lazily when next shown, and silently refresh the visible tab in
-        // place (keep current rows to avoid a blank flash).
-        let visible = selectedTab
-        states = states.filter { $0.key == visible }
-        Task { await load(visible, keepCurrent: true) }
+    private func bookings(for tab: BookingTab) -> [Booking] {
+        let now = Date()
+        let filtered = allBookings.filter { tab.category.contains($0, now: now) }
+        return tab.category.sorted(filtered)
     }
 
     // MARK: - Loading
 
-    // Opening a tab (screen appears or tab switched): show any cached rows
-    // immediately and silently refresh them in the background; the first load of
-    // a tab shows the loading state. A failed silent refresh keeps the stale rows
-    // and stays quiet (no error toast).
+    // Opening a tab: if it's never been fetched, fetch it (showing the loading
+    // state only when there's nothing cached to display); otherwise refresh
+    // silently in the background.
     private func openTab(_ tab: BookingTab) async {
-        switch states[tab] {
-        case .loading:
-            return
-        case .loaded:
-            await load(tab, keepCurrent: true, surfaceError: false)
-        default:
+        switch fetchPhase[tab] ?? .idle {
+        case .loading, .loaded:
+            await load(tab, silent: true)
+        case .idle, .failed:
             await load(tab)
         }
     }
 
-    private func load(_ tab: BookingTab, keepCurrent: Bool = false, surfaceError: Bool = true) async {
-        if !keepCurrent {
-            states[tab] = .loading
+    private func load(_ tab: BookingTab, silent: Bool = false) async {
+        if !silent, bookings(for: tab).isEmpty {
+            fetchPhase[tab] = .loading
         }
         do {
-            let bookings = try await getMyBookingsUseCase.execute(tab: tab)
-            states[tab] = .loaded(bookings)
+            try await refreshBookingsUseCase.execute(category: tab.category)
+            fetchPhase[tab] = .loaded
         } catch {
-            if !keepCurrent {
-                states[tab] = .failed
+            if fetchPhase[tab] != .loaded, bookings(for: tab).isEmpty {
+                fetchPhase[tab] = .failed
             }
-            if surfaceError {
+            if !silent {
                 showError(error, scope: .current)
             }
         }

@@ -3,14 +3,15 @@ import Foundation
 // MARK: - CreateAltegioBookingUseCase
 
 protocol CreateAltegioBookingUseCase {
-    /// Create the booking record. `workerId` nil = "any team member".
+    /// Create the booking record and return the full backend `Booking`. `workerId`
+    /// nil = "any team member".
     func execute(
         salonId: String,
         workerId: String?,
         serviceIds: [String],
         datetime: String,
         comment: String?
-    ) async throws -> CreatedBooking
+    ) async throws -> Booking
 }
 
 // MARK: - CreateAltegioBookingUseCaseImpl
@@ -18,11 +19,11 @@ protocol CreateAltegioBookingUseCase {
 final class CreateAltegioBookingUseCaseImpl: CreateAltegioBookingUseCase {
 
     private let repository: AltegioBookingRepository
-    private let bookingEventBus: any BookingEventBus
+    private let bookingsRepository: any BookingsRepository
 
-    init(repository: AltegioBookingRepository, bookingEventBus: any BookingEventBus) {
+    init(repository: AltegioBookingRepository, bookingsRepository: any BookingsRepository) {
         self.repository = repository
-        self.bookingEventBus = bookingEventBus
+        self.bookingsRepository = bookingsRepository
     }
 
     func execute(
@@ -31,18 +32,19 @@ final class CreateAltegioBookingUseCaseImpl: CreateAltegioBookingUseCase {
         serviceIds: [String],
         datetime: String,
         comment: String?
-    ) async throws -> CreatedBooking {
-        let booking = try await repository.createBooking(
+    ) async throws -> Booking {
+        let created = try await repository.createBooking(
             salonId: salonId,
             workerId: workerId,
             serviceIds: serviceIds,
             datetime: datetime,
             comment: comment
         )
-        // Let the Home and MyBookings screens refresh themselves.
-        bookingEventBus.notifyBookingCreated(
-            BookingCreatedEvent(bookingId: booking.bookingId, salonId: salonId)
-        )
-        return booking
+        // Fetch the created booking into the source of truth and return it: the
+        // backend read the new record back from Altegio at create, so this carries
+        // the CRM data (incl. the short link). Home / MyBookings observe the cache,
+        // and the details screen navigates straight off this Booking — same as the
+        // EasyWeek confirm flow.
+        return try await bookingsRepository.refreshBooking(id: created.bookingId)
     }
 }

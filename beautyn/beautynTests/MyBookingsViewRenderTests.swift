@@ -1,3 +1,4 @@
+import Combine
 import CoreLocation
 import SwiftUI
 import XCTest
@@ -49,21 +50,27 @@ final class MyBookingsViewRenderTests: XCTestCase {
                 didTapBookingDetails: { _ in },
                 didTapBook: { _ in }
             ),
-            getMyBookingsUseCase: MockGetMyBookingsUseCase(bookings: bookings),
-            bookingEventBus: BookingEventBusImpl()
+            observeBookingsUseCase: MockObserveBookingsUseCase(bookings: bookings),
+            refreshBookingsUseCase: MockRefreshBookingsUseCase()
         )
     }
 }
 
-// MARK: - MockGetMyBookingsUseCase
+// MARK: - Mocks
 
-private final class MockGetMyBookingsUseCase: GetMyBookingsUseCase {
+@MainActor
+private final class MockObserveBookingsUseCase: ObserveBookingsUseCase {
     let bookings: [Booking]
     init(bookings: [Booking]) { self.bookings = bookings }
 
-    func execute(tab: BookingTab) async throws -> [Booking] {
-        bookings
+    func execute() -> AnyPublisher<[Booking], Never> {
+        Just(bookings).eraseToAnyPublisher()
     }
+}
+
+@MainActor
+private final class MockRefreshBookingsUseCase: RefreshBookingsUseCase {
+    func execute(category: BookingCategory?) async throws {}
 }
 
 // MARK: - Preview Data
@@ -82,6 +89,7 @@ extension Array where Element == Booking {
             status: .created,
             datetime: Date().addingTimeInterval(86_400),
             endDatetime: Date().addingTimeInterval(86_400 + 5_400),
+            cancelledAt: nil,
             services: [
                 BookingService(id: "srv1", name: "Classic Manicure", description: nil, price: nil),
                 BookingService(id: "srv2", name: "French", description: nil, price: nil),
@@ -102,10 +110,49 @@ extension Array where Element == Booking {
             status: .created,
             datetime: Date().addingTimeInterval(2 * 86_400),
             endDatetime: Date().addingTimeInterval(2 * 86_400 + 5_400),
+            cancelledAt: nil,
             services: [
                 BookingService(id: "srv1", name: "Classic Manicure", description: nil, price: nil),
                 BookingService(id: "srv2", name: "French", description: nil, price: nil),
             ],
+            totalPrice: 700,
+            currency: "UAH",
+            durationMinutes: 90,
+            timezone: TimeZone(identifier: "Europe/Kyiv")
+        ),
+        // Completed → Past tab.
+        Booking(
+            id: "b3",
+            salonId: "s1",
+            salonName: "Nail bar: Glossy Room",
+            salonAddress: "вул. Зеленицька, 15, 05-091",
+            salonImageURL: nil,
+            coordinate: CLLocationCoordinate2D(latitude: 50.4501, longitude: 30.5234),
+            bookingUrl: nil,
+            status: .completed,
+            datetime: Date().addingTimeInterval(-2 * 86_400),
+            endDatetime: Date().addingTimeInterval(-2 * 86_400 + 5_400),
+            cancelledAt: nil,
+            services: [BookingService(id: "srv1", name: "Classic Manicure", description: nil, price: nil)],
+            totalPrice: 700,
+            currency: "UAH",
+            durationMinutes: 90,
+            timezone: TimeZone(identifier: "Europe/Kyiv")
+        ),
+        // Cancelled → Cancelled tab.
+        Booking(
+            id: "b4",
+            salonId: "s1",
+            salonName: "Nail bar: Glossy Room",
+            salonAddress: "вул. Зеленицька, 15, 05-091",
+            salonImageURL: nil,
+            coordinate: CLLocationCoordinate2D(latitude: 50.4501, longitude: 30.5234),
+            bookingUrl: nil,
+            status: .canceled,
+            datetime: Date().addingTimeInterval(-86_400),
+            endDatetime: Date().addingTimeInterval(-86_400 + 5_400),
+            cancelledAt: Date().addingTimeInterval(-3_600),
+            services: [BookingService(id: "srv1", name: "Classic Manicure", description: nil, price: nil)],
             totalPrice: 700,
             currency: "UAH",
             durationMinutes: 90,

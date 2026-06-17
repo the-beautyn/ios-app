@@ -143,6 +143,7 @@ final class SalonBookingControllerFactoryImpl: SalonBookingControllerFactory {
         let viewModel = BookingDetailsViewModel(
             booking: booking,
             transition: transition,
+            observeBookingUseCase: assembler.app.observeBookingUseCase,
             getSalonByIdUseCase: assembler.salonBooking.getSalonByIdUseCase,
             getSalonShareUseCase: assembler.salonBooking.getSalonShareUseCase,
             saveSalonUseCase: assembler.app.saveSalonUseCase,

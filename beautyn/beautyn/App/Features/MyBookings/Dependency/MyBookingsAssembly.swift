@@ -4,17 +4,8 @@ import Foundation
 
 final class MyBookingsAssembly: Assembly {
     func assemble(container: Container) {
-        container.register((any MyBookingsRepository).self) { resolver in
-            MyBookingsRepositoryImpl(
-                networkService: resolver.require((any NetworkService).self)
-            )
-        }
-
-        container.register((any GetMyBookingsUseCase).self) { resolver in
-            GetMyBookingsUseCaseImpl(
-                repository: resolver.require((any MyBookingsRepository).self)
-            )
-        }
+        // The bookings repository + observe/refresh use cases live in AppAssembly
+        // (shared source of truth). This feature only wires its own UI factories.
 
         container.register((any MyBookingsControllerFactory).self) { resolver in
             MyBookingsControllerFactoryImpl(assembler: resolver)

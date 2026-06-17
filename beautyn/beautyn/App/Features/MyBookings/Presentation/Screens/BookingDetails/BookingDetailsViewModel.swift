@@ -61,8 +61,12 @@ final class BookingDetailsViewModel: BaseViewModel {
 
     // MARK: - Dependencies
 
-    private let booking: Booking
+    /// Seeded from the booking handed in at navigation (flash-free first render),
+    /// then kept fresh by the shared bookings source of truth so a change made
+    /// elsewhere (e.g. a cancel) reflects here.
+    @Published private(set) var booking: Booking
     private let transition: Transition
+    private let observeBookingUseCase: any ObserveBookingUseCase
     private let getSalonByIdUseCase: any GetSalonByIdUseCase
     private let getSalonShareUseCase: any GetSalonShareUseCase
     private let saveSalonUseCase: any SaveSalonUseCase
@@ -76,6 +80,7 @@ final class BookingDetailsViewModel: BaseViewModel {
     init(
         booking: Booking,
         transition: Transition,
+        observeBookingUseCase: any ObserveBookingUseCase,
         getSalonByIdUseCase: any GetSalonByIdUseCase,
         getSalonShareUseCase: any GetSalonShareUseCase,
         saveSalonUseCase: any SaveSalonUseCase,
@@ -85,6 +90,7 @@ final class BookingDetailsViewModel: BaseViewModel {
     ) {
         self.booking = booking
         self.transition = transition
+        self.observeBookingUseCase = observeBookingUseCase
         self.getSalonByIdUseCase = getSalonByIdUseCase
         self.getSalonShareUseCase = getSalonShareUseCase
         self.saveSalonUseCase = saveSalonUseCase
@@ -92,6 +98,7 @@ final class BookingDetailsViewModel: BaseViewModel {
         self.savedSalonsEventBus = savedSalonsEventBus
         self.sessionManager = sessionManager
         super.init()
+        observeBooking()
         observeSavedSalonsBus()
     }
 
@@ -290,6 +297,18 @@ final class BookingDetailsViewModel: BaseViewModel {
         // just leaves the heart in its default (unsaved) state.
         guard let salon = try? await getSalonByIdUseCase.execute(id: booking.salonId) else { return }
         isFavorited = salon.isSaved
+    }
+
+    private func observeBooking() {
+        // Keep the screen in sync with the source of truth. Ignore `nil` (e.g. the
+        // booking isn't cached on a cold entry) so we keep showing the seed.
+        observeBookingUseCase.execute(id: booking.id)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] updated in
+                guard let self, let updated else { return }
+                self.booking = updated
+            }
+            .store(in: &cancellables)
     }
 
     private func observeSavedSalonsBus() {

@@ -49,7 +49,7 @@ final class SalonBookingAssembly: Assembly {
         container.register((any CreateAltegioBookingUseCase).self) { resolver in
             CreateAltegioBookingUseCaseImpl(
                 repository: resolver.require((any AltegioBookingRepository).self),
-                bookingEventBus: resolver.require((any BookingEventBus).self)
+                bookingsRepository: resolver.require((any BookingsRepository).self)
             )
         }
 
@@ -68,8 +68,7 @@ final class SalonBookingAssembly: Assembly {
         container.register((any ConfirmEasyweekBookingUseCase).self) { resolver in
             ConfirmEasyweekBookingUseCaseImpl(
                 repository: resolver.require((any EasyweekBookingRepository).self),
-                getBookingByIdUseCase: resolver.require((any GetBookingByIdUseCase).self),
-                bookingEventBus: resolver.require((any BookingEventBus).self)
+                bookingsRepository: resolver.require((any BookingsRepository).self)
             )
         }
 

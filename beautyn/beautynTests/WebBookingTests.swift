@@ -47,28 +47,25 @@ final class WebBookingTests: XCTestCase {
 
     // MARK: - Confirm use case
 
-    func testConfirmFetchesFullBookingAndNotifiesBus() async throws {
+    @MainActor
+    func testConfirmFetchesFullBookingAndCachesIt() async throws {
         let repo = MockEasyweekBookingRepository(bookingId: "local-booking-1")
-        let getById = MockGetBookingByIdUseCase(booking: Self.makeBooking(id: "local-booking-1"))
-        let bus = BookingEventBusImpl()
-
-        var received: BookingCreatedEvent?
-        var cancellables = Set<AnyCancellable>()
-        bus.bookingCreated.sink { received = $0 }.store(in: &cancellables)
+        let bookings = MockBookingsRepository()
+        bookings.refreshBookingResult = Self.makeBooking(id: "local-booking-1")
 
         let sut = ConfirmEasyweekBookingUseCaseImpl(
             repository: repo,
-            getBookingByIdUseCase: getById,
-            bookingEventBus: bus
+            bookingsRepository: bookings
         )
 
         let booking = try await sut.execute(salonId: "salon-9", bookingUuid: "ew-uuid")
 
         XCTAssertEqual(repo.confirmedSalonId, "salon-9")
         XCTAssertEqual(repo.confirmedBookingUuid, "ew-uuid")
-        XCTAssertEqual(getById.requestedId, "local-booking-1")
+        XCTAssertEqual(bookings.refreshedId, "local-booking-1")
         XCTAssertEqual(booking.id, "local-booking-1")
-        XCTAssertEqual(received, BookingCreatedEvent(bookingId: "local-booking-1", salonId: "salon-9"))
+        // The full booking is cached so Home / MyBookings see it.
+        XCTAssertNotNil(bookings.stored["local-booking-1"])
     }
 
     // MARK: - Helpers
@@ -85,6 +82,7 @@ final class WebBookingTests: XCTestCase {
             status: .created,
             datetime: Date(timeIntervalSince1970: 0),
             endDatetime: nil,
+            cancelledAt: nil,
             services: [],
             totalPrice: nil,
             currency: nil,
@@ -107,17 +105,5 @@ private final class MockEasyweekBookingRepository: EasyweekBookingRepository {
         confirmedSalonId = salonId
         confirmedBookingUuid = bookingUuid
         return bookingId
-    }
-}
-
-private final class MockGetBookingByIdUseCase: GetBookingByIdUseCase {
-    private let booking: Booking
-    private(set) var requestedId: String?
-
-    init(booking: Booking) { self.booking = booking }
-
-    func execute(id: String) async throws -> Booking {
-        requestedId = id
-        return booking
     }
 }

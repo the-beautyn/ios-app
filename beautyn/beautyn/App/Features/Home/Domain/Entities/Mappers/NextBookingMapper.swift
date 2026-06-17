@@ -23,6 +23,8 @@ enum NextBookingMapper {
             status: .created,
             datetime: next.datetime,
             endDatetime: next.endDatetime,
+            // The next appointment is always upcoming, never cancelled.
+            cancelledAt: nil,
             services: next.services.isEmpty
                 ? next.serviceNames.map {
                     BookingService(id: $0, name: $0, description: nil, price: nil)

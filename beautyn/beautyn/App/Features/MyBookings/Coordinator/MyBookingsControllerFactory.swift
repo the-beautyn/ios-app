@@ -25,8 +25,8 @@ final class MyBookingsControllerFactoryImpl: MyBookingsControllerFactory {
     func makeMyBookings(transition: MyBookingsViewModel.Transition) -> UIViewController {
         let viewModel = MyBookingsViewModel(
             transition: transition,
-            getMyBookingsUseCase: assembler.myBookings.getMyBookingsUseCase,
-            bookingEventBus: assembler.app.bookingEventBus
+            observeBookingsUseCase: assembler.app.observeBookingsUseCase,
+            refreshBookingsUseCase: assembler.app.refreshBookingsUseCase
         )
         return MyBookingsController(viewModel: viewModel)
     }
@@ -38,6 +38,7 @@ final class MyBookingsControllerFactoryImpl: MyBookingsControllerFactory {
         let viewModel = BookingDetailsViewModel(
             booking: booking,
             transition: transition,
+            observeBookingUseCase: assembler.app.observeBookingUseCase,
             getSalonByIdUseCase: assembler.salonBooking.getSalonByIdUseCase,
             getSalonShareUseCase: assembler.salonBooking.getSalonShareUseCase,
             saveSalonUseCase: assembler.app.saveSalonUseCase,

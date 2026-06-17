@@ -17,6 +17,10 @@ struct Booking: Identifiable {
     let status: BookingStatus
     let datetime: Date
     let endDatetime: Date?
+    /// When the booking was cancelled (server `cancelled_at`). Drives the Cancelled
+    /// tab's ordering — most-recently-cancelled first. `nil` for active bookings and
+    /// for legacy cancelled rows that predate the field (those fall back to `datetime`).
+    let cancelledAt: Date?
     let services: [BookingService]
     let totalPrice: Double?
     let currency: String?
@@ -29,9 +33,37 @@ struct Booking: Identifiable {
     var serviceNames: [String] { services.map(\.name) }
 }
 
+// MARK: - Booking + Equatable
+//
+// `CLLocationCoordinate2D` isn't `Equatable`, so we can't synthesize it — compare
+// the coordinate by lat/long. Equatable lets the bookings cache de-duplicate
+// (`removeDuplicates`) and avoids redundant `objectWillChange` on no-op upserts.
+
+extension Booking: Equatable {
+    static func == (lhs: Booking, rhs: Booking) -> Bool {
+        lhs.id == rhs.id
+            && lhs.salonId == rhs.salonId
+            && lhs.salonName == rhs.salonName
+            && lhs.salonAddress == rhs.salonAddress
+            && lhs.salonImageURL == rhs.salonImageURL
+            && lhs.coordinate?.latitude == rhs.coordinate?.latitude
+            && lhs.coordinate?.longitude == rhs.coordinate?.longitude
+            && lhs.bookingUrl == rhs.bookingUrl
+            && lhs.status == rhs.status
+            && lhs.datetime == rhs.datetime
+            && lhs.endDatetime == rhs.endDatetime
+            && lhs.cancelledAt == rhs.cancelledAt
+            && lhs.services == rhs.services
+            && lhs.totalPrice == rhs.totalPrice
+            && lhs.currency == rhs.currency
+            && lhs.durationMinutes == rhs.durationMinutes
+            && lhs.timezone == rhs.timezone
+    }
+}
+
 // MARK: - BookingService
 
-struct BookingService: Identifiable {
+struct BookingService: Identifiable, Equatable {
     let id: String
     let name: String
     /// Only available for bookings built from the salon catalog (post-success);

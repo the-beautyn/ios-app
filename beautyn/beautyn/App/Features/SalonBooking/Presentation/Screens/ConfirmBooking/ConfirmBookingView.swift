@@ -258,8 +258,13 @@ private func makePreviewVM() -> ConfirmBookingViewModel {
 }
 
 private final class PreviewCreateBookingUseCase: CreateAltegioBookingUseCase {
-    func execute(salonId: String, workerId: String?, serviceIds: [String], datetime: String, comment: String?) async throws -> CreatedBooking {
-        CreatedBooking(bookingId: "preview", crmRecordId: 1, shortLink: nil, status: "created")
+    func execute(salonId: String, workerId: String?, serviceIds: [String], datetime: String, comment: String?) async throws -> Booking {
+        Booking(
+            id: "preview", salonId: salonId, salonName: "Preview Salon", salonAddress: nil,
+            salonImageURL: nil, coordinate: nil, bookingUrl: nil, status: .created,
+            datetime: Date(), endDatetime: nil, cancelledAt: nil, services: [],
+            totalPrice: nil, currency: nil, durationMinutes: nil, timezone: nil
+        )
     }
 }
 

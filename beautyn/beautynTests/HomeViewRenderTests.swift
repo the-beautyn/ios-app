@@ -53,7 +53,7 @@ final class HomeViewRenderTests: XCTestCase {
             saveSalonUseCase: MockSaveSalonUseCase(),
             unsaveSalonUseCase: MockUnsaveSalonUseCase(),
             savedSalonsEventBus: MockSavedSalonsEventBus(),
-            bookingEventBus: MockBookingEventBus(),
+            observeBookingUseCase: MockObserveBookingUseCase(),
             sessionManager: SessionManager(keychainService: KeychainServiceImpl(), defaultsService: DefaultsStorageService()),
             getCurrentUserUseCase: MockGetCurrentUserUseCase()
         )
@@ -81,9 +81,12 @@ private final class MockSavedSalonsEventBus: SavedSalonsEventBus {
     func notify(_ change: SavedSalonChange) {}
 }
 
-private final class MockBookingEventBus: BookingEventBus {
-    var bookingCreated: AnyPublisher<BookingCreatedEvent, Never> { Empty().eraseToAnyPublisher() }
-    func notifyBookingCreated(_ event: BookingCreatedEvent) {}
+@MainActor
+private final class MockObserveBookingUseCase: ObserveBookingUseCase {
+    func execute(id: String) -> AnyPublisher<Booking?, Never> {
+        // Emit nil so Home renders from the feed snapshot (no cache override).
+        Just(nil).eraseToAnyPublisher()
+    }
 }
 
 // MARK: - MockHomeFeedUseCase

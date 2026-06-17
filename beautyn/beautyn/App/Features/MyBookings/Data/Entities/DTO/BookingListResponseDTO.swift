@@ -23,6 +23,7 @@ struct BookingItemDTO: Decodable {
     let status: String
     let datetime: String
     let endDatetime: String?
+    let cancelledAt: String?
     let serviceNames: [String]?
     let totalPrice: Double?
     let currency: String?
@@ -41,6 +42,7 @@ struct BookingItemDTO: Decodable {
         case status
         case datetime
         case endDatetime = "end_datetime"
+        case cancelledAt = "cancelled_at"
         case serviceNames = "service_names"
         case totalPrice = "total_price"
         case currency

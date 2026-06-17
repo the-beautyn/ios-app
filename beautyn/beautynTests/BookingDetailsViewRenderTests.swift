@@ -44,6 +44,7 @@ final class BookingDetailsViewRenderTests: XCTestCase {
         BookingDetailsViewModel(
             booking: makeBooking(status: status, datetime: datetime),
             transition: .init(didTapBookAgain: { _ in }, didRequireAuth: {}),
+            observeBookingUseCase: MockObserveBookingUseCase(),
             getSalonByIdUseCase: MockGetSalonByIdUseCase(),
             getSalonShareUseCase: MockGetSalonShareUseCase(),
             saveSalonUseCase: MockSaveSalonUseCase(),
@@ -68,6 +69,7 @@ final class BookingDetailsViewRenderTests: XCTestCase {
             status: status,
             datetime: datetime,
             endDatetime: datetime.addingTimeInterval(5_400),
+            cancelledAt: nil,
             services: [
                 BookingService(
                     id: "srv1",
@@ -86,6 +88,14 @@ final class BookingDetailsViewRenderTests: XCTestCase {
 }
 
 // MARK: - Mocks
+
+@MainActor
+private final class MockObserveBookingUseCase: ObserveBookingUseCase {
+    func execute(id: String) -> AnyPublisher<Booking?, Never> {
+        // Emit nil so the screen keeps the seed booking passed into the VM.
+        Just(nil).eraseToAnyPublisher()
+    }
+}
 
 private final class MockGetSalonByIdUseCase: GetSalonByIdUseCase {
     func execute(id: String) async throws -> Salon { throw CancellationError() }

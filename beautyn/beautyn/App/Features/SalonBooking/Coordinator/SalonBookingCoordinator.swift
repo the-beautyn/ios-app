@@ -42,26 +42,10 @@ final class SalonBookingCoordinator: BaseCoordinator {
                 self?.showSelectService(salon: salon, entry: entry, availableServiceIds: availableServiceIds)
             },
             didCompleteEasyweekBooking: { [weak self] booking in
-                self?.showEasyweekBookingSuccess(booking: booking)
+                self?.showBookingSuccess(booking: booking)
             }
         )
         let vc = factory.makeSalonProfile(salonId: salonId, transition: transition)
-        router.push(vc, animated: true)
-    }
-
-    // EasyWeek booking is made in the web widget and confirmed on the backend;
-    // show the same success splash → details handoff as the in-app Altegio flow.
-    private func showEasyweekBookingSuccess(booking: Booking) {
-        let transition = BookingSuccessViewModel.Transition(
-            didFinish: { [weak self] in
-                guard let self else { return }
-                // Collapse back to the salon profile, then push the details screen
-                // so back from details returns to the salon profile.
-                self.router.popTo(SalonProfileController.self, animated: false)
-                self.showBookingDetails(booking: booking)
-            }
-        )
-        let vc = factory.makeBookingSuccess(transition: transition)
         router.push(vc, animated: true)
     }
 
@@ -110,15 +94,10 @@ final class SalonBookingCoordinator: BaseCoordinator {
 
     private func showConfirmBooking(salon: Salon, selectedServiceIds: Set<String>, workerId: String?, datetime: String) {
         let transition = ConfirmBookingViewModel.Transition(
-            didFinishBooking: { [weak self] created in
-                // Booking done — show the success splash, which then hands off to
-                // the booking details screen.
-                self?.showBookingSuccess(
-                    salon: salon,
-                    selectedServiceIds: selectedServiceIds,
-                    datetime: datetime,
-                    created: created
-                )
+            didFinishBooking: { [weak self] booking in
+                // Booking done — show the success splash, which then hands off to the
+                // booking details screen built from the backend booking.
+                self?.showBookingSuccess(booking: booking)
             }
         )
         let vc = factory.makeConfirmBooking(
@@ -131,21 +110,14 @@ final class SalonBookingCoordinator: BaseCoordinator {
         router.push(vc, animated: true)
     }
 
-    private func showBookingSuccess(
-        salon: Salon,
-        selectedServiceIds: Set<String>,
-        datetime: String,
-        created: CreatedBooking
-    ) {
+    // Booking done (in-app Altegio create or EasyWeek widget confirm) — show the
+    // success splash, then hand off to the details screen. Both providers navigate
+    // off the backend `Booking` (fetched into the source of truth at create/confirm),
+    // so the details screen reflects the CRM-sourced data.
+    private func showBookingSuccess(booking: Booking) {
         let transition = BookingSuccessViewModel.Transition(
             didFinish: { [weak self] in
                 guard let self else { return }
-                let booking = CreatedBookingMapper.make(
-                    salon: salon,
-                    selectedServiceIds: selectedServiceIds,
-                    datetime: datetime,
-                    created: created
-                )
                 // Collapse the booking stack back to the salon profile (removes the
                 // confirm + success + selection steps), then push the details
                 // screen — so back from details returns to the salon profile.

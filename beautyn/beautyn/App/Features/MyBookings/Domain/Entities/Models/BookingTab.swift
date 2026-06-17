@@ -2,8 +2,9 @@ import Foundation
 
 // MARK: - BookingTab
 //
-// The three segments of the My Bookings screen. Each maps to a backend status
-// filter (see `GetMyBookingsUseCase`) and carries its own localized labels.
+// The three segments of the My Bookings screen. Each maps to a `BookingCategory`
+// (the canonical bucketing used for fetching + the local split) and carries its
+// own localized labels.
 
 enum BookingTab: Int, CaseIterable, Identifiable {
     case upcoming
@@ -11,6 +12,15 @@ enum BookingTab: Int, CaseIterable, Identifiable {
     case cancelled
 
     var id: Int { rawValue }
+
+    /// The domain bucketing this tab displays (used for fetching + local split).
+    var category: BookingCategory {
+        switch self {
+        case .upcoming: return .upcoming
+        case .past: return .past
+        case .cancelled: return .cancelled
+        }
+    }
 
     var title: String {
         switch self {

@@ -249,6 +249,12 @@ struct BookingDetailsView: BaseViewProtocol {
 
 #if DEBUG
 
+private final class PreviewObserveBookingUseCase: ObserveBookingUseCase {
+    func execute(id: String) -> AnyPublisher<Booking?, Never> {
+        Just(nil).eraseToAnyPublisher()
+    }
+}
+
 private final class PreviewGetSalonByIdUseCase: GetSalonByIdUseCase {
     func execute(id: String) async throws -> Salon {
         throw CancellationError()   // favorite state stays default in previews
@@ -287,6 +293,7 @@ private extension Booking {
             status: status,
             datetime: Date().addingTimeInterval(86_400),
             endDatetime: Date().addingTimeInterval(86_400 + 5_400),
+            cancelledAt: nil,
             services: [
                 BookingService(id: "srv1", name: "Classic Manicure", description: "Охайна форма, кутикула, легкий care та базове покриття.", price: 700)
             ],
@@ -303,6 +310,7 @@ private func makePreviewViewModel(status: BookingStatus) -> BookingDetailsViewMo
     BookingDetailsViewModel(
         booking: .preview(status: status),
         transition: .init(didTapBookAgain: { _ in }, didRequireAuth: {}),
+        observeBookingUseCase: PreviewObserveBookingUseCase(),
         getSalonByIdUseCase: PreviewGetSalonByIdUseCase(),
         getSalonShareUseCase: PreviewGetSalonShareUseCase(),
         saveSalonUseCase: PreviewSaveSalonUseCase(),

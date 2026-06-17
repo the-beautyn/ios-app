@@ -17,9 +17,9 @@ final class ConfirmBookingViewModel: BaseViewModel {
     // MARK: - Transition
 
     struct Transition {
-        /// The booking was created — leave the flow (success toast + pop is owned
-        /// by the coordinator).
-        let didFinishBooking: (CreatedBooking) -> Void
+        /// The booking was created — hand the full backend `Booking` back so the
+        /// coordinator can show the success splash and push the details screen.
+        let didFinishBooking: (Booking) -> Void
     }
 
     // MARK: - Published State

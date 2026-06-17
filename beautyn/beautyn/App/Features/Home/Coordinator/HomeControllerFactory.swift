@@ -29,7 +29,7 @@ final class HomeControllerFactoryImpl: HomeControllerFactory {
             saveSalonUseCase: assembler.app.saveSalonUseCase,
             unsaveSalonUseCase: assembler.app.unsaveSalonUseCase,
             savedSalonsEventBus: assembler.app.savedSalonsEventBus,
-            bookingEventBus: assembler.app.bookingEventBus,
+            observeBookingUseCase: assembler.app.observeBookingUseCase,
             sessionManager: assembler.app.sessionManager,
             getCurrentUserUseCase: assembler.app.getCurrentUserUseCase
         )
@@ -43,6 +43,7 @@ final class HomeControllerFactoryImpl: HomeControllerFactory {
         let viewModel = BookingDetailsViewModel(
             booking: booking,
             transition: transition,
+            observeBookingUseCase: assembler.app.observeBookingUseCase,
             getSalonByIdUseCase: assembler.salonBooking.getSalonByIdUseCase,
             getSalonShareUseCase: assembler.salonBooking.getSalonShareUseCase,
             saveSalonUseCase: assembler.app.saveSalonUseCase,

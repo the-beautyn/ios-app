@@ -84,6 +84,8 @@ struct HomeView: BaseViewProtocol {
                         )
                     }
                     .padding(.horizontal, CGFloat.Spacing.md)
+                    // Fades in/out when the next appointment appears or is cleared.
+                    .transition(.opacity)
                 }
 
                 // Saved Salons (auth only)
@@ -111,6 +113,9 @@ struct HomeView: BaseViewProtocol {
                         .padding(.horizontal, CGFloat.Spacing.md)
                         salonCardsRow(items: section.items)
                     }
+                    // Inserted/removed sections fade while the feed below slides to
+                    // fill the gap (driven by the view model's withAnimation on refresh).
+                    .transition(.opacity)
                 }
             }
             .padding(.top, CGFloat.Spacing.lg)
@@ -156,6 +161,8 @@ struct HomeView: BaseViewProtocol {
                         onTap: { viewModel.didTapSalonCard(salon.id) },
                         onFavoriteTap: { viewModel.didTapFavorite(salonId: salon.id) }
                     )
+                    // Cards scale/fade in/out as a section's items change on refresh.
+                    .transition(.scale.combined(with: .opacity))
                 }
             }
             .scrollTargetLayout()
@@ -185,7 +192,7 @@ struct HomeView: BaseViewProtocol {
             saveSalonUseCase: PreviewSaveSalonUseCase(),
             unsaveSalonUseCase: PreviewUnsaveSalonUseCase(),
             savedSalonsEventBus: PreviewSavedSalonsEventBus(),
-            bookingEventBus: BookingEventBusImpl(),
+            observeBookingUseCase: PreviewObserveBookingUseCase(),
             sessionManager: SessionManager(keychainService: KeychainServiceImpl(), defaultsService: DefaultsStorageService()),
             getCurrentUserUseCase: PreviewGetCurrentUserUseCase()
         )
@@ -209,6 +216,12 @@ private final class PreviewUnsaveSalonUseCase: UnsaveSalonUseCase {
 private final class PreviewSavedSalonsEventBus: SavedSalonsEventBus {
     var changes: AnyPublisher<SavedSalonChange, Never> { Empty().eraseToAnyPublisher() }
     func notify(_ change: SavedSalonChange) {}
+}
+
+private final class PreviewObserveBookingUseCase: ObserveBookingUseCase {
+    func execute(id: String) -> AnyPublisher<Booking?, Never> {
+        Just(nil).eraseToAnyPublisher()
+    }
 }
 
 private final class PreviewGetCurrentUserUseCase: GetCurrentUserUseCase {

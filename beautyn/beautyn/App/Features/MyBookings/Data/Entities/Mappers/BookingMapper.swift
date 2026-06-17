@@ -30,6 +30,7 @@ enum BookingMapper {
             status: BookingStatus(raw: dto.status),
             datetime: datetime,
             endDatetime: dto.endDatetime.flatMap { parseDate($0) },
+            cancelledAt: dto.cancelledAt.flatMap { parseDate($0) },
             services: mapServices(dto),
             // Backend sends the total in cents (kopiykas); convert to UAH so the
             // card shows e.g. 300, not 30000 — same as SalonMapper / the Home feed.

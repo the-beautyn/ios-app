@@ -15,7 +15,6 @@ protocol AppFactory: ResolverInjector {
     var deleteAccountUseCase: any DeleteAccountUseCase { get }
     var tokenRefresher: TokenRefresher { get }
     var getCurrentUserUseCase: any GetCurrentUserUseCase { get }
-    var getBookingByIdUseCase: any GetBookingByIdUseCase { get }
     var refreshCurrentUserUseCase: any RefreshCurrentUserUseCase { get }
     var clearUserUseCase: any ClearUserUseCase { get }
     var updateUserProfileUseCase: any UpdateUserProfileUseCase { get }
@@ -30,7 +29,10 @@ protocol AppFactory: ResolverInjector {
     var unsaveSalonUseCase: any UnsaveSalonUseCase { get }
     var getSavedSalonsUseCase: any GetSavedSalonsUseCase { get }
     var savedSalonsEventBus: any SavedSalonsEventBus { get }
-    var bookingEventBus: any BookingEventBus { get }
+    var observeBookingsUseCase: any ObserveBookingsUseCase { get }
+    var observeBookingUseCase: any ObserveBookingUseCase { get }
+    var refreshBookingsUseCase: any RefreshBookingsUseCase { get }
+    var refreshBookingUseCase: any RefreshBookingUseCase { get }
 }
 
 // MARK: - Default implementations
@@ -48,7 +50,6 @@ extension AppFactory {
     var deleteAccountUseCase: any DeleteAccountUseCase { resolver.require((any DeleteAccountUseCase).self) }
     var tokenRefresher: TokenRefresher { resolver.require(TokenRefresher.self) }
     var getCurrentUserUseCase: any GetCurrentUserUseCase { resolver.require((any GetCurrentUserUseCase).self) }
-    var getBookingByIdUseCase: any GetBookingByIdUseCase { resolver.require((any GetBookingByIdUseCase).self) }
     var refreshCurrentUserUseCase: any RefreshCurrentUserUseCase { resolver.require((any RefreshCurrentUserUseCase).self) }
     var clearUserUseCase: any ClearUserUseCase { resolver.require((any ClearUserUseCase).self) }
     var updateUserProfileUseCase: any UpdateUserProfileUseCase { resolver.require((any UpdateUserProfileUseCase).self) }
@@ -63,7 +64,10 @@ extension AppFactory {
     var unsaveSalonUseCase: any UnsaveSalonUseCase { resolver.require((any UnsaveSalonUseCase).self) }
     var getSavedSalonsUseCase: any GetSavedSalonsUseCase { resolver.require((any GetSavedSalonsUseCase).self) }
     var savedSalonsEventBus: any SavedSalonsEventBus { resolver.require((any SavedSalonsEventBus).self) }
-    var bookingEventBus: any BookingEventBus { resolver.require((any BookingEventBus).self) }
+    var observeBookingsUseCase: any ObserveBookingsUseCase { resolver.require((any ObserveBookingsUseCase).self) }
+    var observeBookingUseCase: any ObserveBookingUseCase { resolver.require((any ObserveBookingUseCase).self) }
+    var refreshBookingsUseCase: any RefreshBookingsUseCase { resolver.require((any RefreshBookingsUseCase).self) }
+    var refreshBookingUseCase: any RefreshBookingUseCase { resolver.require((any RefreshBookingUseCase).self) }
 }
 
 // MARK: - Implementation
