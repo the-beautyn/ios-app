@@ -41,10 +41,11 @@ enum AppointmentDateFormatter {
 
     static func timeString(start: Date, end: Date?, timeZone: TimeZone? = nil) -> String {
         let zone = timeZone ?? .current
-        timeFormatter.timeZone = zone
-        var value = timeFormatter.string(from: start)
+        let formatter = timeFormatter.copy() as! DateFormatter
+        formatter.timeZone = zone
+        var value = formatter.string(from: start)
         if let end {
-            value += " – " + timeFormatter.string(from: end)
+            value += " – " + formatter.string(from: end)
         }
         return value
     }
