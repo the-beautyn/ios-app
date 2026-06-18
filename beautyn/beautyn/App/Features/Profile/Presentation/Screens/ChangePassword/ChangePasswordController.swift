@@ -19,17 +19,14 @@ final class ChangePasswordController: BaseHostingViewController<ChangePasswordVi
         fatalError("init(coder:) has not been implemented")
     }
 
+    override var prefersNavigationBarHidden: Bool { false }
+
     override func viewDidLoad() {
         super.viewDidLoad()
         title = Localization.profileChangePasswordTitle
         navigationItem.backButtonDisplayMode = .minimal
         setupSubmitButton()
         bindSubmitButton()
-    }
-
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        navigationController?.setNavigationBarHidden(false, animated: animated)
     }
 
     // MARK: - Submit button

@@ -29,14 +29,16 @@ struct CachedImage<ClipShape: Shape>: View {
         if url != nil {
             LazyImage(source: url) { state in
                 if let container = state.imageContainer {
-                    NukeUI.Image(container)
-                        .resizingMode(.aspectFill)
+                    SwiftUI.Image(uiImage: container.image)
+                        .resizable()
+                        .scaledToFill()
                 } else {
                     placeholder
                 }
             }
             .processors(resizeProcessors)
             .frame(width: size.width, height: size.height)
+            .clipped()
             .clipShape(clipShape)
         } else {
             placeholder
@@ -64,17 +66,24 @@ extension CachedImage where ClipShape == Circle {
     static func avatar(
         url: URL?,
         size: CGSize,
-        iconSize: CGFloat = 100
+        iconSize: CGFloat? = nil
     ) -> CachedImage<Circle> {
-        CachedImage<Circle>(
+        // Default the icon to ~50% of the avatar size so it sits centered
+        // inside the circle clip regardless of the avatar diameter — small
+        // 40pt avatars (specialist rows) and larger profile avatars both
+        // look correct.
+        let effectiveIconSize = iconSize ?? (size.width * 0.5)
+        return CachedImage<Circle>(
             url: url,
             size: size,
             clipShape: Circle(),
             placeholder: AnyView(
-                SwiftUI.Image(.avatarPlaceholder)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: iconSize, height: iconSize)
+                Color.App.beige2
+                    .overlay(
+                        SwiftUI.Image(systemName: "person.fill")
+                            .font(.system(size: effectiveIconSize))
+                            .foregroundStyle(Color.App.gray2)
+                    )
             )
         )
     }

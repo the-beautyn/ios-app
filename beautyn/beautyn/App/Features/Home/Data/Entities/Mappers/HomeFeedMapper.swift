@@ -61,7 +61,18 @@ enum HomeFeedMapper {
             datetime: parseDate(dto.datetime),
             endDatetime: dto.endDatetime.map { parseDate($0) },
             totalPriceCents: dto.totalPriceCents,
-            durationMinutes: dto.durationMinutes
+            durationMinutes: dto.durationMinutes,
+            serviceNames: dto.serviceNames ?? [],
+            services: (dto.services ?? []).map { service in
+                NextBookingService(
+                    id: service.id,
+                    name: service.name,
+                    description: service.description,
+                    priceCents: service.priceCents
+                )
+            },
+            bookingUrl: dto.shortLink,
+            timezone: dto.salonTimezone.flatMap(TimeZone.init(identifier:))
         )
     }
 

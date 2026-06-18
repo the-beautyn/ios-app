@@ -20,6 +20,19 @@ final class Router {
         navigationController.pushViewController(viewController, animated: animated)
     }
 
+    /// Swap the top view controller for another, keeping the rest of the stack —
+    /// e.g. replacing Booking Details with the details of a rescheduled booking so
+    /// "back" still returns to where the user came from.
+    func replaceTop(_ viewController: UIViewController, animated: Bool = true) {
+        var controllers = navigationController.viewControllers
+        if controllers.isEmpty {
+            controllers = [viewController]
+        } else {
+            controllers[controllers.count - 1] = viewController
+        }
+        navigationController.setViewControllers(controllers, animated: animated)
+    }
+
     func pop(animated: Bool = true) {
         navigationController.popViewController(animated: animated)
     }

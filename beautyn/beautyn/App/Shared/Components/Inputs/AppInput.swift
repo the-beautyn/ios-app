@@ -356,6 +356,46 @@ struct AppCodeField: View {
     }
 }
 
+// MARK: ─────────────────────────────────────────────────────────────────────
+// MARK: 5. AppTextEditor — multiline text (comments, notes…)
+// MARK: ─────────────────────────────────────────────────────────────────────
+
+struct AppTextEditor: View {
+
+    let placeholder: String
+    @Binding var text: String
+    var height: CGFloat = 100
+
+    // UITextView (which backs SwiftUI's TextEditor) lays text out with a small
+    // built-in inset: ~5 pt horizontal (lineFragmentPadding) and ~8 pt vertical.
+    // We pad the editor to land its text at the Figma 14 / 16 pt insets, and
+    // pad the placeholder to the same spot so the two overlap exactly.
+    private static let editorInternalH: CGFloat = 5
+    private static let editorInternalV: CGFloat = 8
+    private static let contentInsetV: CGFloat = 16
+
+    var body: some View {
+        ZStack(alignment: .topLeading) {
+            if text.isEmpty {
+                InputPlaceholder(text: placeholder)
+                    .padding(.horizontal, InputMetrics.paddingH)
+                    .padding(.vertical, Self.contentInsetV)
+            }
+
+            TextEditor(text: $text)
+                .inputTextStyle()
+                .scrollContentBackground(.hidden)
+                .padding(.horizontal, InputMetrics.paddingH - Self.editorInternalH)
+                .padding(.vertical, Self.contentInsetV - Self.editorInternalV)
+        }
+        .frame(height: height)
+        .overlay {
+            RoundedRectangle(cornerRadius: InputMetrics.cornerRadius, style: .continuous)
+                .stroke(Color.inputBorder(hasError: false), lineWidth: 1)
+        }
+    }
+}
+
 // MARK: - Preview
 
 #if DEBUG
@@ -365,6 +405,7 @@ private struct InputPreviewRoot: View {
     @State private var password = ""
     @State private var phone    = ""
     @State private var otp      = ""
+    @State private var comment  = ""
 
     @State private var emailError:    String? = nil
     @State private var passwordError: String? = nil
@@ -422,6 +463,14 @@ private struct InputPreviewRoot: View {
                         .font(.App.caption1)
                         .foregroundStyle(Color.App.gray2)
                     toggleError("OTP error", message: "Невірний код", error: $otpError)
+                }
+
+                // ── Multiline ─────────────────────────────────────────
+                section("Multiline input") {
+                    AppTextEditor(
+                        placeholder: "Залиште додаткові коментарі для майстра або салону",
+                        text: $comment
+                    )
                 }
             }
             .padding(.horizontal, CGFloat.Spacing.md)

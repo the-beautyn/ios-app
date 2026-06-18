@@ -12,6 +12,9 @@
 "input_phone_placeholder" = "номер телефону";
 "common_cancel" = "Скасувати";
 "common_done" = "Готово";
+"common_today" = "Сьогодні";
+"common_tomorrow" = "Завтра";
+"common_yesterday" = "Вчора";
 
 // MARK: - Errors
 "error_invalid_response" = "Невірна відповідь сервера.";
@@ -117,6 +120,18 @@
 "salon_book_button" = "Записатись";
 "salon_options_count" = "%d опцій";
 "salon_specialist_nearest_date" = "Найближча дата запису %@:";
+"salon_profile_search_placeholder" = "Пошук";
+"salon_profile_nothing_found" = "Нічого не знайдено";
+"salon_profile_coming_soon_title" = "Скоро";
+"salon_profile_coming_soon_message" = "Онлайн-запис у застосунку буде доступний найближчим часом.";
+
+// MARK: - Select Service
+"select_service_title" = "Оберіть послугу";
+"select_service_other_category" = "Інше";
+"edit_services_title" = "Додані послуги";
+"edit_services_count" = "%d послуги";
+"edit_services_total" = "Всього";
+"price_uah" = "%@ грн";
 
 // MARK: - Booking
 "booking_date_picker_title" = "Оберіть час та дату";
@@ -127,12 +142,46 @@
 "booking_clear_button" = "Почистити";
 "booking_apply_button" = "Застосувати";
 
+// MARK: - Confirm Booking
+"confirm_booking_title" = "Підтвердження запису";
+"confirm_booking_payment_on_site" = "Оплата на місці";
+"confirm_booking_your_data" = "Ваші дані";
+"confirm_booking_discount_title" = "Код знижки";
+"confirm_booking_discount_placeholder" = "Введіть код";
+"confirm_booking_comment_title" = "Коментар";
+"confirm_booking_comment_placeholder" = "Залиште додаткові коментарі для майстра або салону";
+"confirm_booking_confirm_button" = "Підтвердити";
+"confirm_booking_success" = "Бронювання створено";
+"booking_success_title" = "Вас успішно записано";
+
 // MARK: - My Bookings
 "bookings_title" = "Мої бронювання";
 "bookings_tab_upcoming" = "Наступні";
 "bookings_tab_past" = "Попередні";
 "bookings_tab_cancelled" = "Скасовані";
 "bookings_upcoming_section_title" = "Наступні записи";
+"bookings_past_section_title" = "Попередні записи";
+"bookings_cancelled_section_title" = "Скасовані записи";
+"bookings_book_button" = "Забронювати";
+"bookings_empty_upcoming" = "У вас немає наступних записів";
+"bookings_empty_past" = "У вас немає попередніх записів";
+"bookings_empty_cancelled" = "У вас немає скасованих записів";
+"booking_details_title" = "Деталі бронювання";
+"booking_details_coming_soon" = "Деталі бронювання будуть доступні незабаром.";
+"booking_details_status_confirmed" = "Підтверджено";
+"booking_details_status_cancelled" = "Скасовано";
+"booking_details_status_completed" = "Завершено";
+"booking_details_add_to_calendar" = "Додати в календар";
+"booking_details_calendar_access_denied" = "Дозвольте доступ до календаря в Налаштуваннях.";
+"booking_details_route" = "Прокласти маршрут";
+"booking_details_make_changes" = "Внести зміни";
+"booking_details_make_changes_subtitle" = "Перенести, відредагувати, відмінити.";
+"booking_details_book_again" = "Забронювати знову";
+"booking_details_services_section" = "Деталі запису";
+"booking_details_total" = "Всього";
+"maps_chooser_title" = "Відкрити в";
+"maps_apple_maps" = "Apple Maps";
+"maps_google_maps" = "Google Maps";
 
 // MARK: - My Profile
 "profile_title" = "Профайл";

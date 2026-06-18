@@ -5,6 +5,10 @@ import UIKit
 @MainActor
 protocol HomeControllerFactory {
     func makeHome(transition: HomeViewModel.Transition) -> UIViewController
+    func makeBookingDetails(
+        booking: Booking,
+        transition: BookingDetailsViewModel.Transition
+    ) -> UIViewController
 }
 
 // MARK: - HomeControllerFactoryImpl
@@ -22,12 +26,35 @@ final class HomeControllerFactoryImpl: HomeControllerFactory {
         let viewModel = HomeViewModel(
             transition: transition,
             getHomeFeedUseCase: assembler.home.getHomeFeedUseCase,
-            saveSalonUseCase: assembler.require((any SaveSalonUseCase).self),
-            unsaveSalonUseCase: assembler.require((any UnsaveSalonUseCase).self),
-            savedSalonsEventBus: assembler.require((any SavedSalonsEventBus).self),
+            saveSalonUseCase: assembler.app.saveSalonUseCase,
+            unsaveSalonUseCase: assembler.app.unsaveSalonUseCase,
+            savedSalonsEventBus: assembler.app.savedSalonsEventBus,
+            observeBookingUseCase: assembler.app.observeBookingUseCase,
             sessionManager: assembler.app.sessionManager,
             getCurrentUserUseCase: assembler.app.getCurrentUserUseCase
         )
         return HomeController(viewModel: viewModel)
+    }
+
+    func makeBookingDetails(
+        booking: Booking,
+        transition: BookingDetailsViewModel.Transition
+    ) -> UIViewController {
+        let viewModel = BookingDetailsViewModel(
+            booking: booking,
+            transition: transition,
+            observeBookingUseCase: assembler.app.observeBookingUseCase,
+            refreshBookingUseCase: assembler.app.refreshBookingUseCase,
+            syncBookingFromCrmUseCase: assembler.app.syncBookingFromCrmUseCase,
+            confirmEasyweekBookingUseCase: assembler.salonBooking.confirmEasyweekBookingUseCase,
+            getCurrentUserUseCase: assembler.app.getCurrentUserUseCase,
+            getSalonByIdUseCase: assembler.salonBooking.getSalonByIdUseCase,
+            getSalonShareUseCase: assembler.salonBooking.getSalonShareUseCase,
+            saveSalonUseCase: assembler.app.saveSalonUseCase,
+            unsaveSalonUseCase: assembler.app.unsaveSalonUseCase,
+            savedSalonsEventBus: assembler.app.savedSalonsEventBus,
+            sessionManager: assembler.app.sessionManager
+        )
+        return BookingDetailsController(viewModel: viewModel)
     }
 }

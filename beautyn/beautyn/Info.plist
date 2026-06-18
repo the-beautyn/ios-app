@@ -23,6 +23,12 @@
 	<string>$(GID_CLIENT_ID)</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>comgooglemaps</string>
+	</array>
+	<key>NSCalendarsWriteOnlyAccessUsageDescription</key>
+	<string>Доступ до календаря потрібен, щоб додати ваш запис у календар.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Доступ до геолокації потрібен, щоб автоматично заповнити ваше місто у профілі.</string>
 	<key>UIAppFonts</key>

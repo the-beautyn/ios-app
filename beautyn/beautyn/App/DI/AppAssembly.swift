@@ -168,6 +168,58 @@ final class AppAssembly: Assembly {
             unsaveSalonUseCase
         }
 
+        let getSavedSalonsUseCase: GetSavedSalonsUseCase = GetSavedSalonsUseCaseImpl(
+            repository: savedSalonsRepository
+        )
+        container.register((any GetSavedSalonsUseCase).self) { _ in
+            getSavedSalonsUseCase
+        }
+
+        // MARK: - Bookings (shared source of truth)
+        //
+        // One cache owned by the repository; Home, MyBookings, Booking Details and
+        // the create/confirm flows all read & write through it. Registered here
+        // (root) so every feature's child assembler resolves the same instance —
+        // a per-feature instance would silently fail to stay in sync.
+
+        let bookingsRepository: any BookingsRepository = BookingsRepositoryImpl(
+            networkService: networkService,
+            sessionManager: sessionManager
+        )
+        container.register((any BookingsRepository).self) { _ in
+            bookingsRepository
+        }
+
+        let observeBookingsUseCase: any ObserveBookingsUseCase =
+            ObserveBookingsUseCaseImpl(repository: bookingsRepository)
+        container.register((any ObserveBookingsUseCase).self) { _ in
+            observeBookingsUseCase
+        }
+
+        let observeBookingUseCase: any ObserveBookingUseCase =
+            ObserveBookingUseCaseImpl(repository: bookingsRepository)
+        container.register((any ObserveBookingUseCase).self) { _ in
+            observeBookingUseCase
+        }
+
+        let refreshBookingsUseCase: any RefreshBookingsUseCase =
+            RefreshBookingsUseCaseImpl(repository: bookingsRepository)
+        container.register((any RefreshBookingsUseCase).self) { _ in
+            refreshBookingsUseCase
+        }
+
+        let refreshBookingUseCase: any RefreshBookingUseCase =
+            RefreshBookingUseCaseImpl(repository: bookingsRepository)
+        container.register((any RefreshBookingUseCase).self) { _ in
+            refreshBookingUseCase
+        }
+
+        let syncBookingFromCrmUseCase: any SyncBookingFromCrmUseCase =
+            SyncBookingFromCrmUseCaseImpl(repository: bookingsRepository)
+        container.register((any SyncBookingFromCrmUseCase).self) { _ in
+            syncBookingFromCrmUseCase
+        }
+
         // MARK: - OAuth services
 
         container.register((any AppleSignInService).self) { _ in

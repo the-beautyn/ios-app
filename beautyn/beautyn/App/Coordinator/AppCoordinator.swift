@@ -92,6 +92,13 @@ final class AppCoordinator: BaseCoordinator {
                 self?.handleResetPasswordDeepLink(model)
             }
             .store(in: &cancellables)
+
+        deepLinkingService.salonLinkPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] model in
+                self?.mainTabCoordinator?.openSalonBooking(salonId: model.salonId)
+            }
+            .store(in: &cancellables)
     }
 
     private func handleResetPasswordDeepLink(_ model: ResetPasswordLinkModel) {

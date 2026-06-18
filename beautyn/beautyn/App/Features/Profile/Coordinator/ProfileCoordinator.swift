@@ -91,7 +91,20 @@ final class ProfileCoordinator: BaseCoordinator {
     }
 
     private func navigateToSalon(salonId: String) {
-        // TODO: Push Salon Profile screen
+        // Profile (and saved salons) is auth-gated, so the user is always
+        // authenticated here — the booking coordinator's onRequireAuth is left
+        // unset since favorite toggles never need to route to auth.
+        let coordinator = SalonBookingCoordinator(
+            parentAssembler: parentAssembler,
+            router: router,
+            salonId: salonId
+        )
+        coordinator.onFinish = { [weak self, weak coordinator] in
+            guard let self, let coordinator else { return }
+            self.removeChild(coordinator)
+        }
+        addChild(coordinator)
+        coordinator.start()
     }
 
     private func navigateToSettings() {

@@ -33,8 +33,17 @@ enum ViewRenderer {
         let initialHeight: CGFloat = 852
         hostingController.view.frame = CGRect(x: 0, y: 0, width: width, height: initialHeight)
 
-        // Attach to a window to trigger SwiftUI lifecycle
-        let window = UIWindow(frame: CGRect(x: 0, y: 0, width: width, height: initialHeight))
+        // Attach to a window to trigger SwiftUI lifecycle. iOS 26 deprecated
+        // UIWindow(frame:); create the window on the test host's active scene.
+        guard let windowScene = UIApplication.shared.connectedScenes
+            .compactMap({ $0 as? UIWindowScene })
+            .first
+        else {
+            XCTFail("ViewRenderer needs an active UIWindowScene (run via the test host app)")
+            return
+        }
+        let window = UIWindow(windowScene: windowScene)
+        window.frame = CGRect(x: 0, y: 0, width: width, height: initialHeight)
         window.rootViewController = hostingController
         window.isHidden = false
 

@@ -37,8 +37,7 @@ struct ProfileView: BaseViewProtocol {
     private var avatar: some View {
         CachedImage.avatar(
             url: viewModel.avatarURL,
-            size: CGSize(width: 44, height: 44),
-            iconSize: 44
+            size: CGSize(width: 44, height: 44)
         )
     }
 

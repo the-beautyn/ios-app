@@ -25,6 +25,15 @@ protocol AppFactory: ResolverInjector {
     var resetPasswordUseCase: any ResetPasswordUseCase { get }
     var forgotPasswordUseCase: any ForgotPasswordUseCase { get }
     var changePasswordUseCase: any ChangePasswordUseCase { get }
+    var saveSalonUseCase: any SaveSalonUseCase { get }
+    var unsaveSalonUseCase: any UnsaveSalonUseCase { get }
+    var getSavedSalonsUseCase: any GetSavedSalonsUseCase { get }
+    var savedSalonsEventBus: any SavedSalonsEventBus { get }
+    var observeBookingsUseCase: any ObserveBookingsUseCase { get }
+    var observeBookingUseCase: any ObserveBookingUseCase { get }
+    var refreshBookingsUseCase: any RefreshBookingsUseCase { get }
+    var refreshBookingUseCase: any RefreshBookingUseCase { get }
+    var syncBookingFromCrmUseCase: any SyncBookingFromCrmUseCase { get }
 }
 
 // MARK: - Default implementations
@@ -52,6 +61,15 @@ extension AppFactory {
     var resetPasswordUseCase: any ResetPasswordUseCase { resolver.require((any ResetPasswordUseCase).self) }
     var forgotPasswordUseCase: any ForgotPasswordUseCase { resolver.require((any ForgotPasswordUseCase).self) }
     var changePasswordUseCase: any ChangePasswordUseCase { resolver.require((any ChangePasswordUseCase).self) }
+    var saveSalonUseCase: any SaveSalonUseCase { resolver.require((any SaveSalonUseCase).self) }
+    var unsaveSalonUseCase: any UnsaveSalonUseCase { resolver.require((any UnsaveSalonUseCase).self) }
+    var getSavedSalonsUseCase: any GetSavedSalonsUseCase { resolver.require((any GetSavedSalonsUseCase).self) }
+    var savedSalonsEventBus: any SavedSalonsEventBus { resolver.require((any SavedSalonsEventBus).self) }
+    var observeBookingsUseCase: any ObserveBookingsUseCase { resolver.require((any ObserveBookingsUseCase).self) }
+    var observeBookingUseCase: any ObserveBookingUseCase { resolver.require((any ObserveBookingUseCase).self) }
+    var refreshBookingsUseCase: any RefreshBookingsUseCase { resolver.require((any RefreshBookingsUseCase).self) }
+    var refreshBookingUseCase: any RefreshBookingUseCase { resolver.require((any RefreshBookingUseCase).self) }
+    var syncBookingFromCrmUseCase: any SyncBookingFromCrmUseCase { resolver.require((any SyncBookingFromCrmUseCase).self) }
 }
 
 // MARK: - Implementation

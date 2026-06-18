@@ -13,16 +13,20 @@ extension Assembler {
     var app: any AppFactory { resolver.require((any AppFactory).self) }
     var auth: any AuthFactory { resolver.require((any AuthFactory).self) }
     var home: any HomeFactory { resolver.require((any HomeFactory).self) }
+    var myBookings: any MyBookingsFactory { resolver.require((any MyBookingsFactory).self) }
     var phoneVerification: any PhoneVerificationFactory { resolver.require((any PhoneVerificationFactory).self) }
     var profile: any ProfileFactory { resolver.require((any ProfileFactory).self) }
     var resetPassword: any ResetPasswordFactory { resolver.require((any ResetPasswordFactory).self) }
+    var salonBooking: any SalonBookingFactory { resolver.require((any SalonBookingFactory).self) }
 }
 
 extension Resolver {
     var app: any AppFactory { self.require((any AppFactory).self) }
     var auth: any AuthFactory { self.require((any AuthFactory).self) }
     var home: any HomeFactory { self.require((any HomeFactory).self) }
+    var myBookings: any MyBookingsFactory { self.require((any MyBookingsFactory).self) }
     var phoneVerification: any PhoneVerificationFactory { self.require((any PhoneVerificationFactory).self) }
     var profile: any ProfileFactory { self.require((any ProfileFactory).self) }
     var resetPassword: any ResetPasswordFactory { self.require((any ResetPasswordFactory).self) }
+    var salonBooking: any SalonBookingFactory { self.require((any SalonBookingFactory).self) }
 }

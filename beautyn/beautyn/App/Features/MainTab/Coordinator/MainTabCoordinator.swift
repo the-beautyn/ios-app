@@ -19,6 +19,7 @@ final class MainTabCoordinator: BaseCoordinator {
 
     private var homeCoordinator: HomeCoordinator!
     private var profileCoordinator: ProfileCoordinator!
+    private var myBookingsCoordinator: MyBookingsCoordinator!
     private var homeNav: UINavigationController!
     private var profileNav: UINavigationController!
     private var searchNav: UINavigationController!
@@ -44,7 +45,7 @@ final class MainTabCoordinator: BaseCoordinator {
             title: Localization.tabSearch,
             icon: UIImage(resource: .searchTab)
         )
-        bookingsNav = makeStubTab(
+        bookingsNav = makeTabNav(
             title: Localization.tabBookings,
             icon: UIImage(resource: .bookingTab)
         )
@@ -70,10 +71,22 @@ final class MainTabCoordinator: BaseCoordinator {
         addChild(profileCoordinator)
         profileCoordinator.start()
 
+        myBookingsCoordinator = MyBookingsCoordinator(
+            router: Router(navigationController: bookingsNav),
+            parentAssembler: parentAssembler
+        )
+        myBookingsCoordinator.onRequireAuth = { [weak self] in
+            self?.onRequireAuth?()
+        }
+        addChild(myBookingsCoordinator)
+        myBookingsCoordinator.start()
+
         tabBarController.viewControllers = [homeNav, searchNav, bookingsNav, profileNav]
         tabBarController.onShouldSelect = { [weak self] viewController in
             guard let self else { return true }
-            if viewController === self.profileNav, !self.isAuthenticated {
+            // Bookings and Profile are user-specific — gate them behind auth.
+            if viewController === self.profileNav || viewController === self.bookingsNav,
+               !self.isAuthenticated {
                 self.onRequireAuth?()
                 return false
             }
@@ -93,6 +106,11 @@ final class MainTabCoordinator: BaseCoordinator {
         tabBarController.selectedViewController = homeNav
     }
 
+    func openSalonBooking(salonId: String) {
+        selectHomeTab()
+        homeCoordinator?.navigateToSalonBooking(salonId: salonId)
+    }
+
     // MARK: - Private
 
     private var isAuthenticated: Bool {
@@ -104,6 +122,7 @@ final class MainTabCoordinator: BaseCoordinator {
         icon: UIImage
     ) -> UINavigationController {
         let nav = UINavigationController()
+        nav.delegate = NavigationBarVisibilityController.shared
         nav.setNavigationBarHidden(true, animated: false)
         nav.tabBarItem = makeTabItem(title: title, icon: icon)
         return nav

@@ -1,0 +1,77 @@
+import SwiftUI
+
+// MARK: - TabSelectorView
+//
+// Matches Figma horizontal tab selector on the Salon Profile screen.
+// e.g. Послуги | Спеціалісти | Відгуки (45) | Портфоліо | Деталі
+// Active tab has an underline indicator.
+
+struct TabSelectorView: View {
+
+    let tabs: [String]
+    @Binding var selectedIndex: Int
+
+    var body: some View {
+        ScrollViewReader { proxy in
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 0) {
+                    ForEach(tabs.indices, id: \.self) { index in
+                        tabItem(title: tabs[index], index: index)
+                            .id(index)
+                    }
+                }
+            }
+            .overlay(alignment: .bottom) {
+                Rectangle()
+                    .fill(Color.App.blueTransparency)
+                    .frame(height: 1)
+            }
+            // Keep the selected tab fully on screen — long titles (e.g.
+            // "Trichology & Aesthetics") at the trailing edge scroll into view.
+            // Animations stay smooth because the parent defers the keyboard
+            // dismissal until after this (and the page slide) settle.
+            .onChange(of: selectedIndex) { _, newValue in
+                withAnimation(.easeInOut(duration: 0.25)) {
+                    proxy.scrollTo(newValue, anchor: .center)
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func tabItem(title: String, index: Int) -> some View {
+        let isSelected = selectedIndex == index
+
+        Button {
+            // Animate the binding write so a TabView bound to the same index
+            // slides between pages instead of jumping on tap.
+            withAnimation(.easeInOut(duration: 0.25)) {
+                selectedIndex = index
+            }
+        } label: {
+            VStack(spacing: 0) {
+                Text(title)
+                    .font(.App.footnote)
+                    .foregroundStyle(isSelected ? Color.App.brown1 : Color.App.gray2)
+                    .padding(.horizontal, CGFloat.Spacing.md)
+                    .padding(.vertical, CGFloat.Spacing.sm)
+
+                Rectangle()
+                    .fill(isSelected ? Color.App.brown1 : Color.clear)
+                    .frame(height: 2)
+            }
+        }
+        .buttonStyle(.plain)
+        .animation(.easeInOut(duration: 0.18), value: isSelected)
+    }
+}
+
+// MARK: - Preview
+
+#if DEBUG
+#Preview {
+    @Previewable @State var selected = 0
+    let tabs = ["Послуги", "Спеціалісти", "Відгуки (45)", "Портфоліо", "Деталі"]
+    TabSelectorView(tabs: tabs, selectedIndex: $selected)
+}
+#endif

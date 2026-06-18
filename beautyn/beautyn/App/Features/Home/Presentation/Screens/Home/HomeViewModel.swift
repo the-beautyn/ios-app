@@ -15,7 +15,7 @@ final class HomeViewModel: BaseViewModel {
         let didTapSavedSalon: (_ salonId: String) -> Void
         let didTapSeeAllSaved: () -> Void
         let didTapSeeAllSection: (_ sectionId: String) -> Void
-        let didTapAppointmentDetails: (_ bookingId: String) -> Void
+        let didTapAppointmentDetails: (_ booking: Booking) -> Void
         let didTapCategory: (_ categoryId: String) -> Void
         let didRequireAuth: () -> Void
     }
@@ -33,6 +33,10 @@ final class HomeViewModel: BaseViewModel {
     @Published private(set) var greeting: String = Localization.homeGreetingUnauthorized
     @Published private(set) var categories: [CategoryChipModel] = []
     @Published private(set) var nextAppointment: AppointmentCardModel?
+    /// The booking currently shown on the card (feed snapshot, overlaid by the
+    /// source-of-truth copy when cached), retained so the details screen can open.
+    private var nextBooking: Booking?
+    private var nextBookingCancellable: AnyCancellable?
     @Published private(set) var savedSalons: [SavedSalonUI] = []
     @Published private(set) var sections: [SectionUI] = []
 
@@ -43,9 +47,15 @@ final class HomeViewModel: BaseViewModel {
     private let saveSalonUseCase: any SaveSalonUseCase
     private let unsaveSalonUseCase: any UnsaveSalonUseCase
     private let savedSalonsEventBus: any SavedSalonsEventBus
+    private let observeBookingUseCase: any ObserveBookingUseCase
     private let sessionManager: SessionManager
     private let getCurrentUserUseCase: any GetCurrentUserUseCase
     private var cancellables = Set<AnyCancellable>()
+
+    // Appear-driven loading: the first appearance shows the full-screen loader;
+    // every later appearance refreshes silently and animates any feed changes.
+    private var hasLoadedOnce = false
+    private var isFetching = false
 
     // MARK: - Init
 
@@ -55,6 +65,7 @@ final class HomeViewModel: BaseViewModel {
         saveSalonUseCase: any SaveSalonUseCase,
         unsaveSalonUseCase: any UnsaveSalonUseCase,
         savedSalonsEventBus: any SavedSalonsEventBus,
+        observeBookingUseCase: any ObserveBookingUseCase,
         sessionManager: SessionManager,
         getCurrentUserUseCase: any GetCurrentUserUseCase
     ) {
@@ -63,17 +74,35 @@ final class HomeViewModel: BaseViewModel {
         self.saveSalonUseCase = saveSalonUseCase
         self.unsaveSalonUseCase = unsaveSalonUseCase
         self.savedSalonsEventBus = savedSalonsEventBus
+        self.observeBookingUseCase = observeBookingUseCase
         self.sessionManager = sessionManager
         self.getCurrentUserUseCase = getCurrentUserUseCase
         super.init()
         observeAuthState()
         observeSavedSalonsBus()
-        Task { [weak self] in
-            await self?.loadHomeFeed()
-        }
     }
 
     // MARK: - Lifecycle
+
+    // Loads on first appearance (with the loader) and silently refreshes on every
+    // subsequent appearance — returning from a salon, a tab switch, etc. — so the
+    // feed reflects new saves / bookings / sections without a visible reload.
+    override func onViewTask() async {
+        await refreshOnAppear()
+    }
+
+    private func refreshOnAppear() async {
+        guard !isFetching else { return }
+        isFetching = true
+        defer { isFetching = false }
+
+        if hasLoadedOnce {
+            await fetchFeed(animated: true)
+        } else {
+            await loadHomeFeed()
+            hasLoadedOnce = true
+        }
+    }
 
     private func observeAuthState() {
         sessionManager.isAuthenticatedPublisher
@@ -110,16 +139,22 @@ final class HomeViewModel: BaseViewModel {
             )
         }
 
+        // Animate just the saved-list mutation so the row (and the feed below it)
+        // slides instead of jumping. The section heart toggle above stays instant.
         if change.isSaved {
             if !savedSalons.contains(where: { $0.id == change.salonId }),
                let card = sections.lazy.flatMap(\.items).first(where: { $0.id == change.salonId }) {
-                savedSalons.insert(
-                    SavedSalonUI(id: card.id, salonName: card.name, imageURL: card.imageURL),
-                    at: 0
-                )
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    savedSalons.insert(
+                        SavedSalonUI(id: card.id, salonName: card.name, imageURL: card.imageURL),
+                        at: 0
+                    )
+                }
             }
         } else {
-            savedSalons.removeAll { $0.id == change.salonId }
+            withAnimation(.easeInOut(duration: 0.3)) {
+                savedSalons.removeAll { $0.id == change.salonId }
+            }
         }
     }
 
@@ -150,8 +185,8 @@ final class HomeViewModel: BaseViewModel {
     }
 
     func didTapAppointmentDetails() {
-        guard let booking = nextAppointment else { return }
-        transition.didTapAppointmentDetails(booking.id)
+        guard let nextBooking else { return }
+        transition.didTapAppointmentDetails(nextBooking)
     }
 
     func didTapFavorite(salonId: String) {
@@ -202,7 +237,7 @@ final class HomeViewModel: BaseViewModel {
 
     #if DEBUG
     func applyMockFeed(_ feed: HomeFeed) {
-        mapFeedToState(feed)
+        mapFeedToState(feed, animated: false)
     }
     #endif
 
@@ -211,10 +246,20 @@ final class HomeViewModel: BaseViewModel {
     private func loadHomeFeed() async {
         showLoader()
         defer { hideLoader() }
+        await fetchFeed(animated: false)
+    }
 
+    // Pull-to-refresh: reuses the feed fetch but relies on the system refresh
+    // control's own spinner instead of the full-screen loader, and animates any
+    // sections/rows that changed.
+    func refresh() async {
+        await fetchFeed(animated: true)
+    }
+
+    private func fetchFeed(animated: Bool) async {
         do {
             let feed = try await getHomeFeedUseCase.execute(latitude: nil, longitude: nil)
-            mapFeedToState(feed)
+            mapFeedToState(feed, animated: animated)
             await loadGreeting()
         } catch {
             showError(error)
@@ -234,8 +279,9 @@ final class HomeViewModel: BaseViewModel {
         }
     }
 
-    private func mapFeedToState(_ feed: HomeFeed) {
-        // Categories (unauthorized only — when categories are present)
+    private func mapFeedToState(_ feed: HomeFeed, animated: Bool) {
+        // Categories live in the pinned header — assigned without animation; the
+        // scrollable feed below is what animates on a silent refresh.
         categories = feed.categories.sorted(by: { ($0.sortOrder ?? 0) < ($1.sortOrder ?? 0) }).map { cat in
             CategoryChipModel(
                 id: cat.id,
@@ -244,15 +290,7 @@ final class HomeViewModel: BaseViewModel {
             )
         }
 
-        // Next appointment (auth only)
-        if let booking = feed.nextBooking {
-            nextAppointment = mapBookingToAppointment(booking)
-        } else {
-            nextAppointment = nil
-        }
-
-        // Saved salons (auth only)
-        savedSalons = feed.savedSalons?.map { saved in
+        let newSavedSalons = feed.savedSalons?.map { saved in
             SavedSalonUI(
                 id: saved.salonId,
                 salonName: saved.salonName,
@@ -260,8 +298,7 @@ final class HomeViewModel: BaseViewModel {
             )
         } ?? []
 
-        // Dynamic sections
-        sections = feed.sections.map { section in
+        let newSections = feed.sections.map { section in
             let titleWithEmoji = [section.title, section.emoji].compactMap { $0 }.joined(separator: " ")
             return SectionUI(
                 id: section.id,
@@ -279,24 +316,64 @@ final class HomeViewModel: BaseViewModel {
                 }
             )
         }
+
+        // Next appointment (auth only). Render from the feed snapshot, then observe
+        // the bookings source of truth by id so a change made elsewhere (e.g. a
+        // cancel) reflects here without re-fetching the whole feed.
+        let newBooking = feed.nextBooking.map(NextBookingMapper.makeBooking)
+
+        // On a silent refresh, animate the section/row diffs (paired with the
+        // .transition styles in HomeView); on the first load, snap into place.
+        if animated {
+            withAnimation(.easeInOut(duration: 0.3)) {
+                savedSalons = newSavedSalons
+                sections = newSections
+                observeNextBooking(newBooking)
+            }
+        } else {
+            savedSalons = newSavedSalons
+            sections = newSections
+            observeNextBooking(newBooking)
+        }
     }
 
-    private func mapBookingToAppointment(_ booking: NextBooking) -> AppointmentCardModel {
-        let dateFormatter = DateFormatter()
-        dateFormatter.locale = Locale(identifier: "uk_UA")
-        dateFormatter.dateFormat = "EEEE, d MMM, yyyy"
-        let dateString = dateFormatter.string(from: booking.datetime).capitalized
+    // MARK: - Next booking
 
-        let timeFormatter = DateFormatter()
-        timeFormatter.dateFormat = "H:mm"
-        var timeString = timeFormatter.string(from: booking.datetime)
-        if let end = booking.endDatetime {
-            timeString += " - " + timeFormatter.string(from: end)
+    private func observeNextBooking(_ feedBooking: Booking?) {
+        nextBookingCancellable = nil
+
+        guard let feedBooking else {
+            nextBooking = nil
+            nextAppointment = nil
+            return
         }
 
+        // Show the feed snapshot immediately…
+        applyNextBooking(feedBooking)
+        // …then prefer the source-of-truth copy whenever it has one (keeps the
+        // feed snapshot when the booking isn't cached).
+        nextBookingCancellable = observeBookingUseCase.execute(id: feedBooking.id)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] cached in
+                self?.applyNextBooking(cached ?? feedBooking)
+            }
+    }
+
+    private func applyNextBooking(_ booking: Booking) {
+        nextBooking = booking
+        // Hide the card once the appointment is cancelled / removed.
+        guard booking.status != .canceled, booking.status != .deleted else {
+            nextBooking = nil
+            nextAppointment = nil
+            return
+        }
+        nextAppointment = mapBookingToAppointment(booking)
+    }
+
+    private func mapBookingToAppointment(_ booking: Booking) -> AppointmentCardModel {
         let price: String
-        if let cents = booking.totalPriceCents {
-            price = Localization.homeAppointmentPrice("\(cents / 100)")
+        if let total = booking.totalPrice {
+            price = Localization.homeAppointmentPrice(Self.priceString(total))
         } else {
             price = ""
         }
@@ -309,14 +386,24 @@ final class HomeViewModel: BaseViewModel {
         }
 
         return AppointmentCardModel(
-            id: booking.bookingId,
+            id: booking.id,
             salonName: booking.salonName,
-            address: booking.salonAddressLine ?? "",
-            salonImageURL: booking.salonCoverImageUrl.flatMap(URL.init(string:)),
-            date: dateString,
-            time: timeString,
+            address: booking.salonAddress ?? "",
+            salonImageURL: booking.salonImageURL,
+            // Same presentation as the My Bookings upcoming card — relative
+            // "Сьогодні" / "Завтра" day and shared time format — only the map is
+            // omitted (no coordinate), per design.
+            date: AppointmentDateFormatter.dateString(booking.datetime, relativeDay: true, timeZone: booking.timezone),
+            time: AppointmentDateFormatter.timeString(start: booking.datetime, end: booking.endDatetime, timeZone: booking.timezone),
             price: price,
-            duration: duration
+            duration: duration,
+            serviceName: booking.serviceNames.isEmpty ? nil : booking.serviceNames.joined(separator: ", ")
         )
+    }
+
+    private static func priceString(_ price: Double) -> String {
+        price.truncatingRemainder(dividingBy: 1) == 0
+            ? String(format: "%.0f", price)
+            : String(format: "%.2f", price)
     }
 }
