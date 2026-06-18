@@ -31,13 +31,14 @@ enum AppointmentDateFormatter {
                 prefix = nil
             }
             if let prefix {
-                dayMonthFormatter.timeZone = zone
-                return "\(prefix), \(dayMonthFormatter.string(from: date))"
+                let formatter = dayMonthFormatter.copy() as! DateFormatter
+                formatter.timeZone = zone
+                return "\(prefix), \(formatter.string(from: date))"
             }
         }
-        weekdayFormatter.timeZone = zone
-        return weekdayFormatter.string(from: date).capitalized
-    }
+        let formatter = weekdayFormatter.copy() as! DateFormatter
+        formatter.timeZone = zone
+        return formatter.string(from: date).capitalized
 
     static func timeString(start: Date, end: Date?, timeZone: TimeZone? = nil) -> String {
         let zone = timeZone ?? .current
