@@ -268,25 +268,32 @@ final class BookingDetailsViewModel: BaseViewModel {
     }
 
     func didTapMakeChanges() {
-        guard let url = booking.bookingUrl else { return }
+        guard booking.bookingUrl != nil else { return }
         makeChangeDidComplete = false
 
-        switch booking.crmType {
-        case .easyweek:
-            // EasyWeek reschedule / new booking creates a NEW appointment and lands
-            // on the widget's completion page — drive the id-capturing webview so we
-            // catch its UUID. A plain close (cancel) just re-syncs the existing one.
-            Task { [weak self] in
-                guard let self else { return }
+        Task { [weak self] in
+            guard let self else { return }
+            // Resolve the CRM type before branching. A booking opened from the Home
+            // next-appointment card starts `.unknown` and the onAppear refresh may not
+            // have landed yet — branching now would open the plain web view for an
+            // EasyWeek booking and miss the new-booking scrape/confirm.
+            let resolved = await self.resolvedBooking()
+            guard let url = resolved.bookingUrl else { return }
+
+            switch resolved.crmType {
+            case .easyweek:
+                // EasyWeek reschedule / new booking creates a NEW appointment and lands
+                // on the widget's completion page — drive the id-capturing web view so we
+                // catch its UUID. A plain close (cancel) just re-syncs the existing one.
                 let autofill = await self.makeAutofill()
                 self.openWebBooking(
                     url: url,
-                    title: self.booking.salonName,
+                    title: resolved.salonName,
                     configuration: .easyWeek,
                     autofill: autofill,
                     // Exclude the booking being changed so the scraper captures the
                     // NEW appointment, not the old one still referenced on the page.
-                    excludeBookingId: self.booking.crmRecordId,
+                    excludeBookingId: resolved.crmRecordId,
                     onCompleted: { [weak self] result in
                         self?.handleEasyweekMakeChangeCompleted(result)
                     },
@@ -294,14 +301,25 @@ final class BookingDetailsViewModel: BaseViewModel {
                         self?.refreshBookingFromCrmAfterMakeChange()
                     }
                 )
-            }
 
-        case .altegio, .unknown:
-            // Altegio edits the same appointment in place — just re-pull it on close.
-            openWebView(url: url, title: booking.salonName) { [weak self] in
-                self?.refreshBookingFromCrmAfterMakeChange()
+            case .altegio, .unknown:
+                // Altegio edits the same appointment in place — just re-pull it on close.
+                self.openWebView(url: url, title: resolved.salonName) { [weak self] in
+                    self?.refreshBookingFromCrmAfterMakeChange()
+                }
             }
         }
+    }
+
+    /// The current booking, resolving a `.unknown` CRM type with a best-effort fetch
+    /// (a Home-seeded booking carries `.unknown` until the onAppear refresh lands), so
+    /// "Внести зміни" branches on the real provider. Falls back to the seed if the
+    /// fetch fails.
+    private func resolvedBooking() async -> Booking {
+        guard booking.crmType == .unknown else { return booking }
+        showLoader()
+        defer { hideLoader() }
+        return (try? await refreshBookingUseCase.execute(id: booking.id)) ?? booking
     }
 
     /// Re-pull the current booking from its CRM after the "Внести зміни" sheet
