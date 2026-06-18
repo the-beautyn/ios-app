@@ -48,7 +48,9 @@ final class BookingsRepositoryImpl: BookingsRepository {
     func refreshBookings(_ category: BookingCategory?) async throws {
         let categories = category.map { [$0] } ?? BookingCategory.allCases
         for category in categories {
-            merge(try await fetch(category))
+            let fetched = try await fetch(category)
+            merge(fetched)
+            await reconcileBookingsMovedOut(of: category, fetched: fetched)
         }
     }
 
@@ -85,6 +87,40 @@ final class BookingsRepositoryImpl: BookingsRepository {
         }
         put(booking)
         return booking
+    }
+
+    /// Re-pull cached bookings that the canonical bucketing still places in
+    /// `category` but that were absent from its latest response — they've moved out
+    /// (e.g. an upcoming booking cancelled on another device), so their cached
+    /// status is stale. A single-id fetch refreshes each and the cache re-buckets
+    /// it. Skipped when the page came back full, since absence may then just be
+    /// truncation rather than a move.
+    private func reconcileBookingsMovedOut(of category: BookingCategory, fetched: [Booking]) async {
+        guard fetched.count < pageLimit else { return }
+        let staleIds = Self.staleBookingIds(
+            in: category,
+            cached: Array(cache.value.values),
+            fetchedIds: Set(fetched.map(\.id)),
+            now: Date()
+        )
+        for id in staleIds {
+            // Best-effort — a failure just leaves the row until the next refresh.
+            _ = try? await refreshBooking(id: id)
+        }
+    }
+
+    /// Cached bookings the canonical bucketing still places in `category` yet that
+    /// weren't returned for it — i.e. whose cached status is out of date. Pure +
+    /// `nonisolated` so it can be unit-tested without the network or the main actor.
+    nonisolated static func staleBookingIds(
+        in category: BookingCategory,
+        cached: [Booking],
+        fetchedIds: Set<String>,
+        now: Date
+    ) -> [String] {
+        cached
+            .filter { category.contains($0, now: now) && !fetchedIds.contains($0.id) }
+            .map(\.id)
     }
 
     private func fetch(_ category: BookingCategory) async throws -> [Booking] {

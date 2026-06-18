@@ -310,6 +310,48 @@ final class BookingCategoryOrderingTests: XCTestCase {
     }
 }
 
+// MARK: - StaleBookingReconcileTests
+//
+// A category refresh upserts only what the server returns, so a booking that moved
+// OUT of a category (e.g. cancelled elsewhere) must be detected and re-fetched —
+// otherwise it lingers with its stale status in the wrong tab.
+
+final class StaleBookingReconcileTests: XCTestCase {
+
+    private let now = Date(timeIntervalSince1970: 1_700_000_000)
+
+    func testFlagsCategoryMemberMissingFromResponse() {
+        let present = makeBooking(id: "present", status: .created, datetime: now.addingTimeInterval(3_600))
+        let movedOut = makeBooking(id: "moved", status: .created, datetime: now.addingTimeInterval(7_200))
+        let cancelled = makeBooking(id: "cancelled", status: .canceled, datetime: now.addingTimeInterval(3_600))
+
+        let stale = BookingsRepositoryImpl.staleBookingIds(
+            in: .upcoming,
+            cached: [present, movedOut, cancelled],
+            fetchedIds: ["present"],
+            now: now
+        )
+
+        // `moved` still looks upcoming but wasn't returned → stale. `present` was
+        // returned; `cancelled` doesn't bucket into upcoming.
+        XCTAssertEqual(stale, ["moved"])
+    }
+
+    func testNoStaleWhenEveryCategoryMemberReturned() {
+        let a = makeBooking(id: "a", status: .created, datetime: now.addingTimeInterval(3_600))
+        let b = makeBooking(id: "b", status: .created, datetime: now.addingTimeInterval(7_200))
+
+        let stale = BookingsRepositoryImpl.staleBookingIds(
+            in: .upcoming,
+            cached: [a, b],
+            fetchedIds: ["a", "b"],
+            now: now
+        )
+
+        XCTAssertTrue(stale.isEmpty)
+    }
+}
+
 // MARK: - Booking factory (shared)
 
 func makeBooking(
