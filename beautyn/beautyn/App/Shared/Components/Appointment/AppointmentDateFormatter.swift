@@ -39,6 +39,7 @@ enum AppointmentDateFormatter {
         let formatter = weekdayFormatter.copy() as! DateFormatter
         formatter.timeZone = zone
         return formatter.string(from: date).capitalized
+    }
 
     static func timeString(start: Date, end: Date?, timeZone: TimeZone? = nil) -> String {
         let zone = timeZone ?? .current
