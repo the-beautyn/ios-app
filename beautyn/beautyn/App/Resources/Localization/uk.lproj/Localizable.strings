@@ -147,7 +147,7 @@
 "confirm_booking_payment_on_site" = "Оплата на місці";
 "confirm_booking_your_data" = "Ваші дані";
 "confirm_booking_discount_title" = "Код знижки";
-"confirm_booking_discount_placeholder" = "Введить код";
+"confirm_booking_discount_placeholder" = "Введіть код";
 "confirm_booking_comment_title" = "Коментар";
 "confirm_booking_comment_placeholder" = "Залиште додаткові коментарі для майстра або салону";
 "confirm_booking_confirm_button" = "Підтвердити";
