@@ -151,8 +151,12 @@ final class BookingCategoryTests: XCTestCase {
 // The "Внести зміни" flow branches on `Booking.crmType`, so the mapper must carry
 // `crm_type` through from the backend (and default to `.unknown` when absent).
 
+@MainActor
 final class BookingMapperCrmTypeTests: XCTestCase {
 
+    // `@MainActor` because the module's default isolation makes BookingItemDTO's
+    // Decodable conformance main-actor-isolated (a Swift 6 error from a nonisolated
+    // context).
     private func decode(_ json: String) throws -> BookingItemDTO {
         try JSONDecoder().decode(BookingItemDTO.self, from: Data(json.utf8))
     }
