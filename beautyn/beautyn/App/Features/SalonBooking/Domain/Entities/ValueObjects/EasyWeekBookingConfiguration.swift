@@ -36,7 +36,10 @@ extension WebBookingConfiguration {
         bookingIdRegexes: [
             "booking/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})",
             "booking:?[\\s\\n]+([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})"
-        ]
+        ],
+        // The "Переглянути мій запис" CTA links to /<slug>/booking/<new-uuid> — the
+        // href is the same in every locale, unlike the button label.
+        completionLinkSelector: "a[href*=\"/booking/\"]"
     )
 }
 

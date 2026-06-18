@@ -19,6 +19,7 @@ struct WebBookingView: View {
                 url: presentation.url,
                 configuration: presentation.configuration,
                 autofill: presentation.autofill,
+                excludeBookingId: presentation.excludeBookingId,
                 onCompleted: presentation.onCompleted
             )
             .ignoresSafeArea(.container, edges: .bottom)

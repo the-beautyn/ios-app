@@ -43,8 +43,12 @@ final class BookingDetailsViewRenderTests: XCTestCase {
     private func makeViewModel(status: BookingStatus, datetime: Date) -> BookingDetailsViewModel {
         BookingDetailsViewModel(
             booking: makeBooking(status: status, datetime: datetime),
-            transition: .init(didTapBookAgain: { _ in }, didRequireAuth: {}),
+            transition: .init(didTapBookAgain: { _ in }, didRequireAuth: {}, didOpenBookingDetails: { _ in }),
             observeBookingUseCase: MockObserveBookingUseCase(),
+            refreshBookingUseCase: MockRefreshBookingUseCase(),
+            syncBookingFromCrmUseCase: MockSyncBookingFromCrmUseCase(),
+            confirmEasyweekBookingUseCase: MockConfirmEasyweekBookingUseCase(),
+            getCurrentUserUseCase: MockGetCurrentUserUseCase(),
             getSalonByIdUseCase: MockGetSalonByIdUseCase(),
             getSalonShareUseCase: MockGetSalonShareUseCase(),
             saveSalonUseCase: MockSaveSalonUseCase(),
@@ -66,6 +70,8 @@ final class BookingDetailsViewRenderTests: XCTestCase {
             salonImageURL: nil,
             coordinate: nil,
             bookingUrl: URL(string: "https://beautyn.com.ua/b/abc123"),
+            crmType: .altegio,
+            crmRecordId: nil,
             status: status,
             datetime: datetime,
             endDatetime: datetime.addingTimeInterval(5_400),
@@ -94,6 +100,33 @@ private final class MockObserveBookingUseCase: ObserveBookingUseCase {
     func execute(id: String) -> AnyPublisher<Booking?, Never> {
         // Emit nil so the screen keeps the seed booking passed into the VM.
         Just(nil).eraseToAnyPublisher()
+    }
+}
+
+@MainActor
+private final class MockRefreshBookingUseCase: RefreshBookingUseCase {
+    func execute(id: String) async throws -> Booking { makeBooking(id: id) }
+}
+
+@MainActor
+private final class MockSyncBookingFromCrmUseCase: SyncBookingFromCrmUseCase {
+    func execute(id: String) async throws -> Booking { makeBooking(id: id) }
+}
+
+private final class MockConfirmEasyweekBookingUseCase: ConfirmEasyweekBookingUseCase {
+    func execute(salonId: String, bookingUuid: String) async throws -> Booking {
+        makeBooking(id: "new")
+    }
+}
+
+private final class MockGetCurrentUserUseCase: GetCurrentUserUseCase {
+    func execute() async throws -> UserProfile {
+        UserProfile(
+            id: "u1", email: "user@example.com", role: "client", name: "Test",
+            secondName: nil, phone: "+380000000000", avatarUrl: nil, birthDate: nil, city: nil,
+            sex: nil, authProvider: "email", isPhoneVerified: true, isProfileCreated: true,
+            isOnboardingCompleted: true
+        )
     }
 }
 

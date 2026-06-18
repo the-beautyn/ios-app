@@ -146,13 +146,52 @@ final class BookingCategoryTests: XCTestCase {
     }
 }
 
+// MARK: - BookingMapperCrmTypeTests
+//
+// The "Внести зміни" flow branches on `Booking.crmType`, so the mapper must carry
+// `crm_type` through from the backend (and default to `.unknown` when absent).
+
+final class BookingMapperCrmTypeTests: XCTestCase {
+
+    private func decode(_ json: String) throws -> BookingItemDTO {
+        try JSONDecoder().decode(BookingItemDTO.self, from: Data(json.utf8))
+    }
+
+    func testMapsEasyweekCrmType() throws {
+        let dto = try decode(#"{"id":"b1","salon_id":"s1","status":"created","datetime":"2026-01-01T10:00:00Z","crm_type":"EASYWEEK"}"#)
+        XCTAssertEqual(BookingMapper.map(dto)?.crmType, .easyweek)
+    }
+
+    func testMapsAltegioCrmType() throws {
+        let dto = try decode(#"{"id":"b2","salon_id":"s1","status":"created","datetime":"2026-01-01T10:00:00Z","crm_type":"ALTEGIO"}"#)
+        XCTAssertEqual(BookingMapper.map(dto)?.crmType, .altegio)
+    }
+
+    func testMissingCrmTypeMapsToUnknown() throws {
+        let dto = try decode(#"{"id":"b3","salon_id":"s1","status":"created","datetime":"2026-01-01T10:00:00Z"}"#)
+        XCTAssertEqual(BookingMapper.map(dto)?.crmType, .unknown)
+    }
+
+    func testMapsCrmRecordId() throws {
+        let dto = try decode(#"{"id":"b4","salon_id":"s1","status":"created","datetime":"2026-01-01T10:00:00Z","crm_record_id":"ew-uuid-123"}"#)
+        XCTAssertEqual(BookingMapper.map(dto)?.crmRecordId, "ew-uuid-123")
+    }
+
+    func testMissingCrmRecordIdIsNil() throws {
+        let dto = try decode(#"{"id":"b5","salon_id":"s1","status":"created","datetime":"2026-01-01T10:00:00Z"}"#)
+        XCTAssertNil(BookingMapper.map(dto)?.crmRecordId)
+    }
+}
+
 // MARK: - Test doubles
 
 @MainActor
 final class MockBookingsRepository: BookingsRepository {
     var stored: [String: Booking] = [:]
     var refreshBookingResult: Booking?
+    var syncBookingResult: Booking?
     private(set) var refreshedId: String?
+    private(set) var syncedId: String?
     private(set) var refreshedCategories: [BookingCategory?] = []
     private(set) var putBookings: [Booking] = []
 
@@ -172,6 +211,16 @@ final class MockBookingsRepository: BookingsRepository {
     func refreshBooking(id: String) async throws -> Booking {
         refreshedId = id
         guard let booking = refreshBookingResult else { throw MyBookingsError.bookingNotFound }
+        stored[id] = booking
+        return booking
+    }
+
+    @discardableResult
+    func syncBookingFromCrm(id: String) async throws -> Booking {
+        syncedId = id
+        guard let booking = syncBookingResult ?? refreshBookingResult else {
+            throw MyBookingsError.bookingNotFound
+        }
         stored[id] = booking
         return booking
     }
@@ -267,7 +316,10 @@ func makeBooking(
     id: String,
     status: BookingStatus = .created,
     datetime: Date = Date(timeIntervalSince1970: 1_700_000_000),
-    cancelledAt: Date? = nil
+    cancelledAt: Date? = nil,
+    crmType: SalonBookingProvider = .unknown,
+    crmRecordId: String? = nil,
+    bookingUrl: URL? = nil
 ) -> Booking {
     Booking(
         id: id,
@@ -276,7 +328,9 @@ func makeBooking(
         salonAddress: nil,
         salonImageURL: nil,
         coordinate: nil,
-        bookingUrl: nil,
+        bookingUrl: bookingUrl,
+        crmType: crmType,
+        crmRecordId: crmRecordId,
         status: status,
         datetime: datetime,
         endDatetime: nil,

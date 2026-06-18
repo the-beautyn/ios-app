@@ -27,6 +27,8 @@ enum BookingMapper {
             salonImageURL: dto.salon?.coverImageUrl.flatMap(URL.init(string:)),
             coordinate: coordinate,
             bookingUrl: dto.shortLink.flatMap(URL.init(string:)),
+            crmType: SalonBookingProvider(rawValue: dto.crmType),
+            crmRecordId: dto.crmRecordId,
             status: BookingStatus(raw: dto.status),
             datetime: datetime,
             endDatetime: dto.endDatetime.flatMap { parseDate($0) },

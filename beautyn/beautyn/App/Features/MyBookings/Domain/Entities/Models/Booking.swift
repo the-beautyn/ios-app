@@ -14,6 +14,16 @@ struct Booking: Identifiable {
     /// Opened in the in-app WebView from "Внести зміни". Named to match
     /// `Salon.bookingUrl`. `nil` when the backend hasn't provided one yet.
     let bookingUrl: URL?
+    /// Which CRM this booking lives in. Drives the "Внести зміни" flow: Altegio
+    /// edits the same appointment (re-pull on close), EasyWeek reschedule / new
+    /// booking creates a new appointment we must catch. `.unknown` for legacy rows
+    /// or sources that don't carry it yet (the details screen then falls back to a
+    /// CRM refresh on appear).
+    let crmType: SalonBookingProvider
+    /// The booking's id in its CRM (EasyWeek booking UUID / Altegio record id).
+    /// Used to exclude the old booking when capturing the new id from an EasyWeek
+    /// reschedule. `nil` for legacy rows / sources that don't carry it.
+    let crmRecordId: String?
     let status: BookingStatus
     let datetime: Date
     let endDatetime: Date?
@@ -49,6 +59,8 @@ extension Booking: Equatable {
             && lhs.coordinate?.latitude == rhs.coordinate?.latitude
             && lhs.coordinate?.longitude == rhs.coordinate?.longitude
             && lhs.bookingUrl == rhs.bookingUrl
+            && lhs.crmType == rhs.crmType
+            && lhs.crmRecordId == rhs.crmRecordId
             && lhs.status == rhs.status
             && lhs.datetime == rhs.datetime
             && lhs.endDatetime == rhs.endDatetime

@@ -214,6 +214,12 @@ final class AppAssembly: Assembly {
             refreshBookingUseCase
         }
 
+        let syncBookingFromCrmUseCase: any SyncBookingFromCrmUseCase =
+            SyncBookingFromCrmUseCaseImpl(repository: bookingsRepository)
+        container.register((any SyncBookingFromCrmUseCase).self) { _ in
+            syncBookingFromCrmUseCase
+        }
+
         // MARK: - OAuth services
 
         container.register((any AppleSignInService).self) { _ in

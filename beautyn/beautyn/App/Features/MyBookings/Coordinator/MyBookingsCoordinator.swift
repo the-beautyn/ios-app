@@ -45,16 +45,25 @@ final class MyBookingsCoordinator: BaseCoordinator {
     }
 
     private func showBookingDetails(booking: Booking) {
+        router.push(makeBookingDetails(booking: booking), animated: true)
+    }
+
+    private func makeBookingDetails(booking: Booking) -> UIViewController {
         let transition = BookingDetailsViewModel.Transition(
             didTapBookAgain: { [weak self] salonId in
                 self?.showSalonProfile(salonId: salonId)
             },
             didRequireAuth: { [weak self] in
                 self?.onRequireAuth?()
+            },
+            didOpenBookingDetails: { [weak self] newBooking in
+                guard let self else { return }
+                // EasyWeek reschedule / new booking — replace the current details
+                // with the new booking, keeping the back stack.
+                self.router.replaceTop(self.makeBookingDetails(booking: newBooking), animated: true)
             }
         )
-        let vc = factory.makeBookingDetails(booking: booking, transition: transition)
-        router.push(vc, animated: true)
+        return factory.makeBookingDetails(booking: booking, transition: transition)
     }
 
     private func showSalonProfile(salonId: String) {

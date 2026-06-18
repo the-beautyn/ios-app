@@ -20,6 +20,10 @@ enum NextBookingMapper {
             salonImageURL: next.salonCoverImageUrl.flatMap(URL.init(string:)),
             coordinate: nil,
             bookingUrl: next.bookingUrl.flatMap(URL.init(string:)),
+            // The home feed doesn't carry the CRM type; Booking Details refreshes
+            // the booking on appear to learn it before "Внести зміни" is tapped.
+            crmType: .unknown,
+            crmRecordId: nil,
             status: .created,
             datetime: next.datetime,
             endDatetime: next.endDatetime,

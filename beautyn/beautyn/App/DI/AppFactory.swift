@@ -33,6 +33,7 @@ protocol AppFactory: ResolverInjector {
     var observeBookingUseCase: any ObserveBookingUseCase { get }
     var refreshBookingsUseCase: any RefreshBookingsUseCase { get }
     var refreshBookingUseCase: any RefreshBookingUseCase { get }
+    var syncBookingFromCrmUseCase: any SyncBookingFromCrmUseCase { get }
 }
 
 // MARK: - Default implementations
@@ -68,6 +69,7 @@ extension AppFactory {
     var observeBookingUseCase: any ObserveBookingUseCase { resolver.require((any ObserveBookingUseCase).self) }
     var refreshBookingsUseCase: any RefreshBookingsUseCase { resolver.require((any RefreshBookingsUseCase).self) }
     var refreshBookingUseCase: any RefreshBookingUseCase { resolver.require((any RefreshBookingUseCase).self) }
+    var syncBookingFromCrmUseCase: any SyncBookingFromCrmUseCase { resolver.require((any SyncBookingFromCrmUseCase).self) }
 }
 
 // MARK: - Implementation

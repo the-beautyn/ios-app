@@ -44,4 +44,10 @@ struct WebBookingConfiguration: Equatable {
     /// order against the page HTML / innerText / app state to extract the booking
     /// id. Capture group 1 is the id.
     let bookingIdRegexes: [String]
+
+    /// CSS selector for the completion page's "view my booking" CTA, whose `href`
+    /// carries the new booking id (locale-independent — keys off link structure,
+    /// not the translated label). Tried BEFORE the page-wide regex scan. `nil`
+    /// skips this step. e.g. `a[href*="/booking/"]`.
+    let completionLinkSelector: String?
 }

@@ -20,6 +20,9 @@ final class BookingDetailsViewModel: BaseViewModel {
         /// Past / cancelled "Забронювати знову" — reopen the salon profile.
         let didTapBookAgain: (_ salonId: String) -> Void
         let didRequireAuth: () -> Void
+        /// Open details for a different booking, replacing the current screen —
+        /// used after an EasyWeek reschedule / new booking made via "Внести зміни".
+        let didOpenBookingDetails: (_ booking: Booking) -> Void
     }
 
     // MARK: - State
@@ -67,6 +70,10 @@ final class BookingDetailsViewModel: BaseViewModel {
     @Published private(set) var booking: Booking
     private let transition: Transition
     private let observeBookingUseCase: any ObserveBookingUseCase
+    private let refreshBookingUseCase: any RefreshBookingUseCase
+    private let syncBookingFromCrmUseCase: any SyncBookingFromCrmUseCase
+    private let confirmEasyweekBookingUseCase: any ConfirmEasyweekBookingUseCase
+    private let getCurrentUserUseCase: any GetCurrentUserUseCase
     private let getSalonByIdUseCase: any GetSalonByIdUseCase
     private let getSalonShareUseCase: any GetSalonShareUseCase
     private let saveSalonUseCase: any SaveSalonUseCase
@@ -74,6 +81,13 @@ final class BookingDetailsViewModel: BaseViewModel {
     private let savedSalonsEventBus: any SavedSalonsEventBus
     private let sessionManager: SessionManager
     private var cancellables = Set<AnyCancellable>()
+    /// The single-booking observation, kept separately so a reschedule can re-point
+    /// it from the old booking to the new one.
+    private var bookingObservation: AnyCancellable?
+
+    /// Set when an EasyWeek "Внести зміни" session ends in a completed booking, so
+    /// the sheet-dismiss handler doesn't also treat it as a plain edit/cancel.
+    private var makeChangeDidComplete = false
 
     // MARK: - Init
 
@@ -81,6 +95,10 @@ final class BookingDetailsViewModel: BaseViewModel {
         booking: Booking,
         transition: Transition,
         observeBookingUseCase: any ObserveBookingUseCase,
+        refreshBookingUseCase: any RefreshBookingUseCase,
+        syncBookingFromCrmUseCase: any SyncBookingFromCrmUseCase,
+        confirmEasyweekBookingUseCase: any ConfirmEasyweekBookingUseCase,
+        getCurrentUserUseCase: any GetCurrentUserUseCase,
         getSalonByIdUseCase: any GetSalonByIdUseCase,
         getSalonShareUseCase: any GetSalonShareUseCase,
         saveSalonUseCase: any SaveSalonUseCase,
@@ -91,6 +109,10 @@ final class BookingDetailsViewModel: BaseViewModel {
         self.booking = booking
         self.transition = transition
         self.observeBookingUseCase = observeBookingUseCase
+        self.refreshBookingUseCase = refreshBookingUseCase
+        self.syncBookingFromCrmUseCase = syncBookingFromCrmUseCase
+        self.confirmEasyweekBookingUseCase = confirmEasyweekBookingUseCase
+        self.getCurrentUserUseCase = getCurrentUserUseCase
         self.getSalonByIdUseCase = getSalonByIdUseCase
         self.getSalonShareUseCase = getSalonShareUseCase
         self.saveSalonUseCase = saveSalonUseCase
@@ -98,13 +120,16 @@ final class BookingDetailsViewModel: BaseViewModel {
         self.savedSalonsEventBus = savedSalonsEventBus
         self.sessionManager = sessionManager
         super.init()
-        observeBooking()
+        observeBooking(id: booking.id)
         observeSavedSalonsBus()
     }
 
     // MARK: - Lifecycle
 
     override func onViewTask() async {
+        // Best-effort refresh so the screen is fresh and carries the CRM type
+        // (the Home-feed entry seeds `.unknown`) before "Внести зміни" is tapped.
+        _ = try? await refreshBookingUseCase.execute(id: booking.id)
         await loadFavoriteState()
     }
 
@@ -244,7 +269,91 @@ final class BookingDetailsViewModel: BaseViewModel {
 
     func didTapMakeChanges() {
         guard let url = booking.bookingUrl else { return }
-        openWebView(url: url, title: booking.salonName)
+        makeChangeDidComplete = false
+
+        switch booking.crmType {
+        case .easyweek:
+            // EasyWeek reschedule / new booking creates a NEW appointment and lands
+            // on the widget's completion page — drive the id-capturing webview so we
+            // catch its UUID. A plain close (cancel) just re-syncs the existing one.
+            Task { [weak self] in
+                guard let self else { return }
+                let autofill = await self.makeAutofill()
+                self.openWebBooking(
+                    url: url,
+                    title: self.booking.salonName,
+                    configuration: .easyWeek,
+                    autofill: autofill,
+                    // Exclude the booking being changed so the scraper captures the
+                    // NEW appointment, not the old one still referenced on the page.
+                    excludeBookingId: self.booking.crmRecordId,
+                    onCompleted: { [weak self] result in
+                        self?.handleEasyweekMakeChangeCompleted(result)
+                    },
+                    onDismiss: { [weak self] in
+                        self?.refreshBookingFromCrmAfterMakeChange()
+                    }
+                )
+            }
+
+        case .altegio, .unknown:
+            // Altegio edits the same appointment in place — just re-pull it on close.
+            openWebView(url: url, title: booking.salonName) { [weak self] in
+                self?.refreshBookingFromCrmAfterMakeChange()
+            }
+        }
+    }
+
+    /// Re-pull the current booking from its CRM after the "Внести зміни" sheet
+    /// closes without a new booking (Altegio edit/cancel, or EasyWeek cancel).
+    private func refreshBookingFromCrmAfterMakeChange() {
+        guard !makeChangeDidComplete else { return }
+        let id = booking.id
+        Task { [weak self] in
+            // Best-effort: the cache (and every screen observing it) updates on success.
+            try? await self?.syncBookingFromCrmUseCase.execute(id: id)
+        }
+    }
+
+    /// EasyWeek widget reported a completed booking. EasyWeek has no native
+    /// reschedule — a completion always means a NEW booking was created, and the
+    /// original may or may not have been cancelled in the same session. We can't
+    /// tell a reschedule from a cancel-then-rebook (identical state, no link), so we
+    /// treat every case the same: confirm the new booking, re-sync the original so
+    /// it reflects its real CRM state (cancelled or still active), then open the new
+    /// booking. The original stays in the system (e.g. in the Cancelled tab).
+    private func handleEasyweekMakeChangeCompleted(_ result: WebBookingResult) {
+        makeChangeDidComplete = true
+        webBookingPresentation = nil
+        let salonId = booking.salonId
+        let originalBookingId = booking.id
+        Task { [weak self] in
+            guard let self else { return }
+            self.showLoader()
+            defer { self.hideLoader() }
+            do {
+                let newBooking = try await self.confirmEasyweekBookingUseCase.execute(
+                    salonId: salonId,
+                    bookingUuid: result.bookingId
+                )
+                // Re-pull the original so it shows its current state (it may have been
+                // cancelled in the same webview session).
+                _ = try? await self.syncBookingFromCrmUseCase.execute(id: originalBookingId)
+                self.transition.didOpenBookingDetails(newBooking)
+            } catch {
+                self.showError(error)
+            }
+        }
+    }
+
+    private func makeAutofill() async -> WebBookingAutofill {
+        let profile = try? await getCurrentUserUseCase.execute()
+        return WebBookingAutofill(
+            firstName: profile?.name ?? "",
+            lastName: profile?.secondName ?? "",
+            email: profile?.email ?? "",
+            phone: profile?.phone ?? ""
+        )
     }
 
     func didTapBookAgain() {
@@ -299,16 +408,17 @@ final class BookingDetailsViewModel: BaseViewModel {
         isFavorited = salon.isSaved
     }
 
-    private func observeBooking() {
+    private func observeBooking(id: String) {
         // Keep the screen in sync with the source of truth. Ignore `nil` (e.g. the
-        // booking isn't cached on a cold entry) so we keep showing the seed.
-        observeBookingUseCase.execute(id: booking.id)
+        // booking isn't cached on a cold entry, or after a reschedule drops the old
+        // one) so we keep showing the current booking. Re-assigning cancels any
+        // previous subscription, letting a reschedule re-point to the new id.
+        bookingObservation = observeBookingUseCase.execute(id: id)
             .receive(on: DispatchQueue.main)
             .sink { [weak self] updated in
                 guard let self, let updated else { return }
                 self.booking = updated
             }
-            .store(in: &cancellables)
     }
 
     private func observeSavedSalonsBus() {

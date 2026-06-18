@@ -18,10 +18,18 @@ struct WebBookingWebView: UIViewRepresentable {
     let url: URL
     let configuration: WebBookingConfiguration
     let autofill: WebBookingAutofill
+    /// CRM id of the booking being changed (EasyWeek reschedule) — excluded when
+    /// scraping so we capture the NEW booking, not the old one. `nil` for a new booking.
+    let excludeBookingId: String?
     let onCompleted: (WebBookingResult) -> Void
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(configuration: configuration, autofill: autofill, onCompleted: onCompleted)
+        Coordinator(
+            configuration: configuration,
+            autofill: autofill,
+            excludeBookingId: excludeBookingId,
+            onCompleted: onCompleted
+        )
     }
 
     func makeUIView(context: Context) -> WKWebView {
@@ -37,12 +45,94 @@ struct WebBookingWebView: UIViewRepresentable {
         context.coordinator.onCompleted = onCompleted
     }
 
+    // MARK: - Booking-id extraction
+    //
+    // Builds the JS that scrapes the completed booking's id off the page, with two
+    // strategies in priority order so it survives EasyWeek markup / locale changes:
+    //   1. The completion CTA's href (`linkSelector`) — locale-independent (keys off
+    //      the link path, not the translated label).
+    //   2. Every booking id on the page (HTML / innerText / Nuxt state); return the
+    //      single one that isn't the excluded (old) booking. Ambiguous → "".
+    // `excludeId` lets a reschedule skip the OLD booking still referenced on the
+    // page. Internal (not private) so it can be unit-tested against an HTML fixture.
+    static func bookingIdExtractionJS(
+        patterns: [String],
+        linkSelector: String?,
+        excludeId: String?
+    ) -> String {
+        let config: [String: Any] = [
+            "patterns": patterns,
+            "linkSelector": linkSelector ?? "",
+            "excludeId": (excludeId ?? "").lowercased()
+        ]
+        let configJSON = (try? JSONSerialization.data(withJSONObject: config))
+            .flatMap { String(data: $0, encoding: .utf8) } ?? "{}"
+        return """
+        (function() {
+            const config = \(configJSON);
+            const linkSelector = config.linkSelector || '';
+            const excludeId = (config.excludeId || '').toLowerCase();
+            const regexes = (config.patterns || []).map((p) => {
+                try { return new RegExp(p, 'i'); } catch (e) { return null; }
+            }).filter(Boolean);
+
+            const isExcluded = (id) => !!excludeId && id.toLowerCase() === excludeId;
+
+            // First booking id captured in a single source.
+            const firstId = (source) => {
+                if (!source) { return null; }
+                for (const re of regexes) {
+                    const m = source.match(re);
+                    if (m && m[1]) { return m[1]; }
+                }
+                return null;
+            };
+
+            // Every booking id captured across a source.
+            const allIds = (source) => {
+                const out = [];
+                if (!source) { return out; }
+                for (const re of regexes) {
+                    const g = new RegExp(re.source, 'ig');
+                    let m;
+                    while ((m = g.exec(source)) !== null) {
+                        if (m[1]) { out.push(m[1]); }
+                        if (m.index === g.lastIndex) { g.lastIndex++; }
+                    }
+                }
+                return out;
+            };
+
+            // Method 1 (priority): the completion CTA's href — locale-independent.
+            if (linkSelector) {
+                const anchors = Array.from(document.querySelectorAll(linkSelector));
+                for (const a of anchors) {
+                    const id = firstId(a.getAttribute('href') || '');
+                    if (id && !isExcluded(id)) { return id; }
+                }
+            }
+
+            // Method 2 (fallback): every booking id on the page; return the unique
+            // one that isn't the old (excluded) booking. Otherwise give up ("").
+            const html = document.documentElement.outerHTML;
+            const text = document.body ? document.body.innerText : '';
+            const state = (window.__NUXT__ && window.__NUXT__.state) ? JSON.stringify(window.__NUXT__.state) : '';
+            const distinct = Array.from(new Set([].concat(allIds(html), allIds(text), allIds(state))));
+            const candidates = distinct.filter((id) => !isExcluded(id));
+            if (candidates.length === 1) { return candidates[0]; }
+
+            return '';
+        })();
+        """
+    }
+
     // MARK: - Coordinator
 
     final class Coordinator: NSObject, WKNavigationDelegate {
 
         private let configuration: WebBookingConfiguration
         private let autofill: WebBookingAutofill
+        private let excludeBookingId: String?
         var onCompleted: (WebBookingResult) -> Void
 
         private weak var webView: WKWebView?
@@ -57,10 +147,12 @@ struct WebBookingWebView: UIViewRepresentable {
         init(
             configuration: WebBookingConfiguration,
             autofill: WebBookingAutofill,
+            excludeBookingId: String?,
             onCompleted: @escaping (WebBookingResult) -> Void
         ) {
             self.configuration = configuration
             self.autofill = autofill
+            self.excludeBookingId = excludeBookingId
             self.onCompleted = onCompleted
         }
 
@@ -208,31 +300,11 @@ struct WebBookingWebView: UIViewRepresentable {
 
         private func fetchBookingId(currentURL: URL, retriesRemaining: Int) {
             guard let webView, !didComplete else { return }
-            let patternsJSON = jsonArrayString(from: configuration.bookingIdRegexes)
-            let js = """
-            (function() {
-                const patterns = \(patternsJSON);
-                const regexes = patterns.map((p) => {
-                    try { return new RegExp(p, 'i'); } catch (e) { return null; }
-                }).filter(Boolean);
-
-                const collect = (source) => {
-                    if (!source) { return null; }
-                    for (const re of regexes) {
-                        const match = source.match(re);
-                        if (match && match[1]) { return match[1]; }
-                    }
-                    return null;
-                };
-
-                const html = document.documentElement.outerHTML;
-                const text = document.body ? document.body.innerText : '';
-                const state = (window.__NUXT__ && window.__NUXT__.state) || null;
-                const stateString = state ? JSON.stringify(state) : '';
-
-                return collect(html) || collect(text) || collect(stateString) || '';
-            })();
-            """
+            let js = WebBookingWebView.bookingIdExtractionJS(
+                patterns: configuration.bookingIdRegexes,
+                linkSelector: configuration.completionLinkSelector,
+                excludeId: excludeBookingId
+            )
             webView.evaluateJavaScript(js) { [weak self] result, _ in
                 guard let self, !self.didComplete else { return }
                 if let bookingId = result as? String, !bookingId.isEmpty {

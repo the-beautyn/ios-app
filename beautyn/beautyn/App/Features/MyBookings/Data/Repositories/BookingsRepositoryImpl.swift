@@ -54,13 +54,12 @@ final class BookingsRepositoryImpl: BookingsRepository {
 
     @discardableResult
     func refreshBooking(id: String) async throws -> Booking {
-        let target = Target(type: BookingsTarget.getBookingById(id: id))
-        let dto: BookingItemDTO = try await networkService.request(target)
-        guard let booking = BookingMapper.map(dto) else {
-            throw MyBookingsError.bookingNotFound
-        }
-        put(booking)
-        return booking
+        try await fetchOne(BookingsTarget.getBookingById(id: id))
+    }
+
+    @discardableResult
+    func syncBookingFromCrm(id: String) async throws -> Booking {
+        try await fetchOne(BookingsTarget.refreshBookingFromCrm(id: id))
     }
 
     // MARK: - Writes
@@ -75,6 +74,18 @@ final class BookingsRepositoryImpl: BookingsRepository {
     }
 
     // MARK: - Private
+
+    /// Request a single booking from `target`, map it, cache it, and return it.
+    /// Shared by `refreshBooking` (DB read) and `syncBookingFromCrm` (live CRM).
+    private func fetchOne(_ targetType: BookingsTarget) async throws -> Booking {
+        let target = Target(type: targetType)
+        let dto: BookingItemDTO = try await networkService.request(target)
+        guard let booking = BookingMapper.map(dto) else {
+            throw MyBookingsError.bookingNotFound
+        }
+        put(booking)
+        return booking
+    }
 
     private func fetch(_ category: BookingCategory) async throws -> [Booking] {
         let target = Target(type: BookingsTarget.getBookings(

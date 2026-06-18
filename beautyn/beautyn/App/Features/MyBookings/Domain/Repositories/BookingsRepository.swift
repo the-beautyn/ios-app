@@ -26,6 +26,12 @@ protocol BookingsRepository {
     @discardableResult
     func refreshBooking(id: String) async throws -> Booking
 
+    /// Re-pull one booking's current state from its CRM (Altegio / EasyWeek),
+    /// cache it, and return it. Used when the "Внести зміни" webview closes — it
+    /// reflects edits/cancellations made there that a plain DB read wouldn't see.
+    @discardableResult
+    func syncBookingFromCrm(id: String) async throws -> Booking
+
     /// Insert/replace a booking obtained elsewhere (the create / confirm flows
     /// already hold the full booking).
     func put(_ booking: Booking)

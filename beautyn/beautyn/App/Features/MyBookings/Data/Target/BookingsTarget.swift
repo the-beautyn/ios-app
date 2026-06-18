@@ -14,6 +14,10 @@ enum BookingsTarget {
         sort: String?
     )
     case getBookingById(id: String)
+    /// Re-pull a single booking's current state from its CRM (Altegio / EasyWeek)
+    /// and return the freshly-synced record. Used when the "Внести зміни" webview
+    /// closes. Unlike `getBookingById` (DB read), this hits the live CRM.
+    case refreshBookingFromCrm(id: String)
 }
 
 // MARK: - TargetType
@@ -30,6 +34,8 @@ extension BookingsTarget: TargetType {
             return "/bookings"
         case let .getBookingById(id):
             return "/bookings/\(id)"
+        case let .refreshBookingFromCrm(id):
+            return "/bookings/\(id)/refresh"
         }
     }
 
@@ -37,6 +43,8 @@ extension BookingsTarget: TargetType {
         switch self {
         case .getBookings, .getBookingById:
             return .get
+        case .refreshBookingFromCrm:
+            return .post
         }
     }
 
@@ -55,7 +63,7 @@ extension BookingsTarget: TargetType {
             }
             return .requestParameters(parameters: params, encoding: URLEncoding.default)
 
-        case .getBookingById:
+        case .getBookingById, .refreshBookingFromCrm:
             return .requestPlain
         }
     }

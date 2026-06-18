@@ -13,27 +13,32 @@ class BaseViewModel: ObservableObject {
 
     func onViewTask() async {}
 
-    func openWebView(url: URL, title: String? = nil) {
-        webPagePresentation = WebPagePresentation(url: url, title: title)
+    func openWebView(url: URL, title: String? = nil, onDismiss: (() -> Void)? = nil) {
+        webPagePresentation = WebPagePresentation(url: url, title: title, onDismiss: onDismiss)
     }
 
     /// Presents the interactive web-booking widget (autofill + completion
     /// detection) for any provider described by `configuration`. `onCompleted`
     /// fires with the detected booking; dismiss the sheet by clearing
-    /// `webBookingPresentation`.
+    /// `webBookingPresentation`. `onDismiss` fires when the user closes the sheet
+    /// without completing (not after a completion).
     func openWebBooking(
         url: URL,
         title: String? = nil,
         configuration: WebBookingConfiguration,
         autofill: WebBookingAutofill,
-        onCompleted: @escaping (WebBookingResult) -> Void
+        excludeBookingId: String? = nil,
+        onCompleted: @escaping (WebBookingResult) -> Void,
+        onDismiss: (() -> Void)? = nil
     ) {
         webBookingPresentation = WebBookingPresentation(
             url: url,
             title: title,
             configuration: configuration,
             autofill: autofill,
-            onCompleted: onCompleted
+            excludeBookingId: excludeBookingId,
+            onCompleted: onCompleted,
+            onDismiss: onDismiss
         )
     }
 }

@@ -55,7 +55,7 @@ private final class StubCreateBookingUseCase: CreateAltegioBookingUseCase {
     func execute(salonId: String, workerId: String?, serviceIds: [String], datetime: String, comment: String?) async throws -> Booking {
         Booking(
             id: "booking-1", salonId: salonId, salonName: "Preview Salon", salonAddress: nil,
-            salonImageURL: nil, coordinate: nil, bookingUrl: nil, status: .created,
+            salonImageURL: nil, coordinate: nil, bookingUrl: nil, crmType: .altegio, crmRecordId: nil, status: .created,
             datetime: Date(), endDatetime: nil, cancelledAt: nil, services: [],
             totalPrice: nil, currency: nil, durationMinutes: nil, timezone: nil
         )

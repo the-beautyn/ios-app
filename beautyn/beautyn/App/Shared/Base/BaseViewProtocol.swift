@@ -21,14 +21,23 @@ extension BaseViewProtocol {
             .sheet(
                 item: Binding<WebPagePresentation?>(
                     get: { viewModel.webPagePresentation },
-                    set: { viewModel.webPagePresentation = $0 }
+                    // SwiftUI writes back through this setter only on user dismissal
+                    // (Done / swipe); a programmatic clear writes the VM directly and
+                    // skips it. So firing onDismiss here means "the user closed it".
+                    set: { newValue in
+                        if newValue == nil { viewModel.webPagePresentation?.onDismiss?() }
+                        viewModel.webPagePresentation = newValue
+                    }
                 ),
                 content: WebPageView.init
             )
             .sheet(
                 item: Binding<WebBookingPresentation?>(
                     get: { viewModel.webBookingPresentation },
-                    set: { viewModel.webBookingPresentation = $0 }
+                    set: { newValue in
+                        if newValue == nil { viewModel.webBookingPresentation?.onDismiss?() }
+                        viewModel.webBookingPresentation = newValue
+                    }
                 ),
                 content: WebBookingView.init
             )

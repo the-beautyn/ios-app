@@ -28,6 +28,14 @@ struct BookingItemDTO: Decodable {
     let totalPrice: Double?
     let currency: String?
     let durationMinutes: Int?
+    /// CRM the booking is connected to ("ALTEGIO" / "EASYWEEK"). Drives the
+    /// "Make changes" flow (Altegio edits in place; EasyWeek reschedule creates a
+    /// new appointment). `nil` for legacy rows.
+    let crmType: String?
+    /// The booking's id in the CRM (EasyWeek booking UUID / Altegio record id).
+    /// Used to exclude the OLD booking when scraping the new id off the EasyWeek
+    /// reschedule completion page. `nil` for legacy rows.
+    let crmRecordId: String?
     /// Short public link to manage the booking. Optional — the list endpoint
     /// may omit it; populated by the create-booking response for now.
     let shortLink: String?
@@ -47,6 +55,8 @@ struct BookingItemDTO: Decodable {
         case totalPrice = "total_price"
         case currency
         case durationMinutes = "duration_minutes"
+        case crmType = "crm_type"
+        case crmRecordId = "crm_record_id"
         case shortLink = "short_link"
         case providerSpecific = "provider_specific"
     }

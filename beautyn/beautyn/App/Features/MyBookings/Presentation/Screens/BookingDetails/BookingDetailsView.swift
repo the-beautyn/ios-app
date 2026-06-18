@@ -280,6 +280,33 @@ private final class PreviewSavedSalonsEventBus: SavedSalonsEventBus {
     func notify(_ change: SavedSalonChange) {}
 }
 
+@MainActor
+private final class PreviewRefreshBookingUseCase: RefreshBookingUseCase {
+    func execute(id: String) async throws -> Booking { .preview(status: .created) }
+}
+
+@MainActor
+private final class PreviewSyncBookingFromCrmUseCase: SyncBookingFromCrmUseCase {
+    func execute(id: String) async throws -> Booking { .preview(status: .created) }
+}
+
+private final class PreviewConfirmEasyweekBookingUseCase: ConfirmEasyweekBookingUseCase {
+    func execute(salonId: String, bookingUuid: String) async throws -> Booking {
+        .preview(status: .created)
+    }
+}
+
+private final class PreviewGetCurrentUserUseCase: GetCurrentUserUseCase {
+    func execute() async throws -> UserProfile {
+        UserProfile(
+            id: "u1", email: "user@example.com", role: "client", name: "Ольга",
+            secondName: nil, phone: "+380506314634", avatarUrl: nil, birthDate: nil, city: nil,
+            sex: nil, authProvider: "email", isPhoneVerified: true, isProfileCreated: true,
+            isOnboardingCompleted: true
+        )
+    }
+}
+
 private extension Booking {
     static func preview(status: BookingStatus, bookingUrl: URL? = URL(string: "https://beautyn.com.ua/b/abc123")) -> Booking {
         Booking(
@@ -290,6 +317,8 @@ private extension Booking {
             salonImageURL: URL(string: "https://picsum.photos/seed/salon1/800/600"),
             coordinate: nil,
             bookingUrl: bookingUrl,
+            crmType: .altegio,
+            crmRecordId: nil,
             status: status,
             datetime: Date().addingTimeInterval(86_400),
             endDatetime: Date().addingTimeInterval(86_400 + 5_400),
@@ -309,8 +338,12 @@ private extension Booking {
 private func makePreviewViewModel(status: BookingStatus) -> BookingDetailsViewModel {
     BookingDetailsViewModel(
         booking: .preview(status: status),
-        transition: .init(didTapBookAgain: { _ in }, didRequireAuth: {}),
+        transition: .init(didTapBookAgain: { _ in }, didRequireAuth: {}, didOpenBookingDetails: { _ in }),
         observeBookingUseCase: PreviewObserveBookingUseCase(),
+        refreshBookingUseCase: PreviewRefreshBookingUseCase(),
+        syncBookingFromCrmUseCase: PreviewSyncBookingFromCrmUseCase(),
+        confirmEasyweekBookingUseCase: PreviewConfirmEasyweekBookingUseCase(),
+        getCurrentUserUseCase: PreviewGetCurrentUserUseCase(),
         getSalonByIdUseCase: PreviewGetSalonByIdUseCase(),
         getSalonShareUseCase: PreviewGetSalonShareUseCase(),
         saveSalonUseCase: PreviewSaveSalonUseCase(),
