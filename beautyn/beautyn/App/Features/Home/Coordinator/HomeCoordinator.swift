@@ -10,6 +10,7 @@ final class HomeCoordinator: BaseCoordinator {
     private let parentAssembler: Assembler
 
     var onRequireAuth: (() -> Void)?
+    var onNavigateToSearchTab: (() -> Void)?
 
     init(router: Router, parentAssembler: Assembler) {
         // SalonBookingAssembly is included so the booking-details screen can reach
@@ -62,7 +63,7 @@ final class HomeCoordinator: BaseCoordinator {
     // MARK: - Navigation Stubs
 
     private func navigateToSearch() {
-        // TODO: Switch to Search tab or push Search screen
+        onNavigateToSearchTab?()
     }
 
     func navigateToSalonBooking(salonId: String) {

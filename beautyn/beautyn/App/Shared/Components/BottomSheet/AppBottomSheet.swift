@@ -2,11 +2,12 @@ import SwiftUI
 
 // MARK: - SnapPosition
 //
-// Five positions a draggable sheet can rest at, ordered bottom → top.
-// Heights are computed relative to the current screen height so the
-// sheet feels consistent on any device.
+// Positions a draggable sheet can rest at, ordered bottom → top.
+// Heights are computed relative to the full screen height so the
+// sheet feels consistent on any device; `height`/`fraction` allow
+// screen-specific positions beyond the presets.
 
-enum SnapPosition: CaseIterable, Equatable, Comparable {
+enum SnapPosition: Equatable {
     /// Off-screen — sheet is not visible.
     case hidden
     /// Peek strip at the bottom — ~120 pt.
@@ -17,6 +18,10 @@ enum SnapPosition: CaseIterable, Equatable, Comparable {
     case medium
     /// Large panel   — ~85 % of screen height.
     case large
+    /// Absolute height in points.
+    case height(CGFloat)
+    /// Fraction of the full screen height (0…1).
+    case fraction(CGFloat)
 
     func height(screenHeight: CGFloat) -> CGFloat {
         switch self {
@@ -25,14 +30,10 @@ enum SnapPosition: CaseIterable, Equatable, Comparable {
         case .compact: return screenHeight * 0.40
         case .medium:  return screenHeight * 0.60
         case .large:   return screenHeight * 0.85
+        case .height(let points):  return points
+        case .fraction(let value): return screenHeight * value
         }
     }
-
-    // Enables sorting / Comparable conformance
-    private var sortOrder: Int {
-        switch self { case .hidden: 0; case .peek: 1; case .compact: 2; case .medium: 3; case .large: 4 }
-    }
-    static func < (lhs: Self, rhs: Self) -> Bool { lhs.sortOrder < rhs.sortOrder }
 }
 
 // MARK: - BottomSheetStyle
@@ -68,6 +69,14 @@ struct AppBottomSheet<Content: View>: View {
     /// Override whether the drag handle is visible.  `nil` = auto (shown when draggable).
     let showDragHandle: Bool?
     let showDimBackground: Bool
+    /// When `false` the sheet can never be dismissed by the user — a downward
+    /// fling clamps to the lowest snap position instead (persistent sheets,
+    /// e.g. search results over a map).
+    let isDismissible: Bool
+    /// Reports the sheet's resting height as a fraction of the screen height —
+    /// fires on appear and after every snap change. Lets the content behind
+    /// the sheet (e.g. a map) know how much of it is actually visible.
+    let onSnapChange: ((_ heightFraction: CGFloat) -> Void)?
     @ViewBuilder let content: () -> Content
 
     // MARK: - State
@@ -82,12 +91,16 @@ struct AppBottomSheet<Content: View>: View {
         style: BottomSheetStyle = .draggable(),
         showDragHandle: Bool? = nil,
         showDimBackground: Bool = true,
+        isDismissible: Bool = true,
+        onSnapChange: ((_ heightFraction: CGFloat) -> Void)? = nil,
         @ViewBuilder content: @escaping () -> Content
     ) {
         _isPresented = isPresented
         self.style = style
         self.showDragHandle = showDragHandle
         self.showDimBackground = showDimBackground
+        self.isDismissible = isDismissible
+        self.onSnapChange = onSnapChange
         self.content = content
 
         if case .draggable(_, let initial) = style {
@@ -105,8 +118,18 @@ struct AppBottomSheet<Content: View>: View {
                 dimLayer
                 sheetLayer(screenHeight: geo.size.height)
             }
-            .ignoresSafeArea()
+            // Fill the GeometryReader even when the dim layer is disabled —
+            // otherwise the ZStack collapses to the sheet's own height and
+            // lands top-leading instead of pinning to the bottom.
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+            .onAppear { notifySnapChange(screenHeight: geo.size.height) }
+            .onChange(of: currentSnap) { _, _ in
+                notifySnapChange(screenHeight: geo.size.height)
+            }
         }
+        // Outside the GeometryReader so snap heights are computed from the
+        // FULL screen height — identical in tab-bar and standalone contexts.
+        .ignoresSafeArea()
         // Reset snap position each time the sheet is re-presented
         .onChange(of: isPresented) { _, newValue in
             if newValue, case .draggable(_, let initial) = style {
@@ -123,7 +146,7 @@ struct AppBottomSheet<Content: View>: View {
             Color.black
                 .opacity(isPresented ? 0.35 : 0)
                 .ignoresSafeArea()
-                .onTapGesture { dismissSheet() }
+                .onTapGesture { if isDismissible { dismissSheet() } }
                 .animation(.easeInOut(duration: 0.22), value: isPresented)
                 .allowsHitTesting(isPresented)
         }
@@ -185,9 +208,10 @@ struct AppBottomSheet<Content: View>: View {
 
                 withAnimation(.spring(response: 0.35, dampingFraction: 0.86)) {
                     dragOffset = 0
-                    if targetH < 80 {
+                    if targetH < 80, isDismissible {
                         dismissSheet()
                     } else {
+                        // nearestSnap clamps a below-threshold fling to the lowest snap
                         currentSnap = nearestSnap(to: targetH, screenHeight: screenHeight)
                     }
                 }
@@ -224,6 +248,11 @@ struct AppBottomSheet<Content: View>: View {
     private func dismissSheet() {
         isPresented = false
     }
+
+    private func notifySnapChange(screenHeight: CGFloat) {
+        guard screenHeight > 0 else { return }
+        onSnapChange?(currentSnap.height(screenHeight: screenHeight) / screenHeight)
+    }
 }
 
 // MARK: - View Modifier
@@ -236,12 +265,16 @@ extension View {
     ///   - style: `.fixed(height:)` or `.draggable(snapPositions:initial:)`.
     ///   - showDragHandle: Force-show or hide the drag handle.  `nil` = auto.
     ///   - showDimBackground: Whether a semi-transparent scrim is shown behind the sheet.
+    ///   - isDismissible: Whether the user can dismiss the sheet (fling down / scrim tap).
+    ///   - onSnapChange: Reports the resting sheet height as a fraction of the screen.
     ///   - content: The sheet's content.
     func bottomSheet<SheetContent: View>(
         isPresented: Binding<Bool>,
         style: BottomSheetStyle = .draggable(),
         showDragHandle: Bool? = nil,
         showDimBackground: Bool = true,
+        isDismissible: Bool = true,
+        onSnapChange: ((_ heightFraction: CGFloat) -> Void)? = nil,
         @ViewBuilder content: @escaping () -> SheetContent
     ) -> some View {
         ZStack {
@@ -251,6 +284,8 @@ extension View {
                 style: style,
                 showDragHandle: showDragHandle,
                 showDimBackground: showDimBackground,
+                isDismissible: isDismissible,
+                onSnapChange: onSnapChange,
                 content: content
             )
         }

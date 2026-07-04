@@ -18,6 +18,7 @@ final class MainTabCoordinator: BaseCoordinator {
     private let parentAssembler: Assembler
 
     private var homeCoordinator: HomeCoordinator!
+    private var searchCoordinator: SearchCoordinator!
     private var profileCoordinator: ProfileCoordinator!
     private var myBookingsCoordinator: MyBookingsCoordinator!
     private var homeNav: UINavigationController!
@@ -41,7 +42,7 @@ final class MainTabCoordinator: BaseCoordinator {
             title: Localization.tabHome,
             icon: UIImage(resource: .homeTab)
         )
-        searchNav = makeStubTab(
+        searchNav = makeTabNav(
             title: Localization.tabSearch,
             icon: UIImage(resource: .searchTab)
         )
@@ -61,8 +62,21 @@ final class MainTabCoordinator: BaseCoordinator {
         homeCoordinator.onRequireAuth = { [weak self] in
             self?.onRequireAuth?()
         }
+        homeCoordinator.onNavigateToSearchTab = { [weak self] in
+            self?.selectSearchTab()
+        }
         addChild(homeCoordinator)
         homeCoordinator.start()
+
+        searchCoordinator = SearchCoordinator(
+            router: Router(navigationController: searchNav),
+            parentAssembler: parentAssembler
+        )
+        searchCoordinator.onRequireAuth = { [weak self] in
+            self?.onRequireAuth?()
+        }
+        addChild(searchCoordinator)
+        searchCoordinator.start()
 
         profileCoordinator = ProfileCoordinator(
             router: Router(navigationController: profileNav),
@@ -106,6 +120,13 @@ final class MainTabCoordinator: BaseCoordinator {
         tabBarController.selectedViewController = homeNav
     }
 
+    func selectSearchTab() {
+        guard let searchNav else { return }
+        // Same tab-bar-visibility safety as `selectHomeTab()`.
+        profileNav?.popToRootViewController(animated: false)
+        tabBarController.selectedViewController = searchNav
+    }
+
     func openSalonBooking(salonId: String) {
         selectHomeTab()
         homeCoordinator?.navigateToSalonBooking(salonId: salonId)
@@ -123,17 +144,6 @@ final class MainTabCoordinator: BaseCoordinator {
     ) -> UINavigationController {
         let nav = UINavigationController()
         nav.delegate = NavigationBarVisibilityController.shared
-        nav.setNavigationBarHidden(true, animated: false)
-        nav.tabBarItem = makeTabItem(title: title, icon: icon)
-        return nav
-    }
-
-    private func makeStubTab(
-        title: String,
-        icon: UIImage
-    ) -> UINavigationController {
-        let placeholder = UIHostingController(rootView: ComingSoonView(title: title))
-        let nav = UINavigationController(rootViewController: placeholder)
         nav.setNavigationBarHidden(true, animated: false)
         nav.tabBarItem = makeTabItem(title: title, icon: icon)
         return nav
@@ -196,25 +206,5 @@ final class MainTabBarController: UITabBarController, UITabBarControllerDelegate
         shouldSelect viewController: UIViewController
     ) -> Bool {
         onShouldSelect?(viewController) ?? true
-    }
-}
-
-// MARK: - Stub placeholder for Search / Bookings tabs
-
-struct ComingSoonView: View {
-    let title: String
-
-    var body: some View {
-        VStack(spacing: CGFloat.Spacing.sm) {
-            Text(title)
-                .font(.App.title2Medium)
-                .tracking(CGFloat.Tracking.title2)
-                .foregroundStyle(Color.App.text)
-            Text("Coming soon")
-                .font(.App.body)
-                .foregroundStyle(Color.App.gray2)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.App.backgroundLight)
     }
 }

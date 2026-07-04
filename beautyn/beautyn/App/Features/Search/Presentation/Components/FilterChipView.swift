@@ -24,7 +24,8 @@ struct FilterChipView: View {
                     .foregroundStyle(isSelected ? Color.App.white : Color.App.text)
             }
             .padding(.horizontal, CGFloat.Spacing.sm)
-            .padding(.vertical, 6)
+            // Figma: 6pt — closest tokens are xxs (4) and xs (8).
+            .padding(.vertical, CGFloat.Spacing.xxs + 2)
             .background(
                 Capsule()
                     .fill(isSelected ? Color.App.brown1 : Color.App.backgroundLight)
