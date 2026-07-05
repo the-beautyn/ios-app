@@ -112,6 +112,14 @@
 "search_clear_history" = "Очистити";
 "search_salons_section" = "Салони";
 "search_date_placeholder" = "Дата";
+"search_sort_section" = "Сортувати за";
+"search_sort_by_rating" = "За оцінкою";
+"search_sort_by_popularity" = "За популярністю";
+"search_sort_by_distance" = "За відстанню";
+"search_sort_by_price" = "За ціною";
+"search_price_section" = "Прайс";
+"search_sort_apply" = "Застосувати";
+"search_sort_clear" = "Очистити";
 
 // MARK: - Salon Profile
 "salon_tab_services" = "Послуги";

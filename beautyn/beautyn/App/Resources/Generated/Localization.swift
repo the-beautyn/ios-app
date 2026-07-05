@@ -221,10 +221,18 @@ public enum Localization {
   public static let searchFilterSort = Localization.tr("Localizable", "search_filter_sort", fallback: "Сортувати")
   public static let searchHint = Localization.tr("Localizable", "search_hint", fallback: "Уведить назву салону")
   public static let searchPreviousSection = Localization.tr("Localizable", "search_previous_section", fallback: "Попередній пошук")
+  public static let searchPriceSection = Localization.tr("Localizable", "search_price_section", fallback: "Прайс")
   public static func searchResultsCount(_ p1: Int) -> String {
     return Localization.tr("Localizable", "search_results_count", p1, fallback: "Знайдено: %d місць")
   }
   public static let searchSalonsSection = Localization.tr("Localizable", "search_salons_section", fallback: "Салони")
+  public static let searchSortApply = Localization.tr("Localizable", "search_sort_apply", fallback: "Застосувати")
+  public static let searchSortByDistance = Localization.tr("Localizable", "search_sort_by_distance", fallback: "За відстанню")
+  public static let searchSortByPopularity = Localization.tr("Localizable", "search_sort_by_popularity", fallback: "За популярністю")
+  public static let searchSortByPrice = Localization.tr("Localizable", "search_sort_by_price", fallback: "За ціною")
+  public static let searchSortByRating = Localization.tr("Localizable", "search_sort_by_rating", fallback: "За оцінкою")
+  public static let searchSortClear = Localization.tr("Localizable", "search_sort_clear", fallback: "Очистити")
+  public static let searchSortSection = Localization.tr("Localizable", "search_sort_section", fallback: "Сортувати за")
   public static let selectButton = Localization.tr("Localizable", "select_button", fallback: "Обрати")
   public static let selectServiceOtherCategory = Localization.tr("Localizable", "select_service_other_category", fallback: "Інше")
   public static let selectServiceTitle = Localization.tr("Localizable", "select_service_title", fallback: "Оберіть послугу")

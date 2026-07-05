@@ -45,6 +45,9 @@ final class SearchCoordinator: BaseCoordinator {
             },
             didTapSearchField: { [weak self] context in
                 self?.showSearchSheet(context)
+            },
+            didTapSortFilter: { [weak self] context in
+                self?.showSearchSort(context)
             }
         )
 
@@ -104,6 +107,23 @@ final class SearchCoordinator: BaseCoordinator {
         modalDismissDelegate = delegate
 
         router.present(nav)
+    }
+
+    // MARK: - Sort/price sheet (modal)
+
+    // A transparent over-full-screen container whose view draws the dim and
+    // the anchored fixed-height sheet (AppBottomSheet). Both UIKit
+    // transitions are instant — the sheet animates its own slide in/out.
+    // Applying flows through `context.onApply` inside the sheet's VM (fired
+    // immediately on Застосувати); this closure only drops the container
+    // after the slide-out.
+    private func showSearchSort(_ context: SearchSortContext) {
+        let transition = SearchSortViewModel.Transition(
+            didTapClose: { [weak self] in
+                self?.router.dismiss(animated: false)
+            }
+        )
+        router.present(factory.makeSearchSort(context: context, transition: transition), animated: false)
     }
 
     private func showSearchLocation(onSelect: @escaping (SearchLocation) -> Void) {

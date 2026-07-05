@@ -143,10 +143,10 @@ struct SearchMapView: BaseViewProtocol {
             FilterChipView(title: Localization.searchFilterServiceType) {
                 viewModel.didTapFilterChip(.serviceType)
             }
-            FilterChipView(title: Localization.searchFilterSort) {
+            FilterChipView(title: Localization.searchFilterSort, isSelected: viewModel.isSortChipActive) {
                 viewModel.didTapFilterChip(.sort)
             }
-            FilterChipView(title: Localization.searchFilterPrice) {
+            FilterChipView(title: Localization.searchFilterPrice, isSelected: viewModel.isPriceChipActive) {
                 viewModel.didTapFilterChip(.price)
             }
         }
@@ -196,10 +196,12 @@ struct SearchMapView: BaseViewProtocol {
                 didTapSalonCard: { _ in },
                 didRequireAuth: {},
                 didTapOpenSettings: {},
-                didTapSearchField: { _ in }
+                didTapSearchField: { _ in },
+                didTapSortFilter: { _ in }
             ),
             searchSalonsUseCase: PreviewSearchSalonsUseCase(),
             searchPinsUseCase: PreviewSearchPinsUseCase(),
+            getSearchFilterOptionsUseCase: PreviewGetSearchFilterOptionsUseCase(),
             resolveInitialRegionUseCase: PreviewResolveInitialRegionUseCase(),
             getUserLocationUseCase: PreviewGetUserLocationUseCase(),
             observeLocationPermissionUseCase: PreviewObserveLocationPermissionUseCase(),
@@ -261,6 +263,16 @@ private final class PreviewSearchPinsUseCase: SearchPinsUseCase {
             SearchPin(id: "p4", latitude: 50.4555, longitude: 30.5155),
             SearchPin(id: "p5", latitude: 50.4430, longitude: 30.5320)
         ]
+    }
+}
+
+private final class PreviewGetSearchFilterOptionsUseCase: GetSearchFilterOptionsUseCase {
+    func execute() async throws -> SearchFilterOptions {
+        SearchFilterOptions(
+            sortOptions: [.distance, .ratingDesc, .priceAsc, .priceDesc, .popular],
+            minPrice: 100,
+            maxPrice: 1_150
+        )
     }
 }
 

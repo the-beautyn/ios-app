@@ -112,6 +112,14 @@
 "search_clear_history" = "Clear";
 "search_salons_section" = "Salons";
 "search_date_placeholder" = "Date";
+"search_sort_section" = "Sort by";
+"search_sort_by_rating" = "By rating";
+"search_sort_by_popularity" = "By popularity";
+"search_sort_by_distance" = "By distance";
+"search_sort_by_price" = "By price";
+"search_price_section" = "Price";
+"search_sort_apply" = "Apply";
+"search_sort_clear" = "Clear";
 
 // MARK: - Salon Profile
 "salon_tab_services" = "Services";

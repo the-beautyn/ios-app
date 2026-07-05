@@ -12,6 +12,9 @@ struct SearchRequestDTO: Encodable {
     var centerLng: Double?
     var viewport: SearchViewportDTO?
     var locationType: String?
+    var sortBy: String?
+    var priceMin: Double?
+    var priceMax: Double?
     var page: Int = 1
     var limit: Int = 20
 }
@@ -21,6 +24,23 @@ struct SearchViewportDTO: Encodable {
     let neLng: Double
     let swLat: Double
     let swLng: Double
+}
+
+// MARK: - FilterOptionsResponseDTO
+//
+// GET /search/filter-options — static, parameterless: the allowed sort keys
+// and the global price range (min…max).
+
+struct FilterOptionsResponseDTO: Decodable {
+    let sortOptions: [String]
+    let minPrice: Double?
+    let maxPrice: Double?
+
+    enum CodingKeys: String, CodingKey {
+        case sortOptions = "sort_options"
+        case minPrice = "min_price"
+        case maxPrice = "max_price"
+    }
 }
 
 // MARK: - SearchResponseDTO

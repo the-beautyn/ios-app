@@ -16,6 +16,7 @@ final class SearchControllerFactoryImpl: SearchControllerFactory {
             transition: transition,
             searchSalonsUseCase: assembler.search.searchSalonsUseCase,
             searchPinsUseCase: assembler.search.searchPinsUseCase,
+            getSearchFilterOptionsUseCase: assembler.search.getSearchFilterOptionsUseCase,
             resolveInitialRegionUseCase: assembler.search.resolveInitialSearchRegionUseCase,
             getUserLocationUseCase: assembler.search.getUserLocationUseCase,
             observeLocationPermissionUseCase: assembler.search.observeLocationPermissionUseCase,
@@ -40,6 +41,11 @@ final class SearchControllerFactoryImpl: SearchControllerFactory {
             sessionManager: assembler.app.sessionManager
         )
         return SearchController(viewModel: viewModel)
+    }
+
+    func makeSearchSort(context: SearchSortContext, transition: SearchSortViewModel.Transition) -> UIViewController {
+        let viewModel = SearchSortViewModel(transition: transition, context: context)
+        return SearchSortController(viewModel: viewModel)
     }
 
     func makeSearchLocation(transition: SearchLocationViewModel.Transition) -> UIViewController {

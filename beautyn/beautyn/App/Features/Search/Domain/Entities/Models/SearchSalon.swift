@@ -62,6 +62,33 @@ struct SearchViewport: Equatable {
     }
 }
 
+// MARK: - SearchSortOption
+
+/// Server sort keys for POST /search — mirrors the backend's SortOptionEnum.
+/// The filter sheet surfaces four of them; `priceDesc` stays contract-only.
+enum SearchSortOption: String {
+    case distance
+    case ratingDesc = "rating_desc"
+    case priceAsc = "price_asc"
+    case priceDesc = "price_desc"
+    case popular
+}
+
+// MARK: - SearchFilterOptions
+
+/// Static bounds for the sort/price filter sheet, from
+/// GET /search/filter-options — fetched once per screen lifetime.
+struct SearchFilterOptions: Equatable {
+    /// Sort keys the backend currently accepts.
+    let sortOptions: [SearchSortOption]
+    /// Price-range track start: the cheapest service anywhere (грн, rounded
+    /// down); nil when no salon has price data.
+    let minPrice: Double?
+    /// Price-range track end: the priciest service anywhere (грн, rounded
+    /// up); nil when no salon has price data.
+    let maxPrice: Double?
+}
+
 // MARK: - SearchQuery
 
 struct SearchQuery {
@@ -72,6 +99,12 @@ struct SearchQuery {
     /// What kind of place the center is — the backend picks its base search
     /// radius from it (city 7 km, address 2 km, …) in center mode.
     var locationType: SearchLocationKind?
+    var sortBy: SearchSortOption?
+    /// Range-overlap price filter: the salon's [min, max] price span must
+    /// intersect [priceMin, priceMax] — i.e. it offers at least one service
+    /// in the requested budget (грн).
+    var priceMin: Double?
+    var priceMax: Double?
     var page: Int = 1
     var limit: Int = 20
 }

@@ -65,6 +65,12 @@ final class SearchAssembly: Assembly {
             )
         }
 
+        container.register((any GetSearchFilterOptionsUseCase).self) { resolver in
+            GetSearchFilterOptionsUseCaseImpl(
+                repository: resolver.require((any SearchRepository).self)
+            )
+        }
+
         container.register((any GetSearchHistoryUseCase).self) { resolver in
             GetSearchHistoryUseCaseImpl(
                 repository: resolver.require((any SearchRepository).self)

@@ -22,6 +22,12 @@ final class SearchRepositoryImpl: SearchRepository {
         return SearchMapper.map(response)
     }
 
+    func filterOptions() async throws -> SearchFilterOptions {
+        let target = Target(type: SearchTarget.filterOptions)
+        let response: FilterOptionsResponseDTO = try await networkService.request(target)
+        return SearchMapper.map(response)
+    }
+
     func history(limit: Int) async throws -> [SearchHistoryItem] {
         let target = Target(type: SearchTarget.history(limit: limit))
         let response: [SearchHistoryItemDTO] = try await networkService.request(target)

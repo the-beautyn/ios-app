@@ -21,9 +21,12 @@ final class SearchMapViewModel: BaseViewModel {
         /// Opens the text-search sheet with the currently applied state and
         /// the callback that applies the submission back to this screen.
         let didTapSearchField: (_ context: SearchInputContext) -> Void
+        /// Opens the sort/price filter sheet with the currently applied state
+        /// and the callback that applies the submission back to this screen.
+        let didTapSortFilter: (_ context: SearchSortContext) -> Void
     }
 
-    // MARK: - Filter chips (placeholder taps for now)
+    // MARK: - Filter chips
 
     enum FilterChip {
         case serviceType
@@ -44,6 +47,15 @@ final class SearchMapViewModel: BaseViewModel {
     /// The text filter applied from the search sheet — shown in the header
     /// pill and sent with every viewport search until cleared.
     @Published private(set) var appliedQuery: String?
+    /// Sort/price filters applied from the sort sheet — sent with every
+    /// search until cleared there; non-nil = the matching chip shows its
+    /// active border.
+    @Published private(set) var appliedSort: SearchSortOption?
+    @Published private(set) var appliedPriceMin: Double?
+    @Published private(set) var appliedPriceMax: Double?
+
+    var isSortChipActive: Bool { appliedSort != nil }
+    var isPriceChipActive: Bool { appliedPriceMin != nil || appliedPriceMax != nil }
 
     /// Where the map sits before the initial region resolves — mirrors the
     /// use case's final fallback.
@@ -54,6 +66,7 @@ final class SearchMapViewModel: BaseViewModel {
     private let transition: Transition
     private let searchSalonsUseCase: any SearchSalonsUseCase
     private let searchPinsUseCase: any SearchPinsUseCase
+    private let getSearchFilterOptionsUseCase: any GetSearchFilterOptionsUseCase
     private let resolveInitialRegionUseCase: any ResolveInitialSearchRegionUseCase
     private let getUserLocationUseCase: any GetUserLocationUseCase
     private let observeLocationPermissionUseCase: any ObserveLocationPermissionUseCase
@@ -74,6 +87,10 @@ final class SearchMapViewModel: BaseViewModel {
     /// Where the applied search is centered — kept so the sheet reopens
     /// prefilled with the same place.
     private var appliedLocation: SearchLocation?
+    /// Global sort/price bounds, fetched once on init (they're static) and
+    /// handed to the sort sheet via its context. nil = the fetch failed; the
+    /// sheet falls back to its built-in defaults.
+    private var filterOptions: SearchFilterOptions?
 
     private var salons: [SearchSalon] = []
     private var currentViewport: SearchViewport?
@@ -103,6 +120,7 @@ final class SearchMapViewModel: BaseViewModel {
         transition: Transition,
         searchSalonsUseCase: any SearchSalonsUseCase,
         searchPinsUseCase: any SearchPinsUseCase,
+        getSearchFilterOptionsUseCase: any GetSearchFilterOptionsUseCase,
         resolveInitialRegionUseCase: any ResolveInitialSearchRegionUseCase,
         getUserLocationUseCase: any GetUserLocationUseCase,
         observeLocationPermissionUseCase: any ObserveLocationPermissionUseCase,
@@ -114,6 +132,7 @@ final class SearchMapViewModel: BaseViewModel {
         self.transition = transition
         self.searchSalonsUseCase = searchSalonsUseCase
         self.searchPinsUseCase = searchPinsUseCase
+        self.getSearchFilterOptionsUseCase = getSearchFilterOptionsUseCase
         self.resolveInitialRegionUseCase = resolveInitialRegionUseCase
         self.getUserLocationUseCase = getUserLocationUseCase
         self.observeLocationPermissionUseCase = observeLocationPermissionUseCase
@@ -133,6 +152,10 @@ final class SearchMapViewModel: BaseViewModel {
         // `.task` re-fires on every tab re-selection — the initial load runs once.
         guard !hasStartedInitialLoad else { return }
         hasStartedInitialLoad = true
+
+        // The filter-sheet bounds are global and static — one background
+        // fetch for the screen's lifetime, off the critical path.
+        fetchFilterOptions()
 
         showLoader()
         defer { hideLoader() }
@@ -344,10 +367,14 @@ final class SearchMapViewModel: BaseViewModel {
             self.activeRefreshCount += 1
             defer { self.activeRefreshCount -= 1 }
 
+            // The probe carries the price filters too — they change how far
+            // the backend widens the radius when matches are sparse.
             let probe = try? await self.searchSalonsUseCase.execute(SearchQuery(
                 centerLat: location.point.latitude,
                 centerLng: location.point.longitude,
                 locationType: location.kind,
+                priceMin: self.appliedPriceMin,
+                priceMax: self.appliedPriceMax,
                 page: 1,
                 limit: 1
             ))
@@ -367,9 +394,46 @@ final class SearchMapViewModel: BaseViewModel {
         }
     }
 
-    // MARK: - Placeholder intents (implemented in later iterations)
+    // MARK: - Filter chips
 
-    func didTapFilterChip(_ chip: FilterChip) {}
+    func didTapFilterChip(_ chip: FilterChip) {
+        switch chip {
+        case .sort, .price:
+            // The one-time bounds fetch may have failed (e.g. offline start) —
+            // retry in the background so the NEXT open gets real bounds; this
+            // open proceeds with the sheet's built-in fallback.
+            if filterOptions == nil {
+                fetchFilterOptions()
+            }
+            // Both chips open the same sheet — it edits sort and price together.
+            transition.didTapSortFilter(SearchSortContext(
+                initialSort: appliedSort,
+                initialPriceMin: appliedPriceMin,
+                initialPriceMax: appliedPriceMax,
+                filterOptions: filterOptions,
+                onApply: { [weak self] submission in
+                    self?.applySortSubmission(submission)
+                }
+            ))
+        case .serviceType:
+            // Placeholder — implemented in a later iteration.
+            break
+        }
+    }
+
+    private func fetchFilterOptions() {
+        Task { [weak self] in
+            guard let self else { return }
+            self.filterOptions = try? await self.getSearchFilterOptionsUseCase.execute()
+        }
+    }
+
+    private func applySortSubmission(_ submission: SearchSortSubmission) {
+        appliedSort = submission.sort
+        appliedPriceMin = submission.priceMin
+        appliedPriceMax = submission.priceMax
+        refreshCurrentViewport()
+    }
 
     // MARK: - Search
 
@@ -380,6 +444,9 @@ final class SearchMapViewModel: BaseViewModel {
             centerLat: (viewport.neLat + viewport.swLat) / 2,
             centerLng: (viewport.neLng + viewport.swLng) / 2,
             viewport: viewport,
+            sortBy: appliedSort,
+            priceMin: appliedPriceMin,
+            priceMax: appliedPriceMax,
             page: 1,
             limit: Self.pageSize
         )
@@ -414,6 +481,9 @@ final class SearchMapViewModel: BaseViewModel {
             centerLat: (viewport.neLat + viewport.swLat) / 2,
             centerLng: (viewport.neLng + viewport.swLng) / 2,
             viewport: viewport,
+            sortBy: appliedSort,
+            priceMin: appliedPriceMin,
+            priceMax: appliedPriceMax,
             page: currentPage + 1,
             limit: Self.pageSize
         )
@@ -510,7 +580,11 @@ final class SearchMapViewModel: BaseViewModel {
     }
 
     private func refreshCurrentViewport() {
-        guard isInitialLoadComplete, let viewport = currentViewport else { return }
+        // `currentViewport` is only set by SUCCESSFUL searches — fall back to
+        // the last attempted one so applying filters right after a failed
+        // load (e.g. backend hiccup) still re-searches instead of silently
+        // doing nothing.
+        guard isInitialLoadComplete, let viewport = currentViewport ?? lastRequestedViewport else { return }
         searchNow(viewport: viewport)
     }
 

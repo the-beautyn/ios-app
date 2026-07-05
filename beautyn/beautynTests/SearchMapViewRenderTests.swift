@@ -46,10 +46,12 @@ final class SearchMapViewRenderTests: XCTestCase {
                 didTapSalonCard: { _ in },
                 didRequireAuth: {},
                 didTapOpenSettings: {},
-                didTapSearchField: { _ in }
+                didTapSearchField: { _ in },
+                didTapSortFilter: { _ in }
             ),
             searchSalonsUseCase: MockSearchSalonsUseCase(),
             searchPinsUseCase: MockSearchPinsUseCase(),
+            getSearchFilterOptionsUseCase: MockGetSearchFilterOptionsUseCase(),
             resolveInitialRegionUseCase: MockResolveInitialRegionUseCase(),
             getUserLocationUseCase: MockGetUserLocationUseCase(),
             observeLocationPermissionUseCase: MockObserveLocationPermissionUseCase(),
@@ -75,6 +77,16 @@ private final class MockSearchPinsUseCase: SearchPinsUseCase {
             guard let latitude = salon.latitude, let longitude = salon.longitude else { return nil }
             return SearchPin(id: salon.id, latitude: latitude, longitude: longitude)
         }
+    }
+}
+
+private final class MockGetSearchFilterOptionsUseCase: GetSearchFilterOptionsUseCase {
+    func execute() async throws -> SearchFilterOptions {
+        SearchFilterOptions(
+            sortOptions: [.distance, .ratingDesc, .priceAsc, .priceDesc, .popular],
+            minPrice: 100,
+            maxPrice: 1_150
+        )
     }
 }
 
@@ -279,6 +291,285 @@ final class SearchMapCameraTests: XCTestCase {
         XCTAssertEqual(SearchMapCamera.fallbackRadiusKm(for: .address), 2)
         XCTAssertEqual(SearchMapCamera.fallbackRadiusKm(for: .poi), 0.5)
         XCTAssertEqual(SearchMapCamera.fallbackRadiusKm(for: .unknown), 3)
+    }
+}
+
+// MARK: - SearchSortViewRenderTests
+//
+// Renders the sort/price filter sheet (Figma 143:8873). The render harness
+// hosts the AppBottomSheet content fullscreen.
+
+@MainActor
+final class SearchSortViewRenderTests: XCTestCase {
+
+    func testRenderSearchSortDefault() async throws {
+        let viewModel = makeViewModel(initialSort: nil, initialPriceMin: nil, initialPriceMax: nil)
+        let view = SearchSortView(viewModel: viewModel)
+        try await ViewRenderer.render(view, name: "search_sort_default")
+    }
+
+    func testRenderSearchSortFilled() async throws {
+        let viewModel = makeViewModel(initialSort: .popular, initialPriceMin: 300, initialPriceMax: 800)
+        let view = SearchSortView(viewModel: viewModel)
+        try await ViewRenderer.render(view, name: "search_sort_filled")
+    }
+
+    private func makeViewModel(
+        initialSort: SearchSortOption?,
+        initialPriceMin: Double?,
+        initialPriceMax: Double?
+    ) -> SearchSortViewModel {
+        SearchSortViewModel(
+            transition: .init(didTapClose: {}),
+            context: SearchSortContext(
+                initialSort: initialSort,
+                initialPriceMin: initialPriceMin,
+                initialPriceMax: initialPriceMax,
+                filterOptions: SearchFilterOptions(
+                    sortOptions: [.distance, .ratingDesc, .priceAsc, .priceDesc, .popular],
+                    minPrice: 100,
+                    maxPrice: 1_150
+                ),
+                onApply: { _ in }
+            )
+        )
+    }
+}
+
+// MARK: - SearchSortViewModelTests
+
+@MainActor
+final class SearchSortViewModelTests: XCTestCase {
+
+    func testApplyAtTrackEdgesOmitsBothPriceFilters() {
+        // 130…1 240 snaps outward to the 100-step: track 100…1 300.
+        let viewModel = makeViewModel(minPrice: 130, maxPrice: 1_240)
+        XCTAssertEqual(viewModel.priceLowerBound, 100)
+        XCTAssertEqual(viewModel.priceUpperBound, 1_300)
+        XCTAssertEqual(viewModel.priceLowerValue, 100)
+        XCTAssertEqual(viewModel.priceUpperValue, 1_300)
+
+        var submitted: SearchSortSubmission?
+        submissionHandler = { submitted = $0 }
+        viewModel.didTapApply()
+        // Applying is immediate — the map refreshes behind the sliding sheet.
+        XCTAssertNotNil(submitted)
+        XCTAssertNil(submitted?.priceMin)
+        XCTAssertNil(submitted?.priceMax)
+        XCTAssertNil(submitted?.sort)
+    }
+
+    func testApplyInsideTrackSendsBothPriceFilters() {
+        let viewModel = makeViewModel(minPrice: 100, maxPrice: 1_200)
+
+        viewModel.priceLowerValue = 300
+        viewModel.priceUpperValue = 800
+        viewModel.didSelectSort(.priceAsc)
+
+        var submitted: SearchSortSubmission?
+        submissionHandler = { submitted = $0 }
+        viewModel.didTapApply()
+        XCTAssertEqual(submitted?.priceMin, 300)
+        XCTAssertEqual(submitted?.priceMax, 800)
+        XCTAssertEqual(submitted?.sort, .priceAsc)
+    }
+
+    func testClearResetsControlsInPlace() {
+        let viewModel = makeViewModel(
+            minPrice: 100, maxPrice: 1_200,
+            initialSort: .popular, initialPriceMin: 300, initialPriceMax: 800
+        )
+
+        XCTAssertEqual(viewModel.selectedSort, .popular)
+        XCTAssertEqual(viewModel.priceLowerValue, 300)
+        XCTAssertEqual(viewModel.priceUpperValue, 800)
+
+        viewModel.didTapClear()
+        XCTAssertNil(viewModel.selectedSort)
+        XCTAssertEqual(viewModel.priceLowerValue, viewModel.priceLowerBound)
+        XCTAssertEqual(viewModel.priceUpperValue, viewModel.priceUpperBound)
+    }
+
+    func testAppliedRangeOutsideTrackIsClamped() {
+        // Applied 50…2 800 earlier, but the global track is 100…1 000.
+        let viewModel = makeViewModel(minPrice: 100, maxPrice: 1_000, initialPriceMin: 50, initialPriceMax: 2_800)
+
+        XCTAssertEqual(viewModel.priceLowerValue, 100)
+        XCTAssertEqual(viewModel.priceUpperValue, 1_000)
+    }
+
+    func testCollapsedAppliedRangeKeepsKnobSeparation() {
+        // A range applied against the wide fallback track (2 500…2 800) gets
+        // pinned to the edge of the real, narrower track — the knobs must
+        // still open one step apart, never collapsed.
+        let viewModel = makeViewModel(minPrice: 100, maxPrice: 1_200, initialPriceMin: 2_500, initialPriceMax: 2_800)
+
+        XCTAssertEqual(viewModel.priceUpperValue, 1_200)
+        XCTAssertEqual(viewModel.priceLowerValue, 1_100)
+    }
+
+    func testMissingOptionsFallBackToDefaults() {
+        let viewModel = makeViewModel(filterOptions: nil)
+
+        XCTAssertEqual(viewModel.priceLowerBound, SearchSortViewModel.fallbackLowerBound)
+        XCTAssertEqual(viewModel.priceUpperBound, SearchSortViewModel.fallbackUpperBound)
+        XCTAssertEqual(viewModel.sortOptions, [.ratingDesc, .popular, .distance, .priceAsc])
+    }
+
+    func testSortRowsNarrowToServerOptions() {
+        let viewModel = makeViewModel(filterOptions: SearchFilterOptions(
+            sortOptions: [.distance, .ratingDesc],
+            minPrice: 100,
+            maxPrice: 500
+        ))
+
+        XCTAssertEqual(viewModel.sortOptions, [.ratingDesc, .distance])
+    }
+
+    // MARK: - Helpers
+
+    private var submissionHandler: (SearchSortSubmission) -> Void = { _ in }
+    /// Deallocating a @MainActor VM (Combine publishers) inside a sync test
+    /// crashes the runner on Xcode 26 — keep them alive until suite teardown.
+    private var retainedViewModels: [SearchSortViewModel] = []
+
+    private func makeViewModel(
+        minPrice: Double?,
+        maxPrice: Double?,
+        initialSort: SearchSortOption? = nil,
+        initialPriceMin: Double? = nil,
+        initialPriceMax: Double? = nil
+    ) -> SearchSortViewModel {
+        makeViewModel(
+            filterOptions: SearchFilterOptions(
+                sortOptions: [.distance, .ratingDesc, .priceAsc, .priceDesc, .popular],
+                minPrice: minPrice,
+                maxPrice: maxPrice
+            ),
+            initialSort: initialSort,
+            initialPriceMin: initialPriceMin,
+            initialPriceMax: initialPriceMax
+        )
+    }
+
+    private func makeViewModel(
+        filterOptions: SearchFilterOptions?,
+        initialSort: SearchSortOption? = nil,
+        initialPriceMin: Double? = nil,
+        initialPriceMax: Double? = nil
+    ) -> SearchSortViewModel {
+        let viewModel = SearchSortViewModel(
+            transition: .init(didTapClose: {}),
+            context: SearchSortContext(
+                initialSort: initialSort,
+                initialPriceMin: initialPriceMin,
+                initialPriceMax: initialPriceMax,
+                filterOptions: filterOptions,
+                onApply: { [weak self] in self?.submissionHandler($0) }
+            )
+        )
+        retainedViewModels.append(viewModel)
+        return viewModel
+    }
+}
+
+// MARK: - SearchMapSortApplyTests
+//
+// Regression: applying a sort/price submission must fire a re-search
+// immediately — even when the initial load failed and `currentViewport`
+// was never set (the map then re-uses the last ATTEMPTED viewport).
+
+@MainActor
+final class SearchMapSortApplyTests: XCTestCase {
+
+    private var retainedViewModels: [SearchMapViewModel] = []
+
+    func testApplyingSortSubmissionRefreshesImmediately() async throws {
+        let salonsUseCase = CountingSearchSalonsUseCase()
+        let viewModel = makeViewModel(salonsUseCase: salonsUseCase)
+
+        await viewModel.onViewTask()
+        let callsAfterInitialLoad = salonsUseCase.calls.count
+
+        viewModel.didTapFilterChip(.sort)
+        let context = try XCTUnwrap(capturedContext)
+        context.onApply(SearchSortSubmission(sort: .priceAsc, priceMin: 300, priceMax: 800))
+
+        await waitForCalls(beyond: callsAfterInitialLoad, in: salonsUseCase)
+
+        XCTAssertGreaterThan(salonsUseCase.calls.count, callsAfterInitialLoad)
+        let lastQuery = try XCTUnwrap(salonsUseCase.calls.last)
+        XCTAssertEqual(lastQuery.sortBy, .priceAsc)
+        XCTAssertEqual(lastQuery.priceMin, 300)
+        XCTAssertEqual(lastQuery.priceMax, 800)
+    }
+
+    func testApplyRefreshesEvenAfterFailedInitialLoad() async throws {
+        let salonsUseCase = CountingSearchSalonsUseCase()
+        salonsUseCase.shouldFail = true
+        let viewModel = makeViewModel(salonsUseCase: salonsUseCase)
+
+        await viewModel.onViewTask() // initial search fails — currentViewport stays nil
+        salonsUseCase.shouldFail = false
+        let callsAfterInitialLoad = salonsUseCase.calls.count
+
+        viewModel.didTapFilterChip(.price)
+        let context = try XCTUnwrap(capturedContext)
+        context.onApply(SearchSortSubmission(sort: nil, priceMin: nil, priceMax: 500))
+
+        await waitForCalls(beyond: callsAfterInitialLoad, in: salonsUseCase)
+        XCTAssertGreaterThan(salonsUseCase.calls.count, callsAfterInitialLoad)
+        XCTAssertEqual(salonsUseCase.calls.last?.priceMax, 500)
+    }
+
+    // MARK: - Helpers
+
+    private var capturedContext: SearchSortContext?
+
+    /// `searchNow` hops through a Task — poll (bounded) instead of a fixed
+    /// sleep so the tests don't flake on loaded CI machines.
+    private func waitForCalls(beyond count: Int, in useCase: CountingSearchSalonsUseCase) async {
+        for _ in 0..<100 {
+            if useCase.calls.count > count { return }
+            try? await Task.sleep(for: .milliseconds(20))
+        }
+    }
+
+    private func makeViewModel(salonsUseCase: CountingSearchSalonsUseCase) -> SearchMapViewModel {
+        let viewModel = SearchMapViewModel(
+            transition: .init(
+                didTapSalonCard: { _ in },
+                didRequireAuth: {},
+                didTapOpenSettings: {},
+                didTapSearchField: { _ in },
+                didTapSortFilter: { [weak self] in self?.capturedContext = $0 }
+            ),
+            searchSalonsUseCase: salonsUseCase,
+            searchPinsUseCase: MockSearchPinsUseCase(),
+            getSearchFilterOptionsUseCase: MockGetSearchFilterOptionsUseCase(),
+            resolveInitialRegionUseCase: MockResolveInitialRegionUseCase(),
+            getUserLocationUseCase: MockGetUserLocationUseCase(),
+            observeLocationPermissionUseCase: MockObserveLocationPermissionUseCase(),
+            saveSalonUseCase: MockSaveSalonUseCase(),
+            unsaveSalonUseCase: MockUnsaveSalonUseCase(),
+            savedSalonsEventBus: MockSavedSalonsEventBus(),
+            sessionManager: SessionManager(keychainService: KeychainServiceImpl(), defaultsService: DefaultsStorageService())
+        )
+        retainedViewModels.append(viewModel)
+        return viewModel
+    }
+}
+
+private final class CountingSearchSalonsUseCase: SearchSalonsUseCase {
+    private(set) var calls: [SearchQuery] = []
+    var shouldFail = false
+
+    func execute(_ query: SearchQuery) async throws -> SearchResults {
+        calls.append(query)
+        if shouldFail {
+            throw URLError(.notConnectedToInternet)
+        }
+        return SearchResults(items: .searchPreview, page: 1, limit: 20, total: 3)
     }
 }
 

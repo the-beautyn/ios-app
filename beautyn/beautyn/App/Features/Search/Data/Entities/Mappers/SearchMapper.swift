@@ -13,8 +13,20 @@ enum SearchMapper {
                 SearchViewportDTO(neLat: $0.neLat, neLng: $0.neLng, swLat: $0.swLat, swLng: $0.swLng)
             },
             locationType: query.locationType?.rawValue,
+            sortBy: query.sortBy?.rawValue,
+            priceMin: query.priceMin,
+            priceMax: query.priceMax,
             page: query.page,
             limit: query.limit
+        )
+    }
+
+    static func map(_ dto: FilterOptionsResponseDTO) -> SearchFilterOptions {
+        SearchFilterOptions(
+            // Unknown server keys (future sorts) are dropped rather than crashing.
+            sortOptions: dto.sortOptions.compactMap(SearchSortOption.init(rawValue:)),
+            minPrice: dto.minPrice,
+            maxPrice: dto.maxPrice
         )
     }
 

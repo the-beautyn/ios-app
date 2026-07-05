@@ -6,6 +6,7 @@ protocol SearchFactory: ResolverInjector {
     var searchRepository: any SearchRepository { get }
     var searchSalonsUseCase: any SearchSalonsUseCase { get }
     var searchPinsUseCase: any SearchPinsUseCase { get }
+    var getSearchFilterOptionsUseCase: any GetSearchFilterOptionsUseCase { get }
     var getSearchHistoryUseCase: any GetSearchHistoryUseCase { get }
     var clearSearchHistoryUseCase: any ClearSearchHistoryUseCase { get }
     var deleteSearchHistoryItemUseCase: any DeleteSearchHistoryItemUseCase { get }
@@ -24,6 +25,9 @@ extension SearchFactory {
     var searchRepository: any SearchRepository { resolver.require((any SearchRepository).self) }
     var searchSalonsUseCase: any SearchSalonsUseCase { resolver.require((any SearchSalonsUseCase).self) }
     var searchPinsUseCase: any SearchPinsUseCase { resolver.require((any SearchPinsUseCase).self) }
+    var getSearchFilterOptionsUseCase: any GetSearchFilterOptionsUseCase {
+        resolver.require((any GetSearchFilterOptionsUseCase).self)
+    }
     var getSearchHistoryUseCase: any GetSearchHistoryUseCase {
         resolver.require((any GetSearchHistoryUseCase).self)
     }

@@ -7,6 +7,7 @@ import Alamofire
 enum SearchTarget {
     case search(SearchRequestDTO)
     case pins(SearchRequestDTO)
+    case filterOptions
     case history(limit: Int)
     case clearHistory
     case deleteHistoryItem(id: String)
@@ -26,6 +27,8 @@ extension SearchTarget: TargetType {
             return "/search"
         case .pins:
             return "/search/pins"
+        case .filterOptions:
+            return "/search/filter-options"
         case .history, .clearHistory:
             return "/search/history"
         case .deleteHistoryItem(let id):
@@ -37,7 +40,7 @@ extension SearchTarget: TargetType {
         switch self {
         case .search, .pins:
             return .post
-        case .history:
+        case .history, .filterOptions:
             return .get
         case .clearHistory, .deleteHistoryItem:
             return .delete
@@ -50,7 +53,7 @@ extension SearchTarget: TargetType {
             return .requestJSONEncodable(dto)
         case .history(let limit):
             return .requestParameters(parameters: ["limit": limit], encoding: URLEncoding.default)
-        case .clearHistory, .deleteHistoryItem:
+        case .filterOptions, .clearHistory, .deleteHistoryItem:
             return .requestPlain
         }
     }
