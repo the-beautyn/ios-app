@@ -59,6 +59,9 @@ final class SalonProfileViewModel: BaseViewModel {
     // MARK: - Dependencies
 
     private let salonId: String
+    /// Opened from the search flow — the salon fetch records a search-history
+    /// visit for the authenticated user.
+    private let isFromSearch: Bool
     private let transition: Transition
     private let getSalonByIdUseCase: any GetSalonByIdUseCase
     private let getSalonShareUseCase: any GetSalonShareUseCase
@@ -76,6 +79,7 @@ final class SalonProfileViewModel: BaseViewModel {
 
     init(
         salonId: String,
+        isFromSearch: Bool = false,
         transition: Transition,
         getSalonByIdUseCase: any GetSalonByIdUseCase,
         getSalonShareUseCase: any GetSalonShareUseCase,
@@ -89,6 +93,7 @@ final class SalonProfileViewModel: BaseViewModel {
         confirmEasyweekBookingUseCase: any ConfirmEasyweekBookingUseCase
     ) {
         self.salonId = salonId
+        self.isFromSearch = isFromSearch
         self.transition = transition
         self.getSalonByIdUseCase = getSalonByIdUseCase
         self.getSalonShareUseCase = getSalonShareUseCase
@@ -380,7 +385,7 @@ final class SalonProfileViewModel: BaseViewModel {
     private func loadSalon() async {
         showLoader()
         do {
-            let result = try await getSalonByIdUseCase.execute(id: salonId)
+            let result = try await getSalonByIdUseCase.execute(id: salonId, isFromSearch: isFromSearch)
             salon = result
             isFavorited = result.isSaved
             hideLoader()

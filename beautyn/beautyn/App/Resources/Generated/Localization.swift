@@ -61,6 +61,7 @@ public enum Localization {
   }
   public static let checkEmailSentTitle = Localization.tr("Localizable", "check_email_sent_title", fallback: "Перевірте вашу пошту")
   public static let commonCancel = Localization.tr("Localizable", "common_cancel", fallback: "Скасувати")
+  public static let commonDelete = Localization.tr("Localizable", "common_delete", fallback: "Видалити")
   public static let commonDone = Localization.tr("Localizable", "common_done", fallback: "Готово")
   public static let commonNotSpecified = Localization.tr("Localizable", "common_not_specified", fallback: "Не вказано")
   public static let commonToday = Localization.tr("Localizable", "common_today", fallback: "Сьогодні")
@@ -213,13 +214,17 @@ public enum Localization {
   public static let savedSalonsEmpty = Localization.tr("Localizable", "saved_salons_empty", fallback: "Ви ще не додали жоден салон")
   public static let savedSalonsSearchPlaceholder = Localization.tr("Localizable", "saved_salons_search_placeholder", fallback: "Уведить назву салону")
   public static let savedSalonsTitle = Localization.tr("Localizable", "saved_salons_title", fallback: "Обрані салони")
+  public static let searchClearHistory = Localization.tr("Localizable", "search_clear_history", fallback: "Очистити")
+  public static let searchDatePlaceholder = Localization.tr("Localizable", "search_date_placeholder", fallback: "Дата")
   public static let searchFilterPrice = Localization.tr("Localizable", "search_filter_price", fallback: "Ціна")
   public static let searchFilterServiceType = Localization.tr("Localizable", "search_filter_service_type", fallback: "Тип послуги")
   public static let searchFilterSort = Localization.tr("Localizable", "search_filter_sort", fallback: "Сортувати")
-  public static let searchHint = Localization.tr("Localizable", "search_hint", fallback: "Уведить назву салону або майстра")
+  public static let searchHint = Localization.tr("Localizable", "search_hint", fallback: "Уведить назву салону")
+  public static let searchPreviousSection = Localization.tr("Localizable", "search_previous_section", fallback: "Попередній пошук")
   public static func searchResultsCount(_ p1: Int) -> String {
     return Localization.tr("Localizable", "search_results_count", p1, fallback: "Знайдено: %d місць")
   }
+  public static let searchSalonsSection = Localization.tr("Localizable", "search_salons_section", fallback: "Салони")
   public static let selectButton = Localization.tr("Localizable", "select_button", fallback: "Обрати")
   public static let selectServiceOtherCategory = Localization.tr("Localizable", "select_service_other_category", fallback: "Інше")
   public static let selectServiceTitle = Localization.tr("Localizable", "select_service_title", fallback: "Оберіть послугу")

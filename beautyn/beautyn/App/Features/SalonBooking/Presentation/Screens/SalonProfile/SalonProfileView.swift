@@ -191,7 +191,7 @@ struct SalonProfileView: BaseViewProtocol {
 private final class PreviewGetSalonByIdUseCase: GetSalonByIdUseCase {
     let salon: Salon
     init(salon: Salon) { self.salon = salon }
-    func execute(id: String) async throws -> Salon { salon }
+    func execute(id: String, isFromSearch: Bool) async throws -> Salon { salon }
 }
 
 private final class PreviewGetSalonShareUseCase: GetSalonShareUseCase {

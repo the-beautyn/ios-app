@@ -4,5 +4,7 @@ import UIKit
 
 @MainActor
 protocol SearchControllerFactory {
-    func makeSearch(transition: SearchViewModel.Transition) -> UIViewController
+    func makeSearchMap(transition: SearchMapViewModel.Transition) -> UIViewController
+    func makeSearch(context: SearchInputContext, transition: SearchViewModel.Transition) -> UIViewController
+    func makeSearchLocation(transition: SearchLocationViewModel.Transition) -> UIViewController
 }

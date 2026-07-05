@@ -3,15 +3,13 @@ import SwiftUI
 // MARK: - SearchHeaderView
 //
 // Matches Figma "Header" on the Search screen — white bar extending under the
-// status bar, with the search-field pill and a round locate button. Both taps
-// are forwarded to the view model (placeholders for now).
+// status bar, with the search-field pill (opens the search sheet) and the
+// locate button (centers the map on the user).
 
 struct SearchHeaderView: View {
 
-    /// Content height below the safe area: top padding (4) + field (44) + bottom padding (16).
-    /// Keep in sync with the paddings in `body` — used to place map controls under the header.
-    static let contentHeight: CGFloat = 64
-
+    /// The applied text filter — shown instead of the placeholder when set.
+    var query: String?
     var onSearchTap: () -> Void
     var onLocationTap: () -> Void
 
@@ -39,9 +37,10 @@ struct SearchHeaderView: View {
                     .font(.system(size: 14))
                     .foregroundStyle(Color.App.gray)
 
-                Text(Localization.searchHint)
+                Text(query?.isEmpty == false ? query! : Localization.searchHint)
                     .font(.App.footnote)
-                    .foregroundStyle(Color.App.gray)
+                    .foregroundStyle(query?.isEmpty == false ? Color.App.text : Color.App.gray)
+                    .lineLimit(1)
 
                 Spacer()
             }

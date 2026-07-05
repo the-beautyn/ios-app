@@ -18,4 +18,16 @@ protocol SearchLocationService {
     /// Forward-geocodes a free-form address / city / country name —
     /// `nil` when nothing matches or the lookup fails.
     func geocode(_ address: String) async -> GeoPoint?
+
+    /// Autocomplete for a free-form place query (addresses, cities, POIs) —
+    /// text-only rows; empty when nothing matches or the lookup fails.
+    func locationCompletions(for query: String) async -> [SearchLocationCompletion]
+
+    /// Geocodes a previously returned completion into an actual place —
+    /// `nil` when the completion is stale or the lookup fails.
+    func resolveLocation(_ completion: SearchLocationCompletion) async -> SearchLocation?
+
+    /// Human-readable name for a coordinate (city with context) — `nil`
+    /// when reverse geocoding fails.
+    func reverseGeocodeName(_ point: GeoPoint) async -> String?
 }

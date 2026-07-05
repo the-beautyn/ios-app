@@ -21,6 +21,9 @@ struct SearchResults: Equatable {
     let page: Int
     let limit: Int
     let total: Int
+    /// The radius the backend actually searched in center mode (after its
+    /// expand-when-sparse loop) — absent for viewport/global searches.
+    var effectiveRadiusKm: Double? = nil
 }
 
 // MARK: - SearchPin
@@ -66,6 +69,9 @@ struct SearchQuery {
     var centerLat: Double?
     var centerLng: Double?
     var viewport: SearchViewport?
+    /// What kind of place the center is — the backend picks its base search
+    /// radius from it (city 7 km, address 2 km, …) in center mode.
+    var locationType: SearchLocationKind?
     var page: Int = 1
     var limit: Int = 20
 }

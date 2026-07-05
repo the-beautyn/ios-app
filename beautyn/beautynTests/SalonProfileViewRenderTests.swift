@@ -76,7 +76,7 @@ final class SalonProfileViewRenderTests: XCTestCase {
 private final class MockGetSalonByIdUseCase: GetSalonByIdUseCase {
     let salon: Salon
     init(salon: Salon) { self.salon = salon }
-    func execute(id: String) async throws -> Salon { salon }
+    func execute(id: String, isFromSearch: Bool) async throws -> Salon { salon }
 }
 
 private final class MockSalonProfileServicesUseCase: GetAltegioAvailableServicesUseCase {

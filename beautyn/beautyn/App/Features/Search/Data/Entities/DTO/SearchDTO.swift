@@ -11,6 +11,7 @@ struct SearchRequestDTO: Encodable {
     var centerLat: Double?
     var centerLng: Double?
     var viewport: SearchViewportDTO?
+    var locationType: String?
     var page: Int = 1
     var limit: Int = 20
 }
@@ -80,3 +81,28 @@ struct SearchMetaDTO: Decodable {
         case geoSource = "geo_source"
     }
 }
+
+// MARK: - SearchHistoryItemDTO
+//
+// Item of GET /search/history — `id` is the history row id (used for
+// per-item deletion), `salon_id` the salon it points to.
+
+struct SearchHistoryItemDTO: Decodable {
+    let id: String
+    let salonId: String
+    let salonName: String
+    let city: String
+    let logoUrl: String?
+    let latitude: Double?
+    let longitude: Double?
+    let lastSearchedAt: String?
+
+    enum CodingKeys: String, CodingKey {
+        case id, city, latitude, longitude
+        case salonId = "salon_id"
+        case salonName = "salon_name"
+        case logoUrl = "logo_url"
+        case lastSearchedAt = "last_searched_at"
+    }
+}
+

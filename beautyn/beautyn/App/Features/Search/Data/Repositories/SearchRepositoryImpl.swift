@@ -21,4 +21,19 @@ final class SearchRepositoryImpl: SearchRepository {
         let response: SearchPinsResponseDTO = try await networkService.request(target)
         return SearchMapper.map(response)
     }
+
+    func history(limit: Int) async throws -> [SearchHistoryItem] {
+        let target = Target(type: SearchTarget.history(limit: limit))
+        let response: [SearchHistoryItemDTO] = try await networkService.request(target)
+        return response.map { SearchMapper.map($0) }
+    }
+
+    func clearHistory() async throws {
+        try await networkService.request(Target(type: SearchTarget.clearHistory))
+    }
+
+    func deleteHistoryItem(id: String) async throws {
+        try await networkService.request(Target(type: SearchTarget.deleteHistoryItem(id: id)))
+    }
+
 }

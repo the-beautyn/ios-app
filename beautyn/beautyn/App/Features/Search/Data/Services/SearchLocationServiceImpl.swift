@@ -13,9 +13,19 @@ import Combine
 final class SearchLocationServiceImpl: SearchLocationService {
 
     private static let locationTimeout: Duration = .seconds(5)
+    private static let completionsTimeout: Duration = .seconds(2)
 
     private let locationManager = CLLocationManager()
     private let locationDelegate = LocationDelegate()
+    private let completer = MKLocalSearchCompleter()
+    private let completerDelegate = CompleterDelegate()
+
+    private var pendingCompletionsContinuation: CheckedContinuation<[MKLocalSearchCompletion], Never>?
+    /// The batch behind the last `locationCompletions(for:)` answer —
+    /// `resolveLocation` maps a completion's index back into it, and only
+    /// when the completion's `batchId` still matches this batch.
+    private var lastCompletions: [MKLocalSearchCompletion] = []
+    private var lastBatchId = UUID()
 
     private var pendingAuthorizationContinuation: CheckedContinuation<CLAuthorizationStatus, Never>?
     private var pendingLocationContinuation: CheckedContinuation<CLLocation, Error>?
@@ -59,6 +69,13 @@ final class SearchLocationServiceImpl: SearchLocationService {
             self?.pendingLocationContinuation?.resume(throwing: error)
             self?.pendingLocationContinuation = nil
         }
+
+        completer.delegate = completerDelegate
+        completer.resultTypes = [.address, .pointOfInterest]
+        completerDelegate.onUpdate = { [weak self] results in
+            self?.pendingCompletionsContinuation?.resume(returning: results)
+            self?.pendingCompletionsContinuation = nil
+        }
     }
 
     // MARK: - SearchLocationService
@@ -86,6 +103,89 @@ final class SearchLocationServiceImpl: SearchLocationService {
             latitude: item.location.coordinate.latitude,
             longitude: item.location.coordinate.longitude
         )
+    }
+
+    func locationCompletions(for query: String) async -> [SearchLocationCompletion] {
+        // A newer query supersedes a still-pending one — answer it with what
+        // the completer knows now so its continuation never leaks.
+        pendingCompletionsContinuation?.resume(returning: completer.results)
+        pendingCompletionsContinuation = nil
+
+        guard !query.isEmpty else {
+            lastCompletions = []
+            lastBatchId = UUID()
+            return []
+        }
+
+        let completions = await withCheckedContinuation { continuation in
+            pendingCompletionsContinuation = continuation
+            completer.queryFragment = query
+
+            // The completer stays silent when the fragment doesn't change its
+            // results — fall back to whatever it currently holds.
+            Task { [weak self] in
+                try? await Task.sleep(for: Self.completionsTimeout)
+                guard let self, self.pendingCompletionsContinuation != nil else { return }
+                self.pendingCompletionsContinuation?.resume(returning: self.completer.results)
+                self.pendingCompletionsContinuation = nil
+            }
+        }
+
+        lastCompletions = completions
+        lastBatchId = UUID()
+        return completions.enumerated().map { index, completion in
+            SearchLocationCompletion(
+                id: index,
+                title: completion.title,
+                subtitle: completion.subtitle.isEmpty ? nil : completion.subtitle,
+                batchId: lastBatchId
+            )
+        }
+    }
+
+    func resolveLocation(_ completion: SearchLocationCompletion) async -> SearchLocation? {
+        guard completion.batchId == lastBatchId,
+              lastCompletions.indices.contains(completion.id) else { return nil }
+        let request = MKLocalSearch.Request(completion: lastCompletions[completion.id])
+        guard let response = try? await MKLocalSearch(request: request).start(),
+              let item = response.mapItems.first else { return nil }
+        return SearchLocation(
+            point: GeoPoint(
+                latitude: item.location.coordinate.latitude,
+                longitude: item.location.coordinate.longitude
+            ),
+            name: completion.title,
+            subtitle: completion.subtitle,
+            kind: Self.classify(item)
+        )
+    }
+
+    /// What kind of place this is — drives the backend's search radius and
+    /// the map zoom. `pointOfInterestCategory` is the only structured signal
+    /// the modern MapKit API offers; city vs street address is inferred by
+    /// comparing the most specific address line against the city name (there
+    /// is no non-deprecated street/thoroughfare accessor).
+    private static func classify(_ item: MKMapItem) -> SearchLocationKind {
+        if item.pointOfInterestCategory != nil { return .poi }
+
+        guard let city = item.addressRepresentations?.cityName, !city.isEmpty else {
+            return .unknown
+        }
+        let specificLine = item.address?.shortAddress
+            ?? item.addressRepresentations?
+                .fullAddress(includingRegion: false, singleLine: false)?
+                .components(separatedBy: "\n").first
+        guard let specificLine, !specificLine.isEmpty else { return .unknown }
+
+        return specificLine == city ? .city : .address
+    }
+
+    func reverseGeocodeName(_ point: GeoPoint) async -> String? {
+        let location = CLLocation(latitude: point.latitude, longitude: point.longitude)
+        guard let request = MKReverseGeocodingRequest(location: location),
+              let item = try? await request.mapItems.first else { return nil }
+        let city = item.addressRepresentations?.cityWithContext
+        return city?.isEmpty == false ? city : item.name
     }
 
     // MARK: - Helpers
@@ -125,6 +225,20 @@ final class SearchLocationServiceImpl: SearchLocationService {
 
     private static func isDenied(_ status: CLAuthorizationStatus) -> Bool {
         status == .denied || status == .restricted
+    }
+}
+
+// MARK: - CompleterDelegate
+
+private final class CompleterDelegate: NSObject, MKLocalSearchCompleterDelegate {
+    var onUpdate: (([MKLocalSearchCompletion]) -> Void)?
+
+    func completerDidUpdateResults(_ completer: MKLocalSearchCompleter) {
+        onUpdate?(completer.results)
+    }
+
+    func completer(_ completer: MKLocalSearchCompleter, didFailWithError error: Error) {
+        onUpdate?([])
     }
 }
 

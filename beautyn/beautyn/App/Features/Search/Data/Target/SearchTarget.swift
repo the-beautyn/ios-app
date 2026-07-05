@@ -7,6 +7,9 @@ import Alamofire
 enum SearchTarget {
     case search(SearchRequestDTO)
     case pins(SearchRequestDTO)
+    case history(limit: Int)
+    case clearHistory
+    case deleteHistoryItem(id: String)
 }
 
 // MARK: - TargetType
@@ -23,6 +26,10 @@ extension SearchTarget: TargetType {
             return "/search"
         case .pins:
             return "/search/pins"
+        case .history, .clearHistory:
+            return "/search/history"
+        case .deleteHistoryItem(let id):
+            return "/search/history/\(id)"
         }
     }
 
@@ -30,6 +37,10 @@ extension SearchTarget: TargetType {
         switch self {
         case .search, .pins:
             return .post
+        case .history:
+            return .get
+        case .clearHistory, .deleteHistoryItem:
+            return .delete
         }
     }
 
@@ -37,6 +48,10 @@ extension SearchTarget: TargetType {
         switch self {
         case .search(let dto), .pins(let dto):
             return .requestJSONEncodable(dto)
+        case .history(let limit):
+            return .requestParameters(parameters: ["limit": limit], encoding: URLEncoding.default)
+        case .clearHistory, .deleteHistoryItem:
+            return .requestPlain
         }
     }
 
@@ -49,8 +64,9 @@ extension SearchTarget: TargetType {
 
 extension SearchTarget: AccessTokenAuthorizable {
 
-    // The endpoint is public; the token is attached only when one exists,
-    // which unlocks the per-salon `is_saved` flag in the response.
+    // Search + suggestions are public — the token is attached only when one
+    // exists (unlocking `is_saved` / personalized suggestions). The history
+    // endpoints require auth; the VM only calls them when a session exists.
     var authorizationType: AuthorizationType? {
         .bearer
     }

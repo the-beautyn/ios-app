@@ -10,8 +10,12 @@ final class SalonRepositoryImpl: SalonRepository {
         self.networkService = networkService
     }
 
-    func getSalon(id: String) async throws -> Salon {
-        let target = Target(type: SalonsTarget.getSalonById(id: id, include: SalonInclude.all))
+    func getSalon(id: String, isFromSearch: Bool) async throws -> Salon {
+        let target = Target(type: SalonsTarget.getSalonById(
+            id: id,
+            include: SalonInclude.all,
+            isFromSearch: isFromSearch
+        ))
         let response: SalonResponseDTO = try await networkService.request(target)
         return SalonMapper.map(response)
     }

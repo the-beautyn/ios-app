@@ -256,7 +256,7 @@ private final class PreviewObserveBookingUseCase: ObserveBookingUseCase {
 }
 
 private final class PreviewGetSalonByIdUseCase: GetSalonByIdUseCase {
-    func execute(id: String) async throws -> Salon {
+    func execute(id: String, isFromSearch: Bool) async throws -> Salon {
         throw CancellationError()   // favorite state stays default in previews
     }
 }

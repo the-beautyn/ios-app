@@ -12,6 +12,7 @@ enum SearchMapper {
             viewport: query.viewport.map {
                 SearchViewportDTO(neLat: $0.neLat, neLng: $0.neLng, swLat: $0.swLat, swLng: $0.swLng)
             },
+            locationType: query.locationType?.rawValue,
             page: query.page,
             limit: query.limit
         )
@@ -22,7 +23,8 @@ enum SearchMapper {
             items: dto.items.map { map($0) },
             page: dto.page,
             limit: dto.limit,
-            total: dto.total
+            total: dto.total,
+            effectiveRadiusKm: dto.meta?.effectiveRadiusKm
         )
     }
 
@@ -30,6 +32,22 @@ enum SearchMapper {
         dto.items.map {
             SearchPin(id: $0.salonId, latitude: $0.latitude, longitude: $0.longitude)
         }
+    }
+
+    static func map(_ dto: SearchHistoryItemDTO) -> SearchHistoryItem {
+        SearchHistoryItem(
+            id: dto.id,
+            salonId: dto.salonId,
+            name: dto.salonName,
+            city: dto.city,
+            imageUrl: dto.logoUrl,
+            point: makePoint(latitude: dto.latitude, longitude: dto.longitude)
+        )
+    }
+
+    private static func makePoint(latitude: Double?, longitude: Double?) -> GeoPoint? {
+        guard let latitude, let longitude else { return nil }
+        return GeoPoint(latitude: latitude, longitude: longitude)
     }
 
     private static func map(_ dto: SearchSalonItemDTO) -> SearchSalon {

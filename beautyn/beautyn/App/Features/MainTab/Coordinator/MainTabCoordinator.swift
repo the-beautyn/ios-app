@@ -63,7 +63,11 @@ final class MainTabCoordinator: BaseCoordinator {
             self?.onRequireAuth?()
         }
         homeCoordinator.onNavigateToSearchTab = { [weak self] in
-            self?.selectSearchTab()
+            guard let self else { return }
+            // The user tapped a search FIELD — land on the map tab with the
+            // text-search sheet already open, ready to type.
+            self.selectSearchTab()
+            self.searchCoordinator?.openSearchSheet()
         }
         addChild(homeCoordinator)
         homeCoordinator.start()
@@ -124,6 +128,9 @@ final class MainTabCoordinator: BaseCoordinator {
         guard let searchNav else { return }
         // Same tab-bar-visibility safety as `selectHomeTab()`.
         profileNav?.popToRootViewController(animated: false)
+        // Land on the map screen even when the tab was left with a salon
+        // profile (or deeper) pushed.
+        searchNav.popToRootViewController(animated: false)
         tabBarController.selectedViewController = searchNav
     }
 

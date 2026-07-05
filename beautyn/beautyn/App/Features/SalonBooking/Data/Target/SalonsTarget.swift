@@ -16,7 +16,7 @@ enum SalonInclude: String, CaseIterable {
 // MARK: - SalonsTarget
 
 enum SalonsTarget {
-    case getSalonById(id: String, include: Set<SalonInclude>)
+    case getSalonById(id: String, include: Set<SalonInclude>, isFromSearch: Bool)
     case getShare(id: String)
 }
 
@@ -30,7 +30,7 @@ extension SalonsTarget: TargetType {
 
     var path: String {
         switch self {
-        case .getSalonById(let id, _):
+        case .getSalonById(let id, _, _):
             return "/salons/\(id)"
         case .getShare(let id):
             return "/salons/\(id)/share"
@@ -46,10 +46,18 @@ extension SalonsTarget: TargetType {
 
     var task: Moya.Task {
         switch self {
-        case .getSalonById(_, let include):
-            guard !include.isEmpty else { return .requestPlain }
-            let value = include.map(\.rawValue).sorted().joined(separator: ",")
-            return .requestParameters(parameters: ["include": value], encoding: URLEncoding.default)
+        case .getSalonById(_, let include, let isFromSearch):
+            var parameters: [String: Any] = [:]
+            if !include.isEmpty {
+                parameters["include"] = include.map(\.rawValue).sorted().joined(separator: ",")
+            }
+            // Records a search-history visit server-side when a token is
+            // attached; the backend ignores it for anonymous requests.
+            if isFromSearch {
+                parameters["isFromSearch"] = "true"
+            }
+            guard !parameters.isEmpty else { return .requestPlain }
+            return .requestParameters(parameters: parameters, encoding: URLEncoding.default)
         case .getShare:
             return .requestPlain
         }

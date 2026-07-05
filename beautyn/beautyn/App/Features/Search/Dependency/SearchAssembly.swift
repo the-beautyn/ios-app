@@ -29,6 +29,24 @@ final class SearchAssembly: Assembly {
             )
         }
 
+        container.register((any GetLocationCompletionsUseCase).self) { resolver in
+            GetLocationCompletionsUseCaseImpl(
+                locationService: resolver.require((any SearchLocationService).self)
+            )
+        }
+
+        container.register((any ResolveLocationCompletionUseCase).self) { resolver in
+            ResolveLocationCompletionUseCaseImpl(
+                locationService: resolver.require((any SearchLocationService).self)
+            )
+        }
+
+        container.register((any ReverseGeocodeNameUseCase).self) { resolver in
+            ReverseGeocodeNameUseCaseImpl(
+                locationService: resolver.require((any SearchLocationService).self)
+            )
+        }
+
         container.register((any SearchRepository).self) { resolver in
             SearchRepositoryImpl(
                 networkService: resolver.require((any NetworkService).self)
@@ -43,6 +61,24 @@ final class SearchAssembly: Assembly {
 
         container.register((any SearchPinsUseCase).self) { resolver in
             SearchPinsUseCaseImpl(
+                repository: resolver.require((any SearchRepository).self)
+            )
+        }
+
+        container.register((any GetSearchHistoryUseCase).self) { resolver in
+            GetSearchHistoryUseCaseImpl(
+                repository: resolver.require((any SearchRepository).self)
+            )
+        }
+
+        container.register((any ClearSearchHistoryUseCase).self) { resolver in
+            ClearSearchHistoryUseCaseImpl(
+                repository: resolver.require((any SearchRepository).self)
+            )
+        }
+
+        container.register((any DeleteSearchHistoryItemUseCase).self) { resolver in
+            DeleteSearchHistoryItemUseCaseImpl(
                 repository: resolver.require((any SearchRepository).self)
             )
         }

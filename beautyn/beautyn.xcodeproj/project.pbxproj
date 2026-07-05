@@ -22,9 +22,10 @@
 		F1A0B0012FA0000100000622 /* SalonProfileViewRenderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A0B0012FA0000100000602 /* SalonProfileViewRenderTests.swift */; };
 		F1A0B0012FA0000100000632 /* SelectServiceViewRenderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A0B0012FA0000100000612 /* SelectServiceViewRenderTests.swift */; };
 		F1A0B0012FA0000100000633 /* SelectDateTimeViewRenderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A0B0012FA0000100000613 /* SelectDateTimeViewRenderTests.swift */; };
-		F1A0B0012FA0000100000634 /* SearchViewRenderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A0B0012FA0000100000614 /* SearchViewRenderTests.swift */; };
+		F1A0B0012FA0000100000634 /* SearchMapViewRenderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A0B0012FA0000100000614 /* SearchMapViewRenderTests.swift */; };
 		F1A0B0012FA0000100000644 /* ConfirmBookingViewRenderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A0B0012FA0000100000624 /* ConfirmBookingViewRenderTests.swift */; };
 		F1A0B0012FA0000100000645 /* BookingSuccessViewRenderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A0B0012FA0000100000625 /* BookingSuccessViewRenderTests.swift */; };
+		F1A0B0012FA0000100000646 /* SearchViewRenderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A0B0012FA0000100000626 /* SearchViewRenderTests.swift */; };
 		F1A0B0012FA0000100000722 /* AppointmentDateFormatterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A0B0012FA0000100000702 /* AppointmentDateFormatterTests.swift */; };
 		F1A0B0012FA0000100000922 /* WebBookingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A0B0012FA0000100000902 /* WebBookingTests.swift */; };
 		F1A0B0012FA0000100000A22 /* BookingsSourceOfTruthTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A0B0012FA0000100000A02 /* BookingsSourceOfTruthTests.swift */; };
@@ -59,9 +60,10 @@
 		F1A0B0012FA0000100000602 /* SalonProfileViewRenderTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SalonProfileViewRenderTests.swift; sourceTree = "<group>"; };
 		F1A0B0012FA0000100000612 /* SelectServiceViewRenderTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SelectServiceViewRenderTests.swift; sourceTree = "<group>"; };
 		F1A0B0012FA0000100000613 /* SelectDateTimeViewRenderTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SelectDateTimeViewRenderTests.swift; sourceTree = "<group>"; };
-		F1A0B0012FA0000100000614 /* SearchViewRenderTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SearchViewRenderTests.swift; sourceTree = "<group>"; };
+		F1A0B0012FA0000100000614 /* SearchMapViewRenderTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SearchMapViewRenderTests.swift; sourceTree = "<group>"; };
 		F1A0B0012FA0000100000624 /* ConfirmBookingViewRenderTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConfirmBookingViewRenderTests.swift; sourceTree = "<group>"; };
 		F1A0B0012FA0000100000625 /* BookingSuccessViewRenderTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BookingSuccessViewRenderTests.swift; sourceTree = "<group>"; };
+		F1A0B0012FA0000100000626 /* SearchViewRenderTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SearchViewRenderTests.swift; sourceTree = "<group>"; };
 		F1A0B0012FA0000100000702 /* AppointmentDateFormatterTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppointmentDateFormatterTests.swift; sourceTree = "<group>"; };
 		F1A0B0012FA0000100000902 /* WebBookingTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebBookingTests.swift; sourceTree = "<group>"; };
 		F1A0B0012FA0000100000A02 /* BookingsSourceOfTruthTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BookingsSourceOfTruthTests.swift; sourceTree = "<group>"; };
@@ -144,7 +146,8 @@
 				F1A0B0012FA0000100000902 /* WebBookingTests.swift */,
 				F1A0B0012FA0000100000A02 /* BookingsSourceOfTruthTests.swift */,
 				F1A0B0012FA0000100000602 /* SalonProfileViewRenderTests.swift */,
-				F1A0B0012FA0000100000614 /* SearchViewRenderTests.swift */,
+				F1A0B0012FA0000100000614 /* SearchMapViewRenderTests.swift */,
+				F1A0B0012FA0000100000626 /* SearchViewRenderTests.swift */,
 				F1A0B0012FA0000100000612 /* SelectServiceViewRenderTests.swift */,
 				F1A0B0012FA0000100000613 /* SelectDateTimeViewRenderTests.swift */,
 				F1A0B0012FA0000100000624 /* ConfirmBookingViewRenderTests.swift */,
@@ -309,7 +312,8 @@
 				F1A0B0012FA0000100000922 /* WebBookingTests.swift in Sources */,
 				F1A0B0012FA0000100000A22 /* BookingsSourceOfTruthTests.swift in Sources */,
 				F1A0B0012FA0000100000622 /* SalonProfileViewRenderTests.swift in Sources */,
-				F1A0B0012FA0000100000634 /* SearchViewRenderTests.swift in Sources */,
+				F1A0B0012FA0000100000634 /* SearchMapViewRenderTests.swift in Sources */,
+				F1A0B0012FA0000100000646 /* SearchViewRenderTests.swift in Sources */,
 				F1A0B0012FA0000100000632 /* SelectServiceViewRenderTests.swift in Sources */,
 				F1A0B0012FA0000100000633 /* SelectDateTimeViewRenderTests.swift in Sources */,
 				F1A0B0012FA0000100000644 /* ConfirmBookingViewRenderTests.swift in Sources */,
