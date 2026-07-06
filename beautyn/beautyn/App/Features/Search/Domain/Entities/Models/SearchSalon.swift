@@ -99,6 +99,8 @@ struct SearchQuery {
     /// What kind of place the center is — the backend picks its base search
     /// radius from it (city 7 km, address 2 km, …) in center mode.
     var locationType: SearchLocationKind?
+    /// Keeps only salons open on that day (weekday open-hours filter).
+    var date: Date?
     var sortBy: SearchSortOption?
     /// Range-overlap price filter: the salon's [min, max] price span must
     /// intersect [priceMin, priceMax] — i.e. it offers at least one service

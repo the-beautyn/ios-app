@@ -35,21 +35,40 @@ final class SearchViewRenderTests: XCTestCase {
         try await ViewRenderer.render(view, name: "search_input_suggestions")
     }
 
+    /// A stale (past) applied day is ignored — the pill falls back to the
+    /// placeholder instead of showing yesterday's date.
+    func testPastAppliedDateIsIgnored() {
+        let past = Calendar.current.date(byAdding: .day, value: -2, to: Date())
+        let staleViewModel = makeViewModel(initialDate: past, sessionManager: makeSessionManager())
+        XCTAssertEqual(staleViewModel.dateTitle, Localization.searchDatePlaceholder)
+
+        let future = Calendar.current.date(byAdding: .day, value: 2, to: Date())
+        let freshViewModel = makeViewModel(initialDate: future, sessionManager: makeSessionManager())
+        XCTAssertNotEqual(freshViewModel.dateTitle, Localization.searchDatePlaceholder)
+
+        // Deallocating these @MainActor VMs at method exit trips a malloc
+        // double-free under Xcode 26 — keep them alive until teardown.
+        addTeardownBlock { _ = staleViewModel; _ = freshViewModel }
+    }
+
     // MARK: - Helpers
 
     private func makeViewModel(
         initialQuery: String? = nil,
+        initialDate: Date? = nil,
         sessionManager: SessionManager
     ) -> SearchViewModel {
         SearchViewModel(
             transition: .init(
                 didTapClose: {},
                 didTapLocationField: { _ in },
+                didTapDateField: { _, _ in },
                 didSelectSalon: { _, _ in },
                 didSubmit: { _ in }
             ),
             initialQuery: initialQuery,
             initialLocation: nil,
+            initialDate: initialDate,
             mapCenter: GeoPoint(latitude: 50.4501, longitude: 30.5234),
             getSearchHistoryUseCase: MockGetSearchHistoryUseCase(),
             clearSearchHistoryUseCase: MockClearSearchHistoryUseCase(),
@@ -61,6 +80,23 @@ final class SearchViewRenderTests: XCTestCase {
 
     private func makeSessionManager() -> SessionManager {
         SessionManager(keychainService: KeychainServiceImpl(), defaultsService: DefaultsStorageService())
+    }
+}
+
+// MARK: - SearchDatePickerViewRenderTests
+
+@MainActor
+final class SearchDatePickerViewRenderTests: XCTestCase {
+
+    /// Date page pushed inside the search sheet (Figma 143:8732, date section
+    /// only) — calendar with a selected future day + Очистити/Застосувати bar.
+    func testRenderSearchDatePicker() async throws {
+        let viewModel = SearchDatePickerViewModel(
+            transition: .init(didTapBack: {}, didApply: { _ in }),
+            initialDate: Calendar.current.date(byAdding: .day, value: 3, to: Date())
+        )
+        let view = SearchDatePickerView(viewModel: viewModel)
+        try await ViewRenderer.render(view, name: "search_date_picker")
     }
 }
 

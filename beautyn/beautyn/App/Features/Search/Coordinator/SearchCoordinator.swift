@@ -78,6 +78,9 @@ final class SearchCoordinator: BaseCoordinator {
             didTapLocationField: { [weak self] onSelect in
                 self?.showSearchLocation(onSelect: onSelect)
             },
+            didTapDateField: { [weak self] initialDate, onApply in
+                self?.showSearchDatePicker(initialDate: initialDate, onApply: onApply)
+            },
             didSelectSalon: { [weak self] salonId, submission in
                 guard let self else { return }
                 // Apply the sheet's state first so backing out of the salon
@@ -140,6 +143,19 @@ final class SearchCoordinator: BaseCoordinator {
             }
         )
         modalRouter?.push(factory.makeSearchLocation(transition: transition))
+    }
+
+    private func showSearchDatePicker(initialDate: Date?, onApply: @escaping (Date?) -> Void) {
+        let transition = SearchDatePickerViewModel.Transition(
+            didTapBack: { [weak self] in
+                self?.modalRouter?.pop()
+            },
+            didApply: { [weak self] date in
+                onApply(date)
+                self?.modalRouter?.pop()
+            }
+        )
+        modalRouter?.push(factory.makeSearchDatePicker(initialDate: initialDate, transition: transition))
     }
 
     private func dismissSearchSheet() {

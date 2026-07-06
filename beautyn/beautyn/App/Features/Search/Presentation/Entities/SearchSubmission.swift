@@ -7,6 +7,8 @@ import Foundation
 struct SearchSubmission {
     let query: String?
     let location: SearchLocation?
+    /// Day filter — keeps only salons open on that day.
+    var date: Date? = nil
     /// Set when a specific salon was picked — the map zooms straight to it
     /// (pin-tap style) instead of the location region.
     var focusPoint: GeoPoint? = nil
@@ -21,6 +23,8 @@ struct SearchSubmission {
 struct SearchInputContext {
     let initialQuery: String?
     let initialLocation: SearchLocation?
+    /// The currently applied day filter, if any.
+    let initialDate: Date?
     /// What the map is currently looking at — ranks the sheet's type-ahead
     /// results by distance when no location is picked yet.
     let mapCenter: GeoPoint?

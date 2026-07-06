@@ -112,6 +112,7 @@
 "search_clear_history" = "Clear";
 "search_salons_section" = "Salons";
 "search_date_placeholder" = "Date";
+"search_date_picker_title" = "Select date";
 "search_sort_section" = "Sort by";
 "search_sort_by_rating" = "By rating";
 "search_sort_by_popularity" = "By popularity";

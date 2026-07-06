@@ -12,6 +12,8 @@ struct SearchRequestDTO: Encodable {
     var centerLng: Double?
     var viewport: SearchViewportDTO?
     var locationType: String?
+    /// `yyyy-MM-dd`.
+    var date: String?
     var sortBy: String?
     var priceMin: Double?
     var priceMax: Double?

@@ -17,6 +17,7 @@ final class SearchViewModel: BaseViewModel {
     struct Transition {
         let didTapClose: () -> Void
         let didTapLocationField: (_ onSelect: @escaping (SearchLocation) -> Void) -> Void
+        let didTapDateField: (_ initialDate: Date?, _ onApply: @escaping (Date?) -> Void) -> Void
         /// Carries the sheet's current state too — opening a salon applies the
         /// search to the map behind, so backing out of the salon profile lands
         /// on the results the user just searched for.
@@ -49,12 +50,30 @@ final class SearchViewModel: BaseViewModel {
     @Published private(set) var historyRows: [Row] = []
     @Published private(set) var resultRows: [Row] = []
     @Published private(set) var selectedLocation: SearchLocation?
+    @Published private(set) var selectedDate: Date?
 
     // MARK: - View state
 
     var showsHistorySection: Bool { trimmedQuery.isEmpty && !historyRows.isEmpty }
     var showsResultsSection: Bool { !trimmedQuery.isEmpty && !resultRows.isEmpty }
     var locationTitle: String { selectedLocation?.name ?? Localization.locationPickerTitle }
+    var dateTitle: String {
+        effectiveDate.map { Self.pillDateFormatter.string(from: $0) } ?? Localization.searchDatePlaceholder
+    }
+
+    /// The applied day filter, ignored once it falls in the past — the sheet
+    /// can outlive midnight, and a stale day must not keep filtering.
+    private var effectiveDate: Date? {
+        selectedDate.flatMap { $0.isBeforeToday ? nil : $0 }
+    }
+
+    /// Short day for the pill, e.g. "25 черв.".
+    private static let pillDateFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.locale = .appDisplay
+        f.dateFormat = "d MMM"
+        return f
+    }()
 
     // MARK: - Dependencies
 
@@ -92,6 +111,7 @@ final class SearchViewModel: BaseViewModel {
         transition: Transition,
         initialQuery: String?,
         initialLocation: SearchLocation?,
+        initialDate: Date?,
         mapCenter: GeoPoint?,
         getSearchHistoryUseCase: any GetSearchHistoryUseCase,
         clearSearchHistoryUseCase: any ClearSearchHistoryUseCase,
@@ -111,6 +131,7 @@ final class SearchViewModel: BaseViewModel {
         // for the prefill — `onViewTask` fetches its results undebounced.
         self.query = initialQuery ?? ""
         self.selectedLocation = initialLocation
+        self.selectedDate = initialDate
     }
 
     // MARK: - Lifecycle
@@ -145,7 +166,14 @@ final class SearchViewModel: BaseViewModel {
     }
 
     func didTapDateField() {
-        // Placeholder — date filtering comes with a later design iteration.
+        transition.didTapDateField(effectiveDate) { [weak self] date in
+            guard let self else { return }
+            self.selectedDate = date
+            // Refilter what's on screen to the newly picked day.
+            if !self.trimmedQuery.isEmpty {
+                self.fetchResults(for: self.trimmedQuery, debounced: false)
+            }
+        }
     }
 
     func didSubmit() {
@@ -208,6 +236,7 @@ final class SearchViewModel: BaseViewModel {
         return SearchSubmission(
             query: trimmed.isEmpty ? nil : trimmed,
             location: selectedLocation,
+            date: effectiveDate,
             focusPoint: point
         )
     }
@@ -265,6 +294,7 @@ final class SearchViewModel: BaseViewModel {
                     // Only meaningful when the user explicitly picked a place;
                     // the map-center fallback has no known kind.
                     locationType: self.selectedLocation?.kind,
+                    date: self.effectiveDate,
                     page: 1,
                     limit: Self.resultsLimit
                 ))

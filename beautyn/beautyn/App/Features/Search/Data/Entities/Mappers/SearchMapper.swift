@@ -13,6 +13,7 @@ enum SearchMapper {
                 SearchViewportDTO(neLat: $0.neLat, neLng: $0.neLng, swLat: $0.swLat, swLng: $0.swLng)
             },
             locationType: query.locationType?.rawValue,
+            date: query.date.map { ApiDateFormatter.string(from: $0) },
             sortBy: query.sortBy?.rawValue,
             priceMin: query.priceMin,
             priceMax: query.priceMax,

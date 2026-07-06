@@ -112,6 +112,7 @@
 "search_clear_history" = "Очистити";
 "search_salons_section" = "Салони";
 "search_date_placeholder" = "Дата";
+"search_date_picker_title" = "Оберіть дату";
 "search_sort_section" = "Сортувати за";
 "search_sort_by_rating" = "За оцінкою";
 "search_sort_by_popularity" = "За популярністю";
@@ -152,7 +153,7 @@
 "booking_choose_time" = "Оберіть час:";
 "booking_any_master" = "Будь-який";
 "booking_total_price" = "Всього: %@ грн";
-"booking_clear_button" = "Почистити";
+"booking_clear_button" = "Очистити";
 "booking_apply_button" = "Застосувати";
 
 // MARK: - Confirm Booking

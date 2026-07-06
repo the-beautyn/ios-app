@@ -33,6 +33,7 @@ final class SearchControllerFactoryImpl: SearchControllerFactory {
             transition: transition,
             initialQuery: context.initialQuery,
             initialLocation: context.initialLocation,
+            initialDate: context.initialDate,
             mapCenter: context.mapCenter,
             getSearchHistoryUseCase: assembler.search.getSearchHistoryUseCase,
             clearSearchHistoryUseCase: assembler.search.clearSearchHistoryUseCase,
@@ -58,5 +59,10 @@ final class SearchControllerFactoryImpl: SearchControllerFactory {
             observeLocationPermissionUseCase: assembler.search.observeLocationPermissionUseCase
         )
         return SearchLocationController(viewModel: viewModel)
+    }
+
+    func makeSearchDatePicker(initialDate: Date?, transition: SearchDatePickerViewModel.Transition) -> UIViewController {
+        let viewModel = SearchDatePickerViewModel(transition: transition, initialDate: initialDate)
+        return SearchDatePickerController(viewModel: viewModel)
     }
 }

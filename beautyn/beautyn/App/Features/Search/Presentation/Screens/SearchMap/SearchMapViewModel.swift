@@ -87,6 +87,14 @@ final class SearchMapViewModel: BaseViewModel {
     /// Where the applied search is centered — kept so the sheet reopens
     /// prefilled with the same place.
     private var appliedLocation: SearchLocation?
+    /// The applied day filter — re-sent with every viewport search, kept so
+    /// the sheet reopens prefilled with the same day.
+    private var appliedDate: Date?
+    /// `appliedDate`, ignored once it falls in the past — the map session
+    /// can outlive midnight, and a stale day must not keep filtering.
+    private var effectiveAppliedDate: Date? {
+        appliedDate.flatMap { $0.isBeforeToday ? nil : $0 }
+    }
     /// Global sort/price bounds, fetched once on init (they're static) and
     /// handed to the sort sheet via its context. nil = the fetch failed; the
     /// sheet falls back to its built-in defaults.
@@ -300,6 +308,7 @@ final class SearchMapViewModel: BaseViewModel {
         transition.didTapSearchField(SearchInputContext(
             initialQuery: appliedQuery,
             initialLocation: appliedLocation,
+            initialDate: effectiveAppliedDate,
             mapCenter: mapCenter,
             onApply: { [weak self] submission in
                 self?.applySubmission(submission)
@@ -312,6 +321,7 @@ final class SearchMapViewModel: BaseViewModel {
     private func applySubmission(_ submission: SearchSubmission) {
         appliedQuery = submission.query
         appliedLocation = submission.location
+        appliedDate = submission.date
 
         if let focusPoint = submission.focusPoint {
             // A specific salon was picked — place the camera on it right away
@@ -373,6 +383,7 @@ final class SearchMapViewModel: BaseViewModel {
                 centerLat: location.point.latitude,
                 centerLng: location.point.longitude,
                 locationType: location.kind,
+                date: self.effectiveAppliedDate,
                 priceMin: self.appliedPriceMin,
                 priceMax: self.appliedPriceMax,
                 page: 1,
@@ -444,6 +455,7 @@ final class SearchMapViewModel: BaseViewModel {
             centerLat: (viewport.neLat + viewport.swLat) / 2,
             centerLng: (viewport.neLng + viewport.swLng) / 2,
             viewport: viewport,
+            date: effectiveAppliedDate,
             sortBy: appliedSort,
             priceMin: appliedPriceMin,
             priceMax: appliedPriceMax,
@@ -481,6 +493,7 @@ final class SearchMapViewModel: BaseViewModel {
             centerLat: (viewport.neLat + viewport.swLat) / 2,
             centerLng: (viewport.neLng + viewport.swLng) / 2,
             viewport: viewport,
+            date: effectiveAppliedDate,
             sortBy: appliedSort,
             priceMin: appliedPriceMin,
             priceMax: appliedPriceMax,

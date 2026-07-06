@@ -63,7 +63,7 @@ struct SearchView: BaseViewProtocol {
                 )
                 SearchPillButton(
                     icon: Image(systemName: "calendar"),
-                    title: Localization.searchDatePlaceholder,
+                    title: viewModel.dateTitle,
                     onTap: { viewModel.didTapDateField() }
                 )
             }
@@ -206,11 +206,13 @@ private struct SectionHeaderChrome: ViewModifier {
             transition: .init(
                 didTapClose: {},
                 didTapLocationField: { _ in },
+                didTapDateField: { _, _ in },
                 didSelectSalon: { _, _ in },
                 didSubmit: { _ in }
             ),
             initialQuery: nil,
             initialLocation: nil,
+            initialDate: nil,
             mapCenter: GeoPoint(latitude: 50.4501, longitude: 30.5234),
             getSearchHistoryUseCase: PreviewGetSearchHistoryUseCase(),
             clearSearchHistoryUseCase: PreviewClearSearchHistoryUseCase(),
