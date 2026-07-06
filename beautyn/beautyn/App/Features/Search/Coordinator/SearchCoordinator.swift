@@ -48,6 +48,9 @@ final class SearchCoordinator: BaseCoordinator {
             },
             didTapSortFilter: { [weak self] context in
                 self?.showSearchSort(context)
+            },
+            didTapServiceTypeFilter: { [weak self] context in
+                self?.showServiceTypeFilterSheet(context)
             }
         )
 
@@ -61,6 +64,12 @@ final class SearchCoordinator: BaseCoordinator {
     func openSearchSheet() {
         guard modalRouter == nil else { return }
         searchMapController?.viewModel.didTapSearchField()
+    }
+
+    /// Searches this category around the user with no text query — used by
+    /// Home's category chips after switching to this tab.
+    func applyCategorySearch(_ category: AppCategory) {
+        searchMapController?.viewModel.applyCategorySearch(category)
     }
 
     // MARK: - Search sheet (modal)
@@ -127,6 +136,22 @@ final class SearchCoordinator: BaseCoordinator {
             }
         )
         router.present(factory.makeSearchSort(context: context, transition: transition), animated: false)
+    }
+
+    // MARK: - Service-type filter sheet (modal)
+
+    private func showServiceTypeFilterSheet(_ context: ServiceTypeFilterContext) {
+        // Unlike the text-search sheet there is no nav stack — the filter
+        // sheet is a single screen, so its controller is presented directly.
+        // Swipe-down = cancel: nothing to clean up, nothing is applied.
+        let transition = ServiceTypeFilterViewModel.Transition(
+            didTapClose: { [weak self] in
+                self?.router.dismiss()
+            }
+        )
+        let vc = factory.makeServiceTypeFilter(context: context, transition: transition)
+        vc.modalPresentationStyle = .pageSheet
+        router.present(vc)
     }
 
     private func showSearchLocation(onSelect: @escaping (SearchLocation) -> Void) {

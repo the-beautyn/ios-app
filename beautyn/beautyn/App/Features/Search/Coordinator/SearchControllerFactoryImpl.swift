@@ -49,6 +49,18 @@ final class SearchControllerFactoryImpl: SearchControllerFactory {
         return SearchSortController(viewModel: viewModel)
     }
 
+    func makeServiceTypeFilter(
+        context: ServiceTypeFilterContext,
+        transition: ServiceTypeFilterViewModel.Transition
+    ) -> UIViewController {
+        let viewModel = ServiceTypeFilterViewModel(
+            transition: transition,
+            context: context,
+            getAppCategoriesUseCase: assembler.search.getAppCategoriesUseCase
+        )
+        return ServiceTypeFilterController(viewModel: viewModel)
+    }
+
     func makeSearchLocation(transition: SearchLocationViewModel.Transition) -> UIViewController {
         let viewModel = SearchLocationViewModel(
             transition: transition,

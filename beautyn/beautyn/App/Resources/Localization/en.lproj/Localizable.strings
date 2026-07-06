@@ -107,6 +107,9 @@
 "search_filter_service_type" = "Service type";
 "search_filter_sort" = "Sort";
 "search_filter_price" = "Price";
+"search_filter_category_title" = "Service category";
+"search_filter_clear" = "Clear";
+"search_filter_apply" = "Apply";
 "search_results_count" = "Found: %d places";
 "search_previous_section" = "Previous search";
 "search_clear_history" = "Clear";

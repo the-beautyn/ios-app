@@ -10,6 +10,9 @@ protocol SearchRepository {
     /// Static filter-sheet bounds: sort keys + the global price range.
     func filterOptions() async throws -> SearchFilterOptions
 
+    /// Every active app category, for the service-type filter sheet. Public.
+    func appCategories() async throws -> [AppCategory]
+
     /// The user's visited-salon history, most recent first. Requires auth.
     func history(limit: Int) async throws -> [SearchHistoryItem]
     /// Removes the whole history. Requires auth.

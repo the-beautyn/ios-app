@@ -47,7 +47,8 @@ final class SearchMapViewRenderTests: XCTestCase {
                 didRequireAuth: {},
                 didTapOpenSettings: {},
                 didTapSearchField: { _ in },
-                didTapSortFilter: { _ in }
+                didTapSortFilter: { _ in },
+                didTapServiceTypeFilter: { _ in }
             ),
             searchSalonsUseCase: MockSearchSalonsUseCase(),
             searchPinsUseCase: MockSearchPinsUseCase(),
@@ -542,7 +543,8 @@ final class SearchMapSortApplyTests: XCTestCase {
                 didRequireAuth: {},
                 didTapOpenSettings: {},
                 didTapSearchField: { _ in },
-                didTapSortFilter: { [weak self] in self?.capturedContext = $0 }
+                didTapSortFilter: { [weak self] in self?.capturedContext = $0 },
+                didTapServiceTypeFilter: { _ in }
             ),
             searchSalonsUseCase: salonsUseCase,
             searchPinsUseCase: MockSearchPinsUseCase(),

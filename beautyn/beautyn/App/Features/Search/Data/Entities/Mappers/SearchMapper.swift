@@ -17,6 +17,7 @@ enum SearchMapper {
             sortBy: query.sortBy?.rawValue,
             priceMin: query.priceMin,
             priceMax: query.priceMax,
+            appCategoryIds: query.appCategoryIds,
             page: query.page,
             limit: query.limit
         )
@@ -29,6 +30,20 @@ enum SearchMapper {
             minPrice: dto.minPrice,
             maxPrice: dto.maxPrice
         )
+    }
+
+    // Mirrors HomeFeedMapper.mapCategory — that mapper is MainActor-isolated,
+    // so it can't be reused from this nonisolated repository path.
+    static func map(_ dto: AppCategoriesResponseDTO) -> [AppCategory] {
+        dto.items.map {
+            AppCategory(
+                id: $0.id,
+                slug: $0.slug,
+                name: $0.name,
+                imageUrl: $0.imageUrl,
+                sortOrder: $0.sortOrder
+            )
+        }
     }
 
     static func map(_ dto: SearchResponseDTO) -> SearchResults {

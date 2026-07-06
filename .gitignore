@@ -1,3 +1,5 @@
 .claude/settings.local.json
 xcuserdata/
 !beautyn/beautyn.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
+
+DerivedData/

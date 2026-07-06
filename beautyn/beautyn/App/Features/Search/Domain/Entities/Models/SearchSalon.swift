@@ -107,6 +107,8 @@ struct SearchQuery {
     /// in the requested budget (грн).
     var priceMin: Double?
     var priceMax: Double?
+    /// Restricts matches to salons mapped to any of these app categories.
+    var appCategoryIds: [String]?
     var page: Int = 1
     var limit: Int = 20
 }

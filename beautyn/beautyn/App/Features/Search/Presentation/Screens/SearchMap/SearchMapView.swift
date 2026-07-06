@@ -140,7 +140,10 @@ struct SearchMapView: BaseViewProtocol {
 
     private var filtersRow: some View {
         HStack(spacing: CGFloat.Spacing.sm) {
-            FilterChipView(title: Localization.searchFilterServiceType) {
+            FilterChipView(
+                title: Localization.searchFilterServiceType,
+                isSelected: viewModel.appliedCategory != nil
+            ) {
                 viewModel.didTapFilterChip(.serviceType)
             }
             FilterChipView(title: Localization.searchFilterSort, isSelected: viewModel.isSortChipActive) {
@@ -197,7 +200,8 @@ struct SearchMapView: BaseViewProtocol {
                 didRequireAuth: {},
                 didTapOpenSettings: {},
                 didTapSearchField: { _ in },
-                didTapSortFilter: { _ in }
+                didTapSortFilter: { _ in },
+                didTapServiceTypeFilter: { _ in }
             ),
             searchSalonsUseCase: PreviewSearchSalonsUseCase(),
             searchPinsUseCase: PreviewSearchPinsUseCase(),

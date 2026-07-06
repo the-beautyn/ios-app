@@ -107,6 +107,9 @@
 "search_filter_service_type" = "Тип послуги";
 "search_filter_sort" = "Сортувати";
 "search_filter_price" = "Ціна";
+"search_filter_category_title" = "Категорія послуги";
+"search_filter_clear" = "Очистити";
+"search_filter_apply" = "Застосувати";
 "search_results_count" = "Знайдено: %d місць";
 "search_previous_section" = "Попередній пошук";
 "search_clear_history" = "Очистити";

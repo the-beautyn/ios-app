@@ -47,11 +47,12 @@ struct CalendarView: View {
         self._displayedMonth = State(initialValue: Self.calendar.startOfMonth(for: initialMonth ?? Date()))
     }
 
-    /// Monday-first Ukrainian calendar — fixed so layout is deterministic regardless of device locale.
+    /// Monday-first gregorian calendar — the week layout is fixed regardless
+    /// of device locale; only the symbols follow the app's display language.
     private static let calendar: Calendar = {
         var c = Calendar(identifier: .gregorian)
         c.firstWeekday = 2                       // Monday
-        c.locale = Locale(identifier: "uk_UA")
+        c.locale = Locale.appDisplay
         return c
     }()
 
@@ -206,7 +207,7 @@ struct CalendarView: View {
 
     private var monthYearString: String {
         let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "uk_UA")
+        formatter.locale = Locale.appDisplay
         formatter.dateFormat = "LLLL yyyy"
         return formatter.string(from: displayedMonth).capitalized
     }

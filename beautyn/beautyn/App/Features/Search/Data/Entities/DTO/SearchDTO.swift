@@ -17,6 +17,7 @@ struct SearchRequestDTO: Encodable {
     var sortBy: String?
     var priceMin: Double?
     var priceMax: Double?
+    var appCategoryIds: [String]?
     var page: Int = 1
     var limit: Int = 20
 }
@@ -43,6 +44,15 @@ struct FilterOptionsResponseDTO: Decodable {
         case minPrice = "min_price"
         case maxPrice = "max_price"
     }
+}
+
+// MARK: - AppCategoriesResponseDTO
+//
+// Body of GET /app-categories — the items reuse Home's `AppCategoryDTO`
+// (the home feed embeds the same wire shape).
+
+struct AppCategoriesResponseDTO: Decodable {
+    let items: [AppCategoryDTO]
 }
 
 // MARK: - SearchResponseDTO

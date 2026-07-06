@@ -24,6 +24,9 @@ final class SearchMapViewModel: BaseViewModel {
         /// Opens the sort/price filter sheet with the currently applied state
         /// and the callback that applies the submission back to this screen.
         let didTapSortFilter: (_ context: SearchSortContext) -> Void
+        /// Opens the service-type filter sheet with the currently applied
+        /// category and the callback that applies the pick back here.
+        let didTapServiceTypeFilter: (_ context: ServiceTypeFilterContext) -> Void
     }
 
     // MARK: - Filter chips
@@ -53,6 +56,9 @@ final class SearchMapViewModel: BaseViewModel {
     @Published private(set) var appliedSort: SearchSortOption?
     @Published private(set) var appliedPriceMin: Double?
     @Published private(set) var appliedPriceMax: Double?
+    /// The service-type filter applied from its sheet — highlights the chip
+    /// and is sent with every search until cleared.
+    @Published private(set) var appliedCategory: AppCategory?
 
     var isSortChipActive: Bool { appliedSort != nil }
     var isPriceChipActive: Bool { appliedPriceMin != nil || appliedPriceMax != nil }
@@ -386,6 +392,7 @@ final class SearchMapViewModel: BaseViewModel {
                 date: self.effectiveAppliedDate,
                 priceMin: self.appliedPriceMin,
                 priceMax: self.appliedPriceMax,
+                appCategoryIds: self.appliedCategory.map { [$0.id] },
                 page: 1,
                 limit: 1
             ))
@@ -409,6 +416,13 @@ final class SearchMapViewModel: BaseViewModel {
 
     func didTapFilterChip(_ chip: FilterChip) {
         switch chip {
+        case .serviceType:
+            transition.didTapServiceTypeFilter(ServiceTypeFilterContext(
+                initialCategory: appliedCategory,
+                onApply: { [weak self] category in
+                    self?.applyCategory(category)
+                }
+            ))
         case .sort, .price:
             // The one-time bounds fetch may have failed (e.g. offline start) —
             // retry in the background so the NEXT open gets real bounds; this
@@ -426,9 +440,6 @@ final class SearchMapViewModel: BaseViewModel {
                     self?.applySortSubmission(submission)
                 }
             ))
-        case .serviceType:
-            // Placeholder — implemented in a later iteration.
-            break
         }
     }
 
@@ -446,6 +457,43 @@ final class SearchMapViewModel: BaseViewModel {
         refreshCurrentViewport()
     }
 
+    /// Applies what the service-type sheet submitted: remembers the category
+    /// for every subsequent search and re-runs the current viewport with it.
+    private func applyCategory(_ category: AppCategory?) {
+        appliedCategory = category
+        refreshCurrentViewport()
+    }
+
+    /// Home's category chips land here after the tab switch: drop the text
+    /// query and picked location, apply the category, and search around the
+    /// user again — same region chain as the initial load (GPS → profile
+    /// city → device region → Kyiv).
+    func applyCategorySearch(_ category: AppCategory) {
+        appliedQuery = nil
+        appliedLocation = nil
+        appliedDate = nil
+        appliedCategory = category
+
+        // First-ever visit to the tab: the map hasn't loaded yet — the state
+        // set above rides along with `onViewTask`'s own region + search.
+        guard isInitialLoadComplete else { return }
+
+        searchTask?.cancel()
+        loadMoreTask?.cancel()
+        searchTask = Task { [weak self] in
+            guard let self, !Task.isCancelled else { return }
+            self.activeRefreshCount += 1
+            defer { self.activeRefreshCount -= 1 }
+
+            let region = SearchMapCamera.makeRegion(await self.resolveInitialRegionUseCase.execute())
+            guard !Task.isCancelled else { return }
+            withAnimation(.easeInOut(duration: 0.3)) {
+                self.cameraPosition = .region(region)
+            }
+            await self.performSearch(viewport: SearchMapCamera.makeViewport(region))
+        }
+    }
+
     // MARK: - Search
 
     private func performSearch(viewport: SearchViewport) async {
@@ -459,6 +507,7 @@ final class SearchMapViewModel: BaseViewModel {
             sortBy: appliedSort,
             priceMin: appliedPriceMin,
             priceMax: appliedPriceMax,
+            appCategoryIds: appliedCategory.map { [$0.id] },
             page: 1,
             limit: Self.pageSize
         )
@@ -497,6 +546,7 @@ final class SearchMapViewModel: BaseViewModel {
             sortBy: appliedSort,
             priceMin: appliedPriceMin,
             priceMax: appliedPriceMax,
+            appCategoryIds: appliedCategory.map { [$0.id] },
             page: currentPage + 1,
             limit: Self.pageSize
         )

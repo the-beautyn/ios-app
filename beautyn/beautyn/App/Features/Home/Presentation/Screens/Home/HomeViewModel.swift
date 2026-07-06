@@ -16,7 +16,8 @@ final class HomeViewModel: BaseViewModel {
         let didTapSeeAllSaved: () -> Void
         let didTapSeeAllSection: (_ sectionId: String) -> Void
         let didTapAppointmentDetails: (_ booking: Booking) -> Void
-        let didTapCategory: (_ categoryId: String) -> Void
+        /// Switches to the Search tab and searches with this category applied.
+        let didTapCategory: (_ category: AppCategory) -> Void
         let didRequireAuth: () -> Void
     }
 
@@ -32,6 +33,9 @@ final class HomeViewModel: BaseViewModel {
 
     @Published private(set) var greeting: String = Localization.homeGreetingUnauthorized
     @Published private(set) var categories: [CategoryChipModel] = []
+    /// The feed's domain categories behind the header chips — kept so a tap
+    /// can hand the full model (not just the id) to the Search tab.
+    private var feedCategories: [AppCategory] = []
     @Published private(set) var nextAppointment: AppointmentCardModel?
     /// The booking currently shown on the card (feed snapshot, overlaid by the
     /// source-of-truth copy when cached), retained so the details screen can open.
@@ -165,7 +169,8 @@ final class HomeViewModel: BaseViewModel {
     }
 
     func didTapCategory(_ category: CategoryChipModel) {
-        transition.didTapCategory(category.id)
+        guard let appCategory = feedCategories.first(where: { $0.id == category.id }) else { return }
+        transition.didTapCategory(appCategory)
     }
 
     func didTapSalonCard(_ salonId: String) {
@@ -282,7 +287,8 @@ final class HomeViewModel: BaseViewModel {
     private func mapFeedToState(_ feed: HomeFeed, animated: Bool) {
         // Categories live in the pinned header — assigned without animation; the
         // scrollable feed below is what animates on a silent refresh.
-        categories = feed.categories.sorted(by: { ($0.sortOrder ?? 0) < ($1.sortOrder ?? 0) }).map { cat in
+        feedCategories = feed.categories.sorted(by: { ($0.sortOrder ?? 0) < ($1.sortOrder ?? 0) })
+        categories = feedCategories.map { cat in
             CategoryChipModel(
                 id: cat.id,
                 title: cat.name,

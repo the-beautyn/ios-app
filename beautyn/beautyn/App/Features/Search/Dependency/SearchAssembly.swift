@@ -71,6 +71,12 @@ final class SearchAssembly: Assembly {
             )
         }
 
+        container.register((any GetAppCategoriesUseCase).self) { resolver in
+            GetAppCategoriesUseCaseImpl(
+                repository: resolver.require((any SearchRepository).self)
+            )
+        }
+
         container.register((any GetSearchHistoryUseCase).self) { resolver in
             GetSearchHistoryUseCaseImpl(
                 repository: resolver.require((any SearchRepository).self)

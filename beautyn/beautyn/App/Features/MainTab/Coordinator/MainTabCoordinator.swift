@@ -69,6 +69,13 @@ final class MainTabCoordinator: BaseCoordinator {
             self.selectSearchTab()
             self.searchCoordinator?.openSearchSheet()
         }
+        homeCoordinator.onSearchCategory = { [weak self] category in
+            guard let self else { return }
+            // The user tapped a category CHIP — land on the map tab searching
+            // that category around the user (no text query).
+            self.selectSearchTab()
+            self.searchCoordinator?.applyCategorySearch(category)
+        }
         addChild(homeCoordinator)
         homeCoordinator.start()
 

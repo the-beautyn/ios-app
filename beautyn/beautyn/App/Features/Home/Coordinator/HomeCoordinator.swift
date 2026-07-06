@@ -11,6 +11,8 @@ final class HomeCoordinator: BaseCoordinator {
 
     var onRequireAuth: (() -> Void)?
     var onNavigateToSearchTab: (() -> Void)?
+    /// Switches to the Search tab and re-searches with this category applied.
+    var onSearchCategory: ((AppCategory) -> Void)?
 
     init(router: Router, parentAssembler: Assembler) {
         // SalonBookingAssembly is included so the booking-details screen can reach
@@ -48,8 +50,8 @@ final class HomeCoordinator: BaseCoordinator {
             didTapAppointmentDetails: { [weak self] booking in
                 self?.navigateToBookingDetails(booking: booking)
             },
-            didTapCategory: { [weak self] categoryId in
-                self?.navigateToCategory(categoryId: categoryId)
+            didTapCategory: { [weak self] category in
+                self?.onSearchCategory?(category)
             },
             didRequireAuth: { [weak self] in
                 self?.onRequireAuth?()
@@ -111,7 +113,4 @@ final class HomeCoordinator: BaseCoordinator {
         return factory.makeBookingDetails(booking: booking, transition: transition)
     }
 
-    private func navigateToCategory(categoryId: String) {
-        // TODO: Push search filtered by category
-    }
 }

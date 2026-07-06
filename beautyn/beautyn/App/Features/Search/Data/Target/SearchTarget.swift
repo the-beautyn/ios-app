@@ -8,6 +8,7 @@ enum SearchTarget {
     case search(SearchRequestDTO)
     case pins(SearchRequestDTO)
     case filterOptions
+    case appCategories
     case history(limit: Int)
     case clearHistory
     case deleteHistoryItem(id: String)
@@ -29,6 +30,8 @@ extension SearchTarget: TargetType {
             return "/search/pins"
         case .filterOptions:
             return "/search/filter-options"
+        case .appCategories:
+            return "/app-categories"
         case .history, .clearHistory:
             return "/search/history"
         case .deleteHistoryItem(let id):
@@ -40,7 +43,7 @@ extension SearchTarget: TargetType {
         switch self {
         case .search, .pins:
             return .post
-        case .history, .filterOptions:
+        case .appCategories, .history, .filterOptions:
             return .get
         case .clearHistory, .deleteHistoryItem:
             return .delete
@@ -51,6 +54,13 @@ extension SearchTarget: TargetType {
         switch self {
         case .search(let dto), .pins(let dto):
             return .requestJSONEncodable(dto)
+        case .appCategories:
+            // The filter sheet needs every pickable category — the backend
+            // caps `limit` at 100, well above the real category count.
+            return .requestParameters(
+                parameters: ["onlyActive": true, "limit": 100],
+                encoding: URLEncoding.default
+            )
         case .history(let limit):
             return .requestParameters(parameters: ["limit": limit], encoding: URLEncoding.default)
         case .filterOptions, .clearHistory, .deleteHistoryItem:
