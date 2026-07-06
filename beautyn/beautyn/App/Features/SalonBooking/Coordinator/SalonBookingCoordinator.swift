@@ -13,14 +13,18 @@ final class SalonBookingCoordinator: BaseCoordinator {
     private let router: Router
     private let factory: SalonBookingControllerFactory
     private let salonId: String
+    /// Entered from the search flow — the salon fetch records a
+    /// search-history visit for the authenticated user.
+    private let isFromSearch: Bool
 
     var onRequireAuth: (() -> Void)?
 
-    init(parentAssembler: Assembler, router: Router, salonId: String) {
+    init(parentAssembler: Assembler, router: Router, salonId: String, isFromSearch: Bool = false) {
         let assembler = Assembler([SalonBookingAssembly()], parent: parentAssembler)
         self.router = router
         self.factory = assembler.salonBooking.controllerFactory
         self.salonId = salonId
+        self.isFromSearch = isFromSearch
     }
 
     override func start() {
@@ -45,7 +49,7 @@ final class SalonBookingCoordinator: BaseCoordinator {
                 self?.showBookingSuccess(booking: booking)
             }
         )
-        let vc = factory.makeSalonProfile(salonId: salonId, transition: transition)
+        let vc = factory.makeSalonProfile(salonId: salonId, isFromSearch: isFromSearch, transition: transition)
         router.push(vc, animated: true)
     }
 

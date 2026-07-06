@@ -6,6 +6,7 @@ import UIKit
 protocol SalonBookingControllerFactory {
     func makeSalonProfile(
         salonId: String,
+        isFromSearch: Bool,
         transition: SalonProfileViewModel.Transition
     ) -> UIViewController
 
@@ -55,10 +56,12 @@ final class SalonBookingControllerFactoryImpl: SalonBookingControllerFactory {
 
     func makeSalonProfile(
         salonId: String,
+        isFromSearch: Bool,
         transition: SalonProfileViewModel.Transition
     ) -> UIViewController {
         let viewModel = SalonProfileViewModel(
             salonId: salonId,
+            isFromSearch: isFromSearch,
             transition: transition,
             getSalonByIdUseCase: assembler.salonBooking.getSalonByIdUseCase,
             getSalonShareUseCase: assembler.salonBooking.getSalonShareUseCase,

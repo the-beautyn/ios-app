@@ -4,7 +4,8 @@ import SwiftUI
 //
 // Matches Figma filter chips on the Search screen.
 // e.g. "Тип послуги ▾", "Сортувати ▾", "Ціна ▾"
-// Outlined pill, active state has brown fill.
+// Outlined pill; the active state swaps the hairline for a 2pt brown border
+// (Figma 143:8432) — content stays the same.
 
 struct FilterChipView: View {
 
@@ -17,21 +18,25 @@ struct FilterChipView: View {
             HStack(spacing: CGFloat.Spacing.xs) {
                 Text(title)
                     .font(.App.caption1)
-                    .foregroundStyle(isSelected ? Color.App.white : Color.App.text)
+                    .foregroundStyle(Color.App.text)
 
                 Image(systemName: "chevron.down")
                     .font(.system(size: 10, weight: .medium))
-                    .foregroundStyle(isSelected ? Color.App.white : Color.App.text)
+                    .foregroundStyle(Color.App.text)
             }
             .padding(.horizontal, CGFloat.Spacing.sm)
-            .padding(.vertical, 6)
+            // Figma: 6pt — closest tokens are xxs (4) and xs (8).
+            .padding(.vertical, CGFloat.Spacing.xxs + 2)
             .background(
                 Capsule()
-                    .fill(isSelected ? Color.App.brown1 : Color.App.backgroundLight)
+                    .fill(Color.App.backgroundLight)
             )
             .overlay(
                 Capsule()
-                    .stroke(isSelected ? Color.clear : Color.App.blueTransparency, lineWidth: 1)
+                    .strokeBorder(
+                        isSelected ? Color.App.brown2 : Color.App.blueTransparency,
+                        lineWidth: isSelected ? 2 : 1
+                    )
             )
         }
         .buttonStyle(.plain)

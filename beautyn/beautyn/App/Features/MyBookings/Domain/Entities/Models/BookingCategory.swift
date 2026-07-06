@@ -9,7 +9,10 @@ import Foundation
 // none. Mirrors the backend's `buildClientScopeWhere` (which derives past/upcoming
 // from the datetime, not just the stored status).
 
-enum BookingCategory: CaseIterable {
+// `nonisolated`: pure value logic with no main-actor state — must stay callable
+// from nonisolated contexts (e.g. BookingsRepositoryImpl.staleBookingIds), which
+// the project-wide default MainActor isolation would otherwise forbid.
+nonisolated enum BookingCategory: CaseIterable {
     case upcoming
     case past
     case cancelled

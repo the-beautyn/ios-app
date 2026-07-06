@@ -100,6 +100,38 @@ struct HomeFeedSectionDTO: Decodable {
     let title: String
     let emoji: String?
     let items: [HomeFeedSalonCardDTO]
+    let searchParams: HomeFeedSectionSearchParamsDTO?
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case type
+        case title
+        case emoji
+        case items
+        case searchParams = "search_params"
+    }
+}
+
+// MARK: - HomeFeedSectionSearchParamsDTO
+
+/// The POST /search parameters that reproduce a section, so a section tap
+/// can replay it on the Search tab.
+struct HomeFeedSectionSearchParamsDTO: Decodable {
+    let query: String?
+    let appCategoryIds: [String]?
+    let sortBy: String?
+    let priceMin: Double?
+    let priceMax: Double?
+    let date: String?
+
+    enum CodingKeys: String, CodingKey {
+        case query
+        case date
+        case appCategoryIds = "app_category_ids"
+        case sortBy = "sort_by"
+        case priceMin = "price_min"
+        case priceMax = "price_max"
+    }
 }
 
 // MARK: - HomeFeedSalonCardDTO

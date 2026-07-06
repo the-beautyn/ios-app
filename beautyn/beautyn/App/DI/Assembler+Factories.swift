@@ -18,6 +18,7 @@ extension Assembler {
     var profile: any ProfileFactory { resolver.require((any ProfileFactory).self) }
     var resetPassword: any ResetPasswordFactory { resolver.require((any ResetPasswordFactory).self) }
     var salonBooking: any SalonBookingFactory { resolver.require((any SalonBookingFactory).self) }
+    var search: any SearchFactory { resolver.require((any SearchFactory).self) }
 }
 
 extension Resolver {
@@ -29,4 +30,5 @@ extension Resolver {
     var profile: any ProfileFactory { self.require((any ProfileFactory).self) }
     var resetPassword: any ResetPasswordFactory { self.require((any ResetPasswordFactory).self) }
     var salonBooking: any SalonBookingFactory { self.require((any SalonBookingFactory).self) }
+    var search: any SearchFactory { self.require((any SearchFactory).self) }
 }

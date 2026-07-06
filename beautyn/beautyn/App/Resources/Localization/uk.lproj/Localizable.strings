@@ -6,11 +6,12 @@
 "add_button" = "Додати";
 "added_button" = "Додано";
 "select_button" = "Обрати";
-"search_hint" = "Уведить назву салону або майстра";
+"search_hint" = "Уведіть назву салону";
 "ok_button" = "OK";
 "error_title" = "Помилка";
 "input_phone_placeholder" = "номер телефону";
 "common_cancel" = "Скасувати";
+"common_delete" = "Видалити";
 "common_done" = "Готово";
 "common_today" = "Сьогодні";
 "common_tomorrow" = "Завтра";
@@ -106,7 +107,23 @@
 "search_filter_service_type" = "Тип послуги";
 "search_filter_sort" = "Сортувати";
 "search_filter_price" = "Ціна";
+"search_filter_category_title" = "Категорія послуги";
+"search_filter_clear" = "Очистити";
+"search_filter_apply" = "Застосувати";
 "search_results_count" = "Знайдено: %d місць";
+"search_previous_section" = "Попередній пошук";
+"search_clear_history" = "Очистити";
+"search_salons_section" = "Салони";
+"search_date_placeholder" = "Дата";
+"search_date_picker_title" = "Оберіть дату";
+"search_sort_section" = "Сортувати за";
+"search_sort_by_rating" = "За оцінкою";
+"search_sort_by_popularity" = "За популярністю";
+"search_sort_by_distance" = "За відстанню";
+"search_sort_by_price" = "За ціною";
+"search_price_section" = "Прайс";
+"search_sort_apply" = "Застосувати";
+"search_sort_clear" = "Очистити";
 
 // MARK: - Salon Profile
 "salon_tab_services" = "Послуги";
@@ -139,7 +156,7 @@
 "booking_choose_time" = "Оберіть час:";
 "booking_any_master" = "Будь-який";
 "booking_total_price" = "Всього: %@ грн";
-"booking_clear_button" = "Почистити";
+"booking_clear_button" = "Очистити";
 "booking_apply_button" = "Застосувати";
 
 // MARK: - Confirm Booking
@@ -240,11 +257,11 @@
 
 // MARK: - Location Picker
 "location_picker_title" = "Локація";
-"location_picker_search_placeholder" = "Уведить адресу або місто";
+"location_picker_search_placeholder" = "Уведіть адресу або місто";
 "location_picker_my_geolocation" = "Моя геолокація";
 "location_picker_permission_denied" = "Відкрийте Налаштування, щоб дозволити доступ до геолокації";
 
 // MARK: - Saved Salons
 "saved_salons_title" = "Обрані салони";
-"saved_salons_search_placeholder" = "Уведить назву салону";
+"saved_salons_search_placeholder" = "Уведіть назву салону";
 "saved_salons_empty" = "Ви ще не додали жоден салон";

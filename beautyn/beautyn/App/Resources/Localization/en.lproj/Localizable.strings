@@ -6,11 +6,12 @@
 "add_button" = "Add";
 "added_button" = "Added";
 "select_button" = "Select";
-"search_hint" = "Enter salon or specialist name";
+"search_hint" = "Enter salon name";
 "ok_button" = "OK";
 "error_title" = "Error";
 "input_phone_placeholder" = "phone number";
 "common_cancel" = "Cancel";
+"common_delete" = "Delete";
 "common_done" = "Done";
 "common_today" = "Today";
 "common_tomorrow" = "Tomorrow";
@@ -106,7 +107,23 @@
 "search_filter_service_type" = "Service type";
 "search_filter_sort" = "Sort";
 "search_filter_price" = "Price";
+"search_filter_category_title" = "Service category";
+"search_filter_clear" = "Clear";
+"search_filter_apply" = "Apply";
 "search_results_count" = "Found: %d places";
+"search_previous_section" = "Previous search";
+"search_clear_history" = "Clear";
+"search_salons_section" = "Salons";
+"search_date_placeholder" = "Date";
+"search_date_picker_title" = "Select date";
+"search_sort_section" = "Sort by";
+"search_sort_by_rating" = "By rating";
+"search_sort_by_popularity" = "By popularity";
+"search_sort_by_distance" = "By distance";
+"search_sort_by_price" = "By price";
+"search_price_section" = "Price";
+"search_sort_apply" = "Apply";
+"search_sort_clear" = "Clear";
 
 // MARK: - Salon Profile
 "salon_tab_services" = "Services";

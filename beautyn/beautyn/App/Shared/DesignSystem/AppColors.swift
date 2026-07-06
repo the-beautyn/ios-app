@@ -14,6 +14,7 @@ extension Color {
         static let text             = Color(hex: "#2D2D2D")
         static let gray             = Color(hex: "#575553")
         static let gray2            = Color(hex: "#898887")
+        static let gray3            = Color(hex: "#C7C7CC")
         static let blueTransparency = Color(hex: "#A6B7C9").opacity(0.20)
         static let white            = Color(hex: "#FFFFFF")
 

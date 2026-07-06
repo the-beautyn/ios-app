@@ -131,7 +131,7 @@ private final class MockGetCurrentUserUseCase: GetCurrentUserUseCase {
 }
 
 private final class MockGetSalonByIdUseCase: GetSalonByIdUseCase {
-    func execute(id: String) async throws -> Salon { throw CancellationError() }
+    func execute(id: String, isFromSearch: Bool) async throws -> Salon { throw CancellationError() }
 }
 
 private final class MockGetSalonShareUseCase: GetSalonShareUseCase {

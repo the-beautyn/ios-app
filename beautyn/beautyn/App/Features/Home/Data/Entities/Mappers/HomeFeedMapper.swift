@@ -96,7 +96,20 @@ enum HomeFeedMapper {
             type: dto.type,
             title: dto.title,
             emoji: dto.emoji,
-            items: dto.items.map { mapSalonCard($0) }
+            items: dto.items.map { mapSalonCard($0) },
+            searchParams: dto.searchParams.map { mapSectionSearchParams($0) }
+        )
+    }
+
+    static func mapSectionSearchParams(_ dto: HomeFeedSectionSearchParamsDTO) -> HomeSectionSearchParams {
+        HomeSectionSearchParams(
+            query: dto.query,
+            appCategoryIds: dto.appCategoryIds,
+            // Unknown sort keys from newer backends degrade to no sort.
+            sortBy: dto.sortBy.flatMap(SearchSortOption.init(rawValue:)),
+            priceMin: dto.priceMin,
+            priceMax: dto.priceMax,
+            date: dto.date.flatMap { ApiDateFormatter.date(from: $0) }
         )
     }
 
