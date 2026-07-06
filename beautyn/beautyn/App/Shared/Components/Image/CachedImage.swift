@@ -40,10 +40,14 @@ struct CachedImage<ClipShape: Shape>: View {
             .frame(width: size.width, height: size.height)
             .clipped()
             .clipShape(clipShape)
+            // Clipping only affects drawing, not hit testing — without this the
+            // scaledToFill overflow invisibly steals taps from neighboring views.
+            .contentShape(clipShape)
         } else {
             placeholder
                 .frame(width: size.width, height: size.height)
                 .clipShape(clipShape)
+                .contentShape(clipShape)
         }
     }
 

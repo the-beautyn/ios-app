@@ -25,6 +25,17 @@ final class HomeControllerFactoryImpl: HomeControllerFactory {
         return HomeController(viewModel: viewModel)
     }
 
+    func makeSavedSalons(transition: SavedSalonsViewModel.Transition) -> UIViewController {
+        let viewModel = SavedSalonsViewModel(
+            transition: transition,
+            getSavedSalonsUseCase: assembler.app.getSavedSalonsUseCase,
+            saveSalonUseCase: assembler.app.saveSalonUseCase,
+            unsaveSalonUseCase: assembler.app.unsaveSalonUseCase,
+            savedSalonsEventBus: assembler.app.savedSalonsEventBus
+        )
+        return SavedSalonsController(viewModel: viewModel)
+    }
+
     func makeBookingDetails(
         booking: Booking,
         transition: BookingDetailsViewModel.Transition

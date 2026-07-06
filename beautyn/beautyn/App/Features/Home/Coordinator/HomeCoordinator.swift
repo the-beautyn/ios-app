@@ -84,7 +84,11 @@ final class HomeCoordinator: BaseCoordinator {
     }
 
     private func navigateToSavedSalons() {
-        // TODO: Push SavedSalons list
+        let transition = SavedSalonsViewModel.Transition(
+            didTapSalon: { [weak self] salonId in self?.navigateToSalonBooking(salonId: salonId) },
+            didTapBack:  { [weak self] in self?.router.pop(animated: true) }
+        )
+        router.push(factory.makeSavedSalons(transition: transition), animated: true)
     }
 
     private func navigateToSectionAll(sectionId: String) {
