@@ -24,4 +24,8 @@ enum ApiDateFormatter {
     static func string(from date: Date) -> String {
         formatter.string(from: date)
     }
+
+    static func date(from string: String) -> Date? {
+        formatter.date(from: string)
+    }
 }

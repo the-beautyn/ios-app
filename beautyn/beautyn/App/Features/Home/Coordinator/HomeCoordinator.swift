@@ -13,6 +13,8 @@ final class HomeCoordinator: BaseCoordinator {
     var onNavigateToSearchTab: (() -> Void)?
     /// Switches to the Search tab and re-searches with this category applied.
     var onSearchCategory: ((AppCategory) -> Void)?
+    /// Switches to the Search tab and re-searches with a section's params.
+    var onSearchSection: ((SectionSearchPreset) -> Void)?
 
     init(router: Router, parentAssembler: Assembler) {
         // SalonBookingAssembly is included so the booking-details screen can reach
@@ -44,8 +46,8 @@ final class HomeCoordinator: BaseCoordinator {
             didTapSeeAllSaved: { [weak self] in
                 self?.navigateToSavedSalons()
             },
-            didTapSeeAllSection: { [weak self] sectionId in
-                self?.navigateToSectionAll(sectionId: sectionId)
+            didTapSeeAllSection: { [weak self] preset in
+                self?.onSearchSection?(preset)
             },
             didTapAppointmentDetails: { [weak self] booking in
                 self?.navigateToBookingDetails(booking: booking)
@@ -89,10 +91,6 @@ final class HomeCoordinator: BaseCoordinator {
             didTapBack:  { [weak self] in self?.router.pop(animated: true) }
         )
         router.push(factory.makeSavedSalons(transition: transition), animated: true)
-    }
-
-    private func navigateToSectionAll(sectionId: String) {
-        // TODO: Push section detail / search with filter
     }
 
     private func navigateToBookingDetails(booking: Booking) {

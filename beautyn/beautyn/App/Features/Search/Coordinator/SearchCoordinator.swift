@@ -72,6 +72,12 @@ final class SearchCoordinator: BaseCoordinator {
         searchMapController?.viewModel.applyCategorySearch(category)
     }
 
+    /// Replays a home section's search around the user — used by Home's
+    /// section headers after switching to this tab.
+    func applySectionSearch(_ preset: SectionSearchPreset) {
+        searchMapController?.viewModel.applySectionSearch(preset)
+    }
+
     // MARK: - Search sheet (modal)
 
     private func showSearchSheet(_ context: SearchInputContext) {

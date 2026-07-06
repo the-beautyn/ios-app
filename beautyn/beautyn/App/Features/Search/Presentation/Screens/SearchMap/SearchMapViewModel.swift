@@ -473,9 +473,29 @@ final class SearchMapViewModel: BaseViewModel {
         appliedLocation = nil
         appliedDate = nil
         appliedCategory = category
+        searchAroundUserRegion()
+    }
 
-        // First-ever visit to the tab: the map hasn't loaded yet — the state
-        // set above rides along with `onViewTask`'s own region + search.
+    /// Home's section headers land here after the tab switch: replace ALL
+    /// applied state with the section's search params and search around the
+    /// user again. An all-nil preset just clears the filters.
+    func applySectionSearch(_ preset: SectionSearchPreset) {
+        appliedQuery = preset.query
+        appliedLocation = nil
+        appliedDate = preset.date
+        appliedCategory = preset.category
+        appliedSort = preset.sortBy
+        appliedPriceMin = preset.priceMin
+        appliedPriceMax = preset.priceMax
+        searchAroundUserRegion()
+    }
+
+    /// Re-centers on the user and re-runs the search with the currently
+    /// applied state — same region chain as the initial load (GPS → profile
+    /// city → device region → Kyiv).
+    private func searchAroundUserRegion() {
+        // First-ever visit to the tab: the map hasn't loaded yet — the applied
+        // state rides along with `onViewTask`'s own region + search.
         guard isInitialLoadComplete else { return }
 
         searchTask?.cancel()

@@ -76,6 +76,13 @@ final class MainTabCoordinator: BaseCoordinator {
             self.selectSearchTab()
             self.searchCoordinator?.applyCategorySearch(category)
         }
+        homeCoordinator.onSearchSection = { [weak self] preset in
+            guard let self else { return }
+            // The user tapped a section HEADER — land on the map tab replaying
+            // that section's search around the user.
+            self.selectSearchTab()
+            self.searchCoordinator?.applySectionSearch(preset)
+        }
         addChild(homeCoordinator)
         homeCoordinator.start()
 

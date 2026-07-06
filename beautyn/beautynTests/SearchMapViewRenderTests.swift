@@ -523,6 +523,79 @@ final class SearchMapSortApplyTests: XCTestCase {
         XCTAssertEqual(salonsUseCase.calls.last?.priceMax, 500)
     }
 
+    // MARK: - Section presets (Home section-header taps)
+
+    func testApplySectionSearchAppliesAllStateAndSearches() async throws {
+        let salonsUseCase = CountingSearchSalonsUseCase()
+        let viewModel = makeViewModel(salonsUseCase: salonsUseCase)
+
+        await viewModel.onViewTask()
+        let callsAfterInitialLoad = salonsUseCase.calls.count
+
+        let date = ApiDateFormatter.date(from: "2099-01-15")
+        viewModel.applySectionSearch(SectionSearchPreset(
+            query: "манікюр",
+            category: AppCategory(id: "cat1", slug: "nails", name: "Нігті", imageUrl: nil, sortOrder: 0),
+            sortBy: .popular,
+            priceMin: 100,
+            priceMax: 900,
+            date: date
+        ))
+
+        await waitForCalls(beyond: callsAfterInitialLoad, in: salonsUseCase)
+        let lastQuery = try XCTUnwrap(salonsUseCase.calls.last)
+        XCTAssertEqual(lastQuery.query, "манікюр")
+        XCTAssertEqual(lastQuery.appCategoryIds, ["cat1"])
+        XCTAssertEqual(lastQuery.sortBy, .popular)
+        XCTAssertEqual(lastQuery.priceMin, 100)
+        XCTAssertEqual(lastQuery.priceMax, 900)
+        XCTAssertEqual(lastQuery.date, date)
+    }
+
+    func testApplySectionSearchBeforeInitialLoadRidesAlong() async throws {
+        let salonsUseCase = CountingSearchSalonsUseCase()
+        let viewModel = makeViewModel(salonsUseCase: salonsUseCase)
+
+        // Preset lands before the tab's first load — the applied state must
+        // ride along with onViewTask's own search.
+        viewModel.applySectionSearch(SectionSearchPreset(
+            query: nil, category: nil, sortBy: .ratingDesc,
+            priceMin: nil, priceMax: 500, date: nil
+        ))
+        await viewModel.onViewTask()
+
+        let firstQuery = try XCTUnwrap(salonsUseCase.calls.first)
+        XCTAssertEqual(firstQuery.sortBy, .ratingDesc)
+        XCTAssertEqual(firstQuery.priceMax, 500)
+    }
+
+    func testApplySectionSearchReplacesPreviousFilters() async throws {
+        let salonsUseCase = CountingSearchSalonsUseCase()
+        let viewModel = makeViewModel(salonsUseCase: salonsUseCase)
+
+        await viewModel.onViewTask()
+        let callsAfterInitialLoad = salonsUseCase.calls.count
+        viewModel.didTapFilterChip(.sort)
+        let context = try XCTUnwrap(capturedContext)
+        context.onApply(SearchSortSubmission(sort: .priceAsc, priceMin: 300, priceMax: 800))
+        await waitForCalls(beyond: callsAfterInitialLoad, in: salonsUseCase)
+        let callsAfterSort = salonsUseCase.calls.count
+
+        // A filterless section clears everything back to a plain nearby search.
+        viewModel.applySectionSearch(SectionSearchPreset(
+            query: nil, category: nil, sortBy: nil,
+            priceMin: nil, priceMax: nil, date: nil
+        ))
+
+        await waitForCalls(beyond: callsAfterSort, in: salonsUseCase)
+        let lastQuery = try XCTUnwrap(salonsUseCase.calls.last)
+        XCTAssertNil(lastQuery.sortBy)
+        XCTAssertNil(lastQuery.priceMin)
+        XCTAssertNil(lastQuery.priceMax)
+        XCTAssertNil(lastQuery.appCategoryIds)
+        XCTAssertNil(lastQuery.query)
+    }
+
     // MARK: - Helpers
 
     private var capturedContext: SearchSortContext?

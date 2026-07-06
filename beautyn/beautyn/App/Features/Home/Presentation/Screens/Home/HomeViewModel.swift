@@ -14,7 +14,8 @@ final class HomeViewModel: BaseViewModel {
         let didTapSalonCard: (_ salonId: String) -> Void
         let didTapSavedSalon: (_ salonId: String) -> Void
         let didTapSeeAllSaved: () -> Void
-        let didTapSeeAllSection: (_ sectionId: String) -> Void
+        /// Switches to the Search tab and searches with this section's params.
+        let didTapSeeAllSection: (_ preset: SectionSearchPreset) -> Void
         let didTapAppointmentDetails: (_ booking: Booking) -> Void
         /// Switches to the Search tab and searches with this category applied.
         let didTapCategory: (_ category: AppCategory) -> Void
@@ -36,6 +37,9 @@ final class HomeViewModel: BaseViewModel {
     /// The feed's domain categories behind the header chips — kept so a tap
     /// can hand the full model (not just the id) to the Search tab.
     private var feedCategories: [AppCategory] = []
+    /// The feed's domain sections behind `sections` — kept so a header tap
+    /// can hand the section's search params to the Search tab.
+    private var feedSections: [HomeFeedSection] = []
     @Published private(set) var nextAppointment: AppointmentCardModel?
     /// The booking currently shown on the card (feed snapshot, overlaid by the
     /// source-of-truth copy when cached), retained so the details screen can open.
@@ -186,7 +190,21 @@ final class HomeViewModel: BaseViewModel {
     }
 
     func didTapSeeAllSection(_ sectionId: String) {
-        transition.didTapSeeAllSection(sectionId)
+        guard let section = feedSections.first(where: { $0.id == sectionId }) else { return }
+        let params = section.searchParams
+        // The Search tab's chip shows the full category model, so resolve the
+        // id against the feed's categories; an unknown id drops the filter.
+        let category = params?.appCategoryIds?.first.flatMap { id in
+            feedCategories.first(where: { $0.id == id })
+        }
+        transition.didTapSeeAllSection(SectionSearchPreset(
+            query: params?.query,
+            category: category,
+            sortBy: params?.sortBy,
+            priceMin: params?.priceMin,
+            priceMax: params?.priceMax,
+            date: params?.date
+        ))
     }
 
     func didTapAppointmentDetails() {
@@ -304,6 +322,7 @@ final class HomeViewModel: BaseViewModel {
             )
         } ?? []
 
+        feedSections = feed.sections
         let newSections = feed.sections.map { section in
             let titleWithEmoji = [section.title, section.emoji].compactMap { $0 }.joined(separator: " ")
             return SectionUI(

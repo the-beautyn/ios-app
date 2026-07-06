@@ -60,6 +60,140 @@ final class HomeViewRenderTests: XCTestCase {
     }
 }
 
+// MARK: - HomeSectionSearchPresetTests
+//
+// A section-header tap must resolve the section's backend-provided search
+// params into a SectionSearchPreset (category id resolved to the feed's full
+// AppCategory) and hand it to the transition.
+
+@MainActor
+final class HomeSectionSearchPresetTests: XCTestCase {
+
+    /// Deallocating a @MainActor VM (Combine publishers) inside a sync test
+    /// crashes the runner on Xcode 26 — keep them alive until suite teardown.
+    private var retainedViewModels: [HomeViewModel] = []
+
+    func testSeeAllSectionResolvesPreset() throws {
+        var captured: SectionSearchPreset?
+        let viewModel = makeViewModel { captured = $0 }
+
+        let date = ApiDateFormatter.date(from: "2099-01-15")
+        viewModel.applyMockFeed(makeFeed(sections: [
+            HomeFeedSection(
+                id: "sec1", type: "category",
+                title: "Нігті сьогодні", emoji: "💅🏼",
+                items: [],
+                searchParams: HomeSectionSearchParams(
+                    query: "манікюр",
+                    appCategoryIds: ["1"],
+                    sortBy: .popular,
+                    priceMin: 100,
+                    priceMax: 900,
+                    date: date
+                )
+            )
+        ]))
+
+        viewModel.didTapSeeAllSection("sec1")
+
+        let preset = try XCTUnwrap(captured)
+        XCTAssertEqual(preset.query, "манікюр")
+        XCTAssertEqual(preset.category?.id, "1")
+        XCTAssertEqual(preset.category?.name, "Нігті")
+        XCTAssertEqual(preset.sortBy, .popular)
+        XCTAssertEqual(preset.priceMin, 100)
+        XCTAssertEqual(preset.priceMax, 900)
+        XCTAssertEqual(preset.date, date)
+    }
+
+    func testSeeAllSectionWithoutParamsSendsEmptyPreset() throws {
+        var captured: SectionSearchPreset?
+        let viewModel = makeViewModel { captured = $0 }
+
+        viewModel.applyMockFeed(makeFeed(sections: [
+            HomeFeedSection(id: "sec1", type: "popular", title: "Популярні", emoji: nil, items: [])
+        ]))
+
+        viewModel.didTapSeeAllSection("sec1")
+
+        let preset = try XCTUnwrap(captured)
+        XCTAssertNil(preset.query)
+        XCTAssertNil(preset.category)
+        XCTAssertNil(preset.sortBy)
+        XCTAssertNil(preset.priceMin)
+        XCTAssertNil(preset.priceMax)
+        XCTAssertNil(preset.date)
+    }
+
+    func testSectionSearchParamsDecodingAndMapping() throws {
+        let json = """
+        {
+            "categories": [],
+            "sections": [{
+                "id": "sec1",
+                "type": "deals",
+                "title": "Бюджетні",
+                "emoji": "💰",
+                "items": [],
+                "search_params": {
+                    "query": "стрижка",
+                    "app_category_ids": ["cat2"],
+                    "sort_by": "price_asc",
+                    "price_min": 100,
+                    "price_max": 500,
+                    "date": "2099-01-15"
+                }
+            }]
+        }
+        """
+        let dto = try JSONDecoder().decode(HomeFeedResponseDTO.self, from: Data(json.utf8))
+        let feed = HomeFeedMapper.map(dto)
+
+        let params = try XCTUnwrap(feed.sections.first?.searchParams)
+        XCTAssertEqual(params.query, "стрижка")
+        XCTAssertEqual(params.appCategoryIds, ["cat2"])
+        XCTAssertEqual(params.sortBy, .priceAsc)
+        XCTAssertEqual(params.priceMin, 100)
+        XCTAssertEqual(params.priceMax, 500)
+        XCTAssertEqual(params.date, ApiDateFormatter.date(from: "2099-01-15"))
+    }
+
+    // MARK: - Helpers
+
+    private func makeFeed(sections: [HomeFeedSection]) -> HomeFeed {
+        HomeFeed(
+            categories: HomeFeed.unauthorizedPreview.categories,
+            nextBooking: nil,
+            savedSalons: nil,
+            sections: sections
+        )
+    }
+
+    private func makeViewModel(onSeeAllSection: @escaping (SectionSearchPreset) -> Void) -> HomeViewModel {
+        let viewModel = HomeViewModel(
+            transition: .init(
+                didTapSearch: {},
+                didTapSalonCard: { _ in },
+                didTapSavedSalon: { _ in },
+                didTapSeeAllSaved: {},
+                didTapSeeAllSection: onSeeAllSection,
+                didTapAppointmentDetails: { _ in },
+                didTapCategory: { _ in },
+                didRequireAuth: {}
+            ),
+            getHomeFeedUseCase: MockHomeFeedUseCase(feed: .unauthorizedPreview),
+            saveSalonUseCase: MockSaveSalonUseCase(),
+            unsaveSalonUseCase: MockUnsaveSalonUseCase(),
+            savedSalonsEventBus: MockSavedSalonsEventBus(),
+            observeBookingUseCase: MockObserveBookingUseCase(),
+            sessionManager: SessionManager(keychainService: KeychainServiceImpl(), defaultsService: DefaultsStorageService()),
+            getCurrentUserUseCase: MockGetCurrentUserUseCase()
+        )
+        retainedViewModels.append(viewModel)
+        return viewModel
+    }
+}
+
 // MARK: - MockGetCurrentUserUseCase
 
 private final class MockGetCurrentUserUseCase: GetCurrentUserUseCase {
