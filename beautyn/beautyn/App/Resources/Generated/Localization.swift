@@ -127,7 +127,7 @@ public enum Localization {
   public static let inputPhonePlaceholder = Localization.tr("Localizable", "input_phone_placeholder", fallback: "номер телефону")
   public static let locationPickerMyGeolocation = Localization.tr("Localizable", "location_picker_my_geolocation", fallback: "Моя геолокація")
   public static let locationPickerPermissionDenied = Localization.tr("Localizable", "location_picker_permission_denied", fallback: "Відкрийте Налаштування, щоб дозволити доступ до геолокації")
-  public static let locationPickerSearchPlaceholder = Localization.tr("Localizable", "location_picker_search_placeholder", fallback: "Уведить адресу або місто")
+  public static let locationPickerSearchPlaceholder = Localization.tr("Localizable", "location_picker_search_placeholder", fallback: "Уведіть адресу або місто")
   public static let locationPickerTitle = Localization.tr("Localizable", "location_picker_title", fallback: "Локація")
   public static let loginPasswordPlaceholder = Localization.tr("Localizable", "login_password_placeholder", fallback: "Введіть пароль")
   public static func loginSubtitle(_ p1: Any) -> String {
@@ -212,7 +212,7 @@ public enum Localization {
   public static let salonTabServices = Localization.tr("Localizable", "salon_tab_services", fallback: "Послуги")
   public static let salonTabSpecialists = Localization.tr("Localizable", "salon_tab_specialists", fallback: "Спеціалісти")
   public static let savedSalonsEmpty = Localization.tr("Localizable", "saved_salons_empty", fallback: "Ви ще не додали жоден салон")
-  public static let savedSalonsSearchPlaceholder = Localization.tr("Localizable", "saved_salons_search_placeholder", fallback: "Уведить назву салону")
+  public static let savedSalonsSearchPlaceholder = Localization.tr("Localizable", "saved_salons_search_placeholder", fallback: "Уведіть назву салону")
   public static let savedSalonsTitle = Localization.tr("Localizable", "saved_salons_title", fallback: "Обрані салони")
   public static let searchClearHistory = Localization.tr("Localizable", "search_clear_history", fallback: "Очистити")
   public static let searchDatePickerTitle = Localization.tr("Localizable", "search_date_picker_title", fallback: "Оберіть дату")
@@ -223,7 +223,7 @@ public enum Localization {
   public static let searchFilterPrice = Localization.tr("Localizable", "search_filter_price", fallback: "Ціна")
   public static let searchFilterServiceType = Localization.tr("Localizable", "search_filter_service_type", fallback: "Тип послуги")
   public static let searchFilterSort = Localization.tr("Localizable", "search_filter_sort", fallback: "Сортувати")
-  public static let searchHint = Localization.tr("Localizable", "search_hint", fallback: "Уведить назву салону")
+  public static let searchHint = Localization.tr("Localizable", "search_hint", fallback: "Уведіть назву салону")
   public static let searchPreviousSection = Localization.tr("Localizable", "search_previous_section", fallback: "Попередній пошук")
   public static let searchPriceSection = Localization.tr("Localizable", "search_price_section", fallback: "Прайс")
   public static func searchResultsCount(_ p1: Int) -> String {

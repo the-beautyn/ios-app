@@ -6,7 +6,7 @@
 "add_button" = "Додати";
 "added_button" = "Додано";
 "select_button" = "Обрати";
-"search_hint" = "Уведить назву салону";
+"search_hint" = "Уведіть назву салону";
 "ok_button" = "OK";
 "error_title" = "Помилка";
 "input_phone_placeholder" = "номер телефону";
@@ -257,11 +257,11 @@
 
 // MARK: - Location Picker
 "location_picker_title" = "Локація";
-"location_picker_search_placeholder" = "Уведить адресу або місто";
+"location_picker_search_placeholder" = "Уведіть адресу або місто";
 "location_picker_my_geolocation" = "Моя геолокація";
 "location_picker_permission_denied" = "Відкрийте Налаштування, щоб дозволити доступ до геолокації";
 
 // MARK: - Saved Salons
 "saved_salons_title" = "Обрані салони";
-"saved_salons_search_placeholder" = "Уведить назву салону";
+"saved_salons_search_placeholder" = "Уведіть назву салону";
 "saved_salons_empty" = "Ви ще не додали жоден салон";

@@ -114,6 +114,10 @@ final class SearchMapViewModel: BaseViewModel {
     private var loadMoreTask: Task<Void, Never>?
     private var hasStartedInitialLoad = false
     private var isInitialLoadComplete = false
+    /// Applied state changed while the initial load was in flight — its
+    /// request may already have been built without it, so re-search once
+    /// the initial load lands.
+    private var needsRefreshAfterInitialLoad = false
     private var isLoadingMore = false
     /// Sheet height as a fraction of the screen, reported by the bottom sheet —
     /// used to focus tapped pins/clusters into the map strip that stays visible.
@@ -178,6 +182,11 @@ final class SearchMapViewModel: BaseViewModel {
         cameraPosition = .region(region)
         await performSearch(viewport: SearchMapCamera.makeViewport(region))
         isInitialLoadComplete = true
+
+        if needsRefreshAfterInitialLoad {
+            needsRefreshAfterInitialLoad = false
+            refreshCurrentViewport()
+        }
     }
 
     // MARK: - Map intents
@@ -494,9 +503,13 @@ final class SearchMapViewModel: BaseViewModel {
     /// applied state — same region chain as the initial load (GPS → profile
     /// city → device region → Kyiv).
     private func searchAroundUserRegion() {
-        // First-ever visit to the tab: the map hasn't loaded yet — the applied
-        // state rides along with `onViewTask`'s own region + search.
-        guard isInitialLoadComplete else { return }
+        // Before the initial load: its region chain is the same one, so the
+        // applied state rides along with `onViewTask`'s own search — unless
+        // that search is already in flight with the old state.
+        guard isInitialLoadComplete else {
+            needsRefreshAfterInitialLoad = hasStartedInitialLoad
+            return
+        }
 
         searchTask?.cancel()
         loadMoreTask?.cancel()
@@ -663,11 +676,18 @@ final class SearchMapViewModel: BaseViewModel {
     }
 
     private func refreshCurrentViewport() {
+        // Before the initial load completes there is no settled viewport to
+        // re-search — but its request may already be in flight with the old
+        // applied state, so queue a refresh for when it lands.
+        guard isInitialLoadComplete else {
+            needsRefreshAfterInitialLoad = hasStartedInitialLoad
+            return
+        }
         // `currentViewport` is only set by SUCCESSFUL searches — fall back to
         // the last attempted one so applying filters right after a failed
         // load (e.g. backend hiccup) still re-searches instead of silently
         // doing nothing.
-        guard isInitialLoadComplete, let viewport = currentViewport ?? lastRequestedViewport else { return }
+        guard let viewport = currentViewport ?? lastRequestedViewport else { return }
         searchNow(viewport: viewport)
     }
 

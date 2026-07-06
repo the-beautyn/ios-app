@@ -53,8 +53,8 @@ struct SearchBorderedField: View {
 #if DEBUG
 #Preview {
     VStack(spacing: CGFloat.Spacing.md) {
-        SearchBorderedField(placeholder: "Уведить назву салону", text: .constant(""))
-        SearchBorderedField(placeholder: "Уведить назву салону", text: .constant("Nail bar"))
+        SearchBorderedField(placeholder: "Уведіть назву салону", text: .constant(""))
+        SearchBorderedField(placeholder: "Уведіть назву салону", text: .constant("Nail bar"))
     }
     .padding(CGFloat.Spacing.md)
 }

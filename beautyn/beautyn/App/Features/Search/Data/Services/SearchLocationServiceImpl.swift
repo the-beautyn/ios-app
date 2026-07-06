@@ -27,9 +27,15 @@ final class SearchLocationServiceImpl: SearchLocationService {
     private var lastCompletions: [MKLocalSearchCompletion] = []
     private var lastBatchId = UUID()
 
-    private var pendingAuthorizationContinuation: CheckedContinuation<CLAuthorizationStatus, Never>?
-    private var pendingLocationContinuation: CheckedContinuation<CLLocation, Error>?
-    private var pendingStatusContinuation: CheckedContinuation<CLAuthorizationStatus, Never>?
+    // Concurrent callers can overlap (e.g. the locate button while the
+    // initial region is still resolving) — every waiter is kept and resumed
+    // together, so none is ever orphaned by a later request.
+    private var pendingAuthorizationContinuations: [CheckedContinuation<CLAuthorizationStatus, Never>] = []
+    private var pendingLocationContinuations: [CheckedContinuation<CLLocation, Error>] = []
+    private var pendingStatusContinuations: [CheckedContinuation<CLAuthorizationStatus, Never>] = []
+    /// In-flight GPS fix — concurrent `currentLocation()` calls share it
+    /// instead of issuing a second `requestLocation()`.
+    private var locationFetchTask: Task<CLLocation, Error>?
     // Reading `locationManager.authorizationStatus` synchronously on the main
     // thread can block on an XPC call (UI-unresponsiveness runtime warning), so
     // the status is only ever taken from `locationManagerDidChangeAuthorization`
@@ -52,22 +58,24 @@ final class SearchLocationServiceImpl: SearchLocationService {
 
             // A wait for the CURRENT status accepts any value, including
             // `.notDetermined` — it just wants to know where we stand.
-            self.pendingStatusContinuation?.resume(returning: status)
-            self.pendingStatusContinuation = nil
+            self.pendingStatusContinuations.forEach { $0.resume(returning: status) }
+            self.pendingStatusContinuations.removeAll()
 
             // A wait for a permission-request ANSWER resolves only once the
             // user has actually decided.
             guard status != .notDetermined else { return }
-            self.pendingAuthorizationContinuation?.resume(returning: status)
-            self.pendingAuthorizationContinuation = nil
+            self.pendingAuthorizationContinuations.forEach { $0.resume(returning: status) }
+            self.pendingAuthorizationContinuations.removeAll()
         }
         locationDelegate.onLocation = { [weak self] location in
-            self?.pendingLocationContinuation?.resume(returning: location)
-            self?.pendingLocationContinuation = nil
+            guard let self else { return }
+            self.pendingLocationContinuations.forEach { $0.resume(returning: location) }
+            self.pendingLocationContinuations.removeAll()
         }
         locationDelegate.onError = { [weak self] error in
-            self?.pendingLocationContinuation?.resume(throwing: error)
-            self?.pendingLocationContinuation = nil
+            guard let self else { return }
+            self.pendingLocationContinuations.forEach { $0.resume(throwing: error) }
+            self.pendingLocationContinuations.removeAll()
         }
 
         completer.delegate = completerDelegate
@@ -84,7 +92,7 @@ final class SearchLocationServiceImpl: SearchLocationService {
         var status = await currentAuthorizationStatus()
         if status == .notDetermined {
             status = await withCheckedContinuation { continuation in
-                pendingAuthorizationContinuation = continuation
+                pendingAuthorizationContinuations.append(continuation)
                 locationManager.requestWhenInUseAuthorization()
             }
         }
@@ -198,29 +206,37 @@ final class SearchLocationServiceImpl: SearchLocationService {
             return latestAuthorizationStatus
         }
         return await withCheckedContinuation { continuation in
-            pendingStatusContinuation = continuation
+            pendingStatusContinuations.append(continuation)
 
             Task { [weak self] in
                 try? await Task.sleep(for: .seconds(2))
-                guard let self, self.pendingStatusContinuation != nil else { return }
-                self.pendingStatusContinuation?.resume(returning: .notDetermined)
-                self.pendingStatusContinuation = nil
+                guard let self, !self.pendingStatusContinuations.isEmpty else { return }
+                self.pendingStatusContinuations.forEach { $0.resume(returning: .notDetermined) }
+                self.pendingStatusContinuations.removeAll()
             }
         }
     }
 
     private func requestLocation() async throws -> CLLocation {
-        try await withCheckedThrowingContinuation { continuation in
-            pendingLocationContinuation = continuation
-            locationManager.requestLocation()
+        if let inFlight = locationFetchTask {
+            return try await inFlight.value
+        }
+        let task = Task { () throws -> CLLocation in
+            try await withCheckedThrowingContinuation { continuation in
+                pendingLocationContinuations.append(continuation)
+                locationManager.requestLocation()
 
-            Task { [weak self] in
-                try? await Task.sleep(for: Self.locationTimeout)
-                guard let self, self.pendingLocationContinuation != nil else { return }
-                self.pendingLocationContinuation?.resume(throwing: CancellationError())
-                self.pendingLocationContinuation = nil
+                Task { [weak self] in
+                    try? await Task.sleep(for: Self.locationTimeout)
+                    guard let self, !self.pendingLocationContinuations.isEmpty else { return }
+                    self.pendingLocationContinuations.forEach { $0.resume(throwing: CancellationError()) }
+                    self.pendingLocationContinuations.removeAll()
+                }
             }
         }
+        locationFetchTask = task
+        defer { locationFetchTask = nil }
+        return try await task.value
     }
 
     private static func isDenied(_ status: CLAuthorizationStatus) -> Bool {

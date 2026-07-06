@@ -5,11 +5,11 @@ import Foundation
 /// Formats dates as the API's `yyyy-MM-dd` day strings.
 enum ApiDateFormatter {
 
-    /// Gregorian / uk_UA calendar, matching `CalendarView` so the API's
-    /// `yyyy-MM-dd` days line up with the grid's days.
+    /// Gregorian calendar so `yyyy-MM-dd` days stay stable even when the
+    /// device uses a non-gregorian calendar.
     private static let calendar: Calendar = {
         var c = Calendar(identifier: .gregorian)
-        c.locale = Locale(identifier: "uk_UA")
+        c.locale = Locale(identifier: "en_US_POSIX")
         return c
     }()
 
