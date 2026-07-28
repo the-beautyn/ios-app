@@ -3,3 +3,21 @@ xcuserdata/
 !beautyn/beautyn.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
 
 DerivedData/
+
+# Graphify — keep only what `graphify query` needs
+# (graph.json, manifest.json, .graphify_labels.json, GRAPH_REPORT.md)
+graphify-out/graph.html
+graphify-out/cache/
+graphify-out/cost.json
+graphify-out/.graphify_python
+graphify-out/.graphify_root
+graphify-out/.graphify_detect.json
+graphify-out/.graphify_extract.json
+graphify-out/.graphify_ast.json
+graphify-out/.graphify_semantic.json
+graphify-out/.graphify_analysis.json
+graphify-out/.graphify_chunk_*.json
+graphify-out/.graphify_uncached.txt
+graphify-out/.graphify_cached.json
+graphify-out/.needs_update
+.claude/settings.json
