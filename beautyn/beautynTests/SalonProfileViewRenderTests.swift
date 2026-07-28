@@ -117,7 +117,7 @@ private final class MockSalonProfileGetCurrentUserUseCase: GetCurrentUserUseCase
             name: "Dmytro", secondName: "Pohrebniak", phone: "+380950021938",
             avatarUrl: nil, birthDate: nil, city: nil, sex: nil,
             authProvider: "password", isPhoneVerified: true,
-            isProfileCreated: true, isOnboardingCompleted: true
+            isProfileCreated: true
         )
     }
 }

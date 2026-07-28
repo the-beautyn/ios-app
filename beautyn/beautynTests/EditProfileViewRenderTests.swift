@@ -56,8 +56,7 @@ private final class MockEditProfileGetCurrentUserUseCase: GetCurrentUserUseCase 
             sex: .female,
             authProvider: "credentials",
             isPhoneVerified: true,
-            isProfileCreated: true,
-            isOnboardingCompleted: true
+            isProfileCreated: true
         )
     }
 }

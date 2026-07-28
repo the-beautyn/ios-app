@@ -16,7 +16,6 @@ struct UserProfileDTO: Decodable {
     let authProvider: String
     let isPhoneVerified: Bool
     let isProfileCreated: Bool
-    let isOnboardingCompleted: Bool
 
     enum CodingKeys: String, CodingKey {
         case id, email, role, name, phone, city, sex
@@ -26,6 +25,5 @@ struct UserProfileDTO: Decodable {
         case authProvider = "auth_provider"
         case isPhoneVerified = "is_phone_verified"
         case isProfileCreated = "is_profile_created"
-        case isOnboardingCompleted = "is_onboarding_completed"
     }
 }

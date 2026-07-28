@@ -25,5 +25,4 @@ struct UserProfile: Codable {
     let authProvider: String
     let isPhoneVerified: Bool
     let isProfileCreated: Bool
-    let isOnboardingCompleted: Bool
 }

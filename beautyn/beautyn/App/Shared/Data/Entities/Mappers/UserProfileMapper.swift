@@ -18,8 +18,7 @@ enum UserProfileMapper {
             sex: dto.sex.flatMap(Sex.init(rawValue:)),
             authProvider: dto.authProvider,
             isPhoneVerified: dto.isPhoneVerified,
-            isProfileCreated: dto.isProfileCreated,
-            isOnboardingCompleted: dto.isOnboardingCompleted
+            isProfileCreated: dto.isProfileCreated
         )
     }
 

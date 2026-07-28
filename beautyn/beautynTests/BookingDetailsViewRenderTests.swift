@@ -124,8 +124,7 @@ private final class MockGetCurrentUserUseCase: GetCurrentUserUseCase {
         UserProfile(
             id: "u1", email: "user@example.com", role: "client", name: "Test",
             secondName: nil, phone: "+380000000000", avatarUrl: nil, birthDate: nil, city: nil,
-            sex: nil, authProvider: "email", isPhoneVerified: true, isProfileCreated: true,
-            isOnboardingCompleted: true
+            sex: nil, authProvider: "email", isPhoneVerified: true, isProfileCreated: true
         )
     }
 }
